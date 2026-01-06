@@ -11,7 +11,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     
-    <!-- Bibliotecas Externas (Gráficos e Leitores) -->
+    <!-- Bibliotecas Externas -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
@@ -32,8 +32,7 @@
         :root { --ion-safe-area-top: env(safe-area-inset-top); --ion-safe-area-bottom: env(safe-area-inset-bottom); }
         body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; color: #0f172a; -webkit-tap-highlight-color: transparent; }
         
-        #api-key-bar { z-index: 1000; transition: transform 0.3s ease; }
-        
+        #api-key-bar { z-index: 1000; }
         .tab-content { display: none; }
         .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -47,13 +46,14 @@
         
         #login-screen { display: flex; }
         #main-app { display: none; }
-
-        canvas { width: 100% !important; height: auto !important; }
+        canvas { width: 100% !important; height: 180px !important; }
+        
+        .folder-card.active { border-color: #4f46e5; background-color: #eef2ff; }
     </style>
 </head>
 <body class="antialiased overflow-x-hidden">
 
-    <!-- BARRA DE CONFIGURAÇÃO GEMINI (FIXA) -->
+    <!-- BARRA DE API KEY (FIXA) -->
     <div id="api-key-bar" class="fixed top-0 left-0 right-0 bg-slate-900 text-white p-3 shadow-2xl flex flex-col md:flex-row items-center justify-center gap-3 border-b border-white/10">
         <div class="flex items-center gap-2">
             <span class="text-[10px] font-black uppercase tracking-widest text-indigo-400">Gemini Key:</span>
@@ -66,90 +66,97 @@
     <div id="login-screen" class="fixed inset-0 z-[200] bg-white flex flex-col items-center justify-center p-8 text-center pt-24">
         <div class="mb-12">
             <h1 class="text-6xl font-black text-indigo-600 tracking-tighter italic leading-none">MedRep</h1>
-            <p class="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-4">Residência Médica & Repetição Espaçada</p>
+            <p class="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-4">Pastas, IA & Repetição Espaçada</p>
         </div>
-        
-        <div class="bg-slate-50 p-10 rounded-[40px] w-full max-w-sm border border-slate-100 mb-8">
-            <p class="text-sm font-semibold text-slate-600 mb-8 leading-relaxed">Conecte sua conta Google para sincronizar suas questões na nuvem.</p>
-            
+        <div class="bg-slate-50 p-10 rounded-[40px] w-full max-w-sm border border-slate-100 mb-8 shadow-sm">
             <button onclick="window.fazerLogin()" class="w-full bg-slate-900 text-white font-black py-5 rounded-[22px] shadow-xl flex items-center justify-center gap-4 active:scale-95 transition-transform">
                 <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" class="w-6" alt="Google">
                 <span class="text-xs uppercase tracking-widest">Entrar com Google</span>
             </button>
-            
             <div id="login-loader" class="hidden mt-6 flex justify-center"><div class="loading-spinner"></div></div>
         </div>
-        <p class="text-[9px] font-black text-slate-300 uppercase tracking-[0.4em]">v11.0 PERFORMANCE EDITION</p>
     </div>
 
-    <!-- APLICATIVO PRINCIPAL -->
+    <!-- MAIN APP -->
     <div id="main-app" class="pt-24">
         <header class="glass border-b border-slate-100 px-6 py-4 sticky top-[60px] md:top-[50px] z-50 flex justify-between items-center max-w-xl mx-auto w-full rounded-b-3xl">
             <div class="flex flex-col">
                 <h1 class="text-xl font-black text-indigo-600 tracking-tighter italic leading-none">MedRep</h1>
-                <span id="user-email" class="text-[8px] font-bold text-slate-400 uppercase mt-1 tracking-widest">Usuário Conectado</span>
+                <select id="folder-selector" onchange="window.onFolderChange(this.value)" class="text-[10px] font-bold text-slate-500 uppercase mt-1 tracking-widest bg-transparent outline-none border-none cursor-pointer">
+                    <option value="all">Todas as Pastas</option>
+                </select>
             </div>
             <div id="due-badge" class="hidden bg-rose-500 text-white text-[10px] font-black px-2 py-1 rounded-full">0</div>
         </header>
 
         <main class="max-w-xl mx-auto p-4 space-y-6 pb-32">
-            <!-- Home -->
+            <!-- ABA HOME -->
             <section id="tab-home" class="tab-content active space-y-6">
                 <div class="bg-indigo-600 p-8 rounded-[40px] text-white shadow-xl relative overflow-hidden">
-                    <p class="text-[9px] font-black uppercase tracking-widest opacity-60 mb-2">Desempenho</p>
-                    <div class="grid grid-cols-2 gap-4 mb-6">
+                    <p class="text-[9px] font-black uppercase tracking-widest opacity-60 mb-2">Seu Dashboard</p>
+                    <div class="grid grid-cols-2 gap-4 mb-4">
                         <div class="bg-white/10 p-4 rounded-2xl">
-                            <p class="text-[9px] font-bold uppercase opacity-50 mb-1">Cards</p>
+                            <p class="text-[9px] font-bold uppercase opacity-50">Cards</p>
                             <p id="stat-total" class="text-2xl font-black">0</p>
                         </div>
                         <div class="bg-white/10 p-4 rounded-2xl">
-                            <p class="text-[9px] font-bold uppercase opacity-50 mb-1">Acertos</p>
+                            <p class="text-[9px] font-bold uppercase opacity-50">Precisão</p>
                             <p id="stat-accuracy" class="text-2xl font-black">0%</p>
                         </div>
                     </div>
-                    <div class="bg-white/5 p-4 rounded-3xl border border-white/10">
+                    <div class="bg-white/5 p-4 rounded-3xl border border-white/10 h-48 flex items-center justify-center">
                         <canvas id="performanceChart"></canvas>
                     </div>
                 </div>
-                
+
+                <!-- PASTAS UI -->
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center px-4">
+                        <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Suas Pastas</h2>
+                        <button onclick="window.createNewFolder()" class="text-[10px] font-black text-indigo-600 uppercase">Nova Pasta +</button>
+                    </div>
+                    <div id="folders-grid" class="grid grid-cols-2 gap-3"></div>
+                </div>
+
                 <div onclick="window.switchTab('study')" class="bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm flex items-center justify-between cursor-pointer active:scale-98 transition-all">
                     <div class="flex items-center gap-4">
                         <div class="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center text-xl">⚡</div>
                         <div>
                             <h3 class="font-black text-slate-800">Iniciar Revisão</h3>
-                            <p id="home-due-text" class="text-xs text-slate-400">Calculando cards...</p>
+                            <p id="home-due-text" class="text-xs text-slate-400">Clique para estudar agora.</p>
                         </div>
-                    </div>
-                    <div class="bg-indigo-600 text-white p-2 rounded-xl">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"/></svg>
                     </div>
                 </div>
             </section>
 
-            <!-- Estudo -->
+            <!-- ABA ESTUDO -->
             <section id="tab-study" class="tab-content">
                 <div id="study-container" class="space-y-6 min-h-[400px]"></div>
             </section>
 
-            <!-- IA Gerador -->
+            <!-- ABA IA -->
             <section id="tab-add" class="tab-content space-y-6">
-                <div id="ia-input-area" class="bg-white p-8 rounded-[40px] border border-slate-100 shadow-sm space-y-6">
+                <div class="bg-white p-8 rounded-[40px] border border-slate-100 shadow-sm space-y-6">
                     <div class="flex items-center gap-4">
                         <div class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-lg">🪄</div>
                         <h2 class="text-lg font-black text-slate-800">Criar com IA</h2>
                     </div>
-                    
-                    <!-- Upload de Arquivos -->
+
+                    <div class="space-y-3">
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Destino</label>
+                        <select id="ia-folder-target" class="w-full bg-slate-50 p-4 rounded-2xl text-xs font-bold outline-none border border-slate-100"></select>
+                    </div>
+
                     <div class="bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl p-6 text-center">
                         <label class="cursor-pointer flex flex-col items-center gap-2">
                             <span class="text-2xl">📄</span>
-                            <span class="text-xs font-bold text-slate-500 uppercase tracking-widest">Anexar PDF ou Word</span>
+                            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Anexar PDF / Word</span>
                             <input type="file" id="file-reader" class="hidden" accept=".pdf,.docx">
-                            <span id="file-status" class="text-[9px] text-indigo-500 font-bold hidden mt-1"></span>
+                            <span id="file-status" class="text-[9px] text-indigo-500 font-bold hidden"></span>
                         </label>
                     </div>
 
-                    <textarea id="ia-prompt" placeholder="Ou cole seu texto aqui..." class="w-full h-48 bg-slate-50 rounded-[24px] p-6 text-sm border border-slate-100 focus:ring-2 ring-indigo-500 outline-none resize-none"></textarea>
+                    <textarea id="ia-prompt" placeholder="Ou cole seu texto de estudo aqui..." class="w-full h-40 bg-slate-50 rounded-[24px] p-6 text-sm border border-slate-100 focus:ring-2 ring-indigo-500 outline-none resize-none"></textarea>
                     
                     <button onclick="window.processIA()" id="btn-ia" class="w-full bg-slate-900 text-white font-black py-5 rounded-[20px] uppercase text-xs flex items-center justify-center gap-4 shadow-xl active:scale-95 transition-transform">
                         <span>Gerar Questões</span>
@@ -166,33 +173,33 @@
                 </div>
             </section>
 
-            <!-- Acervo -->
+            <!-- ABA ACERVO -->
             <section id="tab-bank" class="tab-content space-y-4">
                 <div class="flex justify-between items-center px-4">
-                    <h2 class="text-lg font-black text-slate-800">Banco de Dados</h2>
+                    <h2 class="text-lg font-black text-slate-800">Banco</h2>
                     <button onclick="window.clearAll()" class="text-[8px] font-black text-rose-500 uppercase tracking-widest bg-rose-50 px-3 py-1.5 rounded-lg">Limpar Tudo</button>
                 </div>
                 <div id="bank-list" class="space-y-2 pb-24"></div>
             </section>
         </main>
 
-        <!-- Nav -->
+        <!-- NAVBAR -->
         <nav class="fixed bottom-0 left-0 right-0 max-w-xl mx-auto bg-white/90 backdrop-blur-2xl border-t border-slate-100 flex justify-around py-6 px-4 z-50 rounded-t-[32px] shadow-2xl safe-bottom">
             <button onclick="window.switchTab('home')" class="nav-btn flex flex-col items-center gap-1 active text-indigo-600" id="nav-home">
                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3L4 9V21H9V15H15V21H20V9L12 3Z"/></svg>
-                <span class="text-[8px] font-black uppercase tracking-widest">Home</span>
+                <span class="text-[8px] font-black uppercase">Home</span>
             </button>
             <button onclick="window.switchTab('study')" class="nav-btn flex flex-col items-center gap-1 text-slate-400" id="nav-study">
                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L4.5 20.29L5.21 21L12 18L18.79 21L19.5 20.29L12 2Z"/></svg>
-                <span class="text-[8px] font-black uppercase tracking-widest">Revisão</span>
+                <span class="text-[8px] font-black uppercase">Revisão</span>
             </button>
             <button onclick="window.switchTab('add')" class="nav-btn flex flex-col items-center gap-1 text-slate-400" id="nav-add">
                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L14.5 8.5L21 11L14.5 13.5L12 20L9.5 13.5L3 11L9.5 8.5L12 2Z"/></svg>
-                <span class="text-[8px] font-black uppercase tracking-widest">IA</span>
+                <span class="text-[8px] font-black uppercase">IA</span>
             </button>
             <button onclick="window.switchTab('bank')" class="nav-btn flex flex-col items-center gap-1 text-slate-400" id="nav-bank">
                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M4 4H20V20H4V4ZM6 6V18H18V6H6ZM8 8H16V10H8V8ZM8 12H16V14H8V12ZM8 16H13V18H8V16Z"/></svg>
-                <span class="text-[8px] font-black uppercase tracking-widest">Acervo</span>
+                <span class="text-[8px] font-black uppercase">Acervo</span>
             </button>
         </nav>
     </div>
@@ -200,15 +207,22 @@
     <script type="module">
         import { GoogleGenAI } from "@google/genai";
 
-        // CONFIGS TÉCNICAS
+        // CONFIGS TÉCNICAS (NÃO ALTERAR)
         const CLIENT_ID = '648353734848-s9fnmd9tt0i5577grbt3q9oju6h71mpi.apps.googleusercontent.com';
         const SCOPES = 'https://www.googleapis.com/auth/drive.file'; 
-        const STORAGE_KEY = 'medrep_data_v11_master';
+        const STORAGE_KEY = 'medrep_data_v12_final';
         const KEY_STORAGE = 'medrep_gemini_key_v11';
         const FILENAME = 'medrep_sync.json';
 
-        // ESTADO
-        let state = { questions: [], srs: {}, history: [] };
+        // ESTADO GLOBAL
+        let state = { 
+            questions: [], 
+            srs: {}, 
+            history: [], 
+            folders: [{id: 'f_default', name: 'Geral'}],
+            currentFolderId: 'all'
+        };
+        
         let tempExtracted = [];
         let studyQueue = [];
         let studyPointer = 0;
@@ -247,10 +261,28 @@
             const btn = document.getElementById('nav-' + tabId);
             btn.classList.add('active', 'text-indigo-600');
             btn.classList.remove('text-slate-400');
+            
             if (tabId === 'home') updateStats();
             if (tabId === 'study') startStudy();
             if (tabId === 'bank') renderBank();
             window.scrollTo(0, 0);
+        };
+
+        window.onFolderChange = (val) => {
+            state.currentFolderId = val;
+            updateStats();
+            if (document.getElementById('tab-bank').classList.contains('active')) renderBank();
+        };
+
+        window.createNewFolder = () => {
+            const name = prompt("Nome da nova pasta:");
+            if (name) {
+                const folder = { id: 'f_' + Math.random().toString(36).substr(2, 9), name: name };
+                state.folders.push(folder);
+                saveLocal();
+                renderFolderSelectors();
+                updateStats();
+            }
         };
 
         // LEITOR DE ARQUIVOS
@@ -322,7 +354,13 @@
         }
 
         window.confirmBatch = () => {
-            const news = tempExtracted.map(q => ({ ...q, id: 'q_' + Math.random().toString(36).substr(2, 9) }));
+            const targetFolderId = document.getElementById('ia-folder-target').value;
+            const news = tempExtracted.map(q => ({ 
+                ...q, 
+                id: 'q_' + Math.random().toString(36).substr(2, 9),
+                folderId: targetFolderId,
+                createdAt: Date.now()
+            }));
             state.questions = [...state.questions, ...news];
             saveLocal();
             document.getElementById('ia-review-area').classList.add('hidden');
@@ -333,29 +371,27 @@
         // GRÁFICO E STATS
         function initChart() {
             const ctx = document.getElementById('performanceChart').getContext('2d');
-            const data = {
-                labels: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'],
-                datasets: [{
-                    label: 'Acertos',
-                    data: [0, 0, 0, 0, 0, 0, 0],
-                    borderColor: '#fff',
-                    backgroundColor: 'rgba(255,255,255,0.2)',
-                    fill: true,
-                    tension: 0.4,
-                    borderWidth: 3,
-                    pointRadius: 4,
-                    pointBackgroundColor: '#fff'
-                }]
-            };
             chartInstance = new Chart(ctx, {
                 type: 'line',
-                data: data,
+                data: {
+                    labels: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'],
+                    datasets: [{
+                        label: 'Acertos',
+                        data: [0, 0, 0, 0, 0, 0, 0],
+                        borderColor: '#fff',
+                        backgroundColor: 'rgba(255,255,255,0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 2,
+                        pointRadius: 3
+                    }]
+                },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
                     scales: {
-                        x: { display: false },
+                        x: { display: true, ticks: { color: '#fff', font: { size: 8 } }, grid: { display: false } },
                         y: { display: false }
                     }
                 }
@@ -363,30 +399,75 @@
         }
 
         function updateStats() {
+            const folderFilter = state.currentFolderId;
             const now = Date.now();
-            const due = state.questions.filter(q => !state.srs[q.id] || state.srs[q.id].nextReview <= now).length;
-            document.getElementById('stat-total').innerText = state.questions.length;
-            document.getElementById('home-due-text').innerText = due > 0 ? `${due} cards pendentes.` : "Tudo revisado!";
+            
+            const filteredQuestions = folderFilter === 'all' 
+                ? state.questions 
+                : state.questions.filter(q => q.folderId === folderFilter);
+
+            const due = filteredQuestions.filter(q => !state.srs[q.id] || state.srs[q.id].nextReview <= now).length;
+            
+            document.getElementById('stat-total').innerText = filteredQuestions.length;
+            document.getElementById('home-due-text').innerText = due > 0 ? `${due} pendentes nesta seleção.` : "Tudo em dia!";
             
             const badge = document.getElementById('due-badge');
             badge.innerText = due;
             badge.classList.toggle('hidden', due === 0);
 
-            const recent = state.history.slice(-100);
-            const hits = recent.filter(h => h.success).length;
-            const acc = recent.length ? Math.round((hits / recent.length) * 100) : 0;
+            // Filtro de Histórico para o Gráfico
+            const folderQuestionIds = new Set(filteredQuestions.map(q => q.id));
+            const filteredHistory = state.history.filter(h => folderQuestionIds.has(h.cardId));
+
+            const hits = filteredHistory.filter(h => h.success).length;
+            const acc = filteredHistory.length ? Math.round((hits / filteredHistory.length) * 100) : 0;
             document.getElementById('stat-accuracy').innerText = acc + "%";
 
-            // Atualizar gráfico (simulação de histórico semanal)
+            // Atualizar Gráfico
             if (chartInstance) {
                 const historyByDay = [0,0,0,0,0,0,0];
-                state.history.forEach(h => {
+                filteredHistory.forEach(h => {
                     const day = new Date(h.date).getDay();
                     if (h.success) historyByDay[day]++;
                 });
                 chartInstance.data.datasets[0].data = historyByDay;
                 chartInstance.update();
             }
+
+            renderFoldersUI();
+        }
+
+        function renderFoldersUI() {
+            const grid = document.getElementById('folders-grid');
+            const now = Date.now();
+            grid.innerHTML = state.folders.map(f => {
+                const count = state.questions.filter(q => q.folderId === f.id).length;
+                const due = state.questions.filter(q => q.folderId === f.id && (!state.srs[q.id] || state.srs[q.id].nextReview <= now)).length;
+                const isActive = state.currentFolderId === f.id;
+                return `
+                    <div onclick="window.onFolderChange('${f.id}')" class="folder-card bg-white p-4 rounded-3xl border border-slate-100 shadow-sm cursor-pointer ${isActive ? 'active' : ''}">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-xl">📁</span>
+                            ${due > 0 ? `<span class="bg-rose-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded-full">${due}</span>` : ''}
+                        </div>
+                        <h4 class="text-[11px] font-black text-slate-800 truncate">${f.name}</h4>
+                        <p class="text-[9px] text-slate-400 font-bold uppercase mt-1">${count} Cards</p>
+                    </div>
+                `;
+            }).join('');
+            renderFolderSelectors();
+        }
+
+        function renderFolderSelectors() {
+            const selectors = [document.getElementById('folder-selector'), document.getElementById('ia-folder-target')];
+            selectors.forEach(sel => {
+                if (!sel) return;
+                const currentVal = sel.value;
+                let html = sel.id === 'folder-selector' ? `<option value="all">Todas as Pastas</option>` : "";
+                html += state.folders.map(f => `<option value="${f.id}">${f.name}</option>`).join('');
+                sel.innerHTML = html;
+                if (currentVal) sel.value = currentVal;
+            });
         }
 
         // GOOGLE SETUP
@@ -445,7 +526,12 @@
         // SRS ENGINE
         function startStudy() {
             const now = Date.now();
-            studyQueue = state.questions.filter(q => !state.srs[q.id] || state.srs[q.id].nextReview <= now);
+            const folderFilter = state.currentFolderId;
+            const filteredQuestions = folderFilter === 'all' 
+                ? state.questions 
+                : state.questions.filter(q => q.folderId === folderFilter);
+
+            studyQueue = filteredQuestions.filter(q => !state.srs[q.id] || state.srs[q.id].nextReview <= now);
             studyQueue.sort(() => Math.random() - 0.5);
             studyPointer = 0;
             renderStudyCard();
@@ -453,6 +539,10 @@
 
         function renderStudyCard() {
             const container = document.getElementById('study-container');
+            if (studyQueue.length === 0) {
+                container.innerHTML = `<div class="py-24 text-center"><div class="text-6xl mb-6">✅</div><h2 class="text-xl font-black">Nada para revisar aqui!</h2><button onclick="window.switchTab('home')" class="mt-8 bg-indigo-600 text-white font-black px-10 py-4 rounded-2xl">Voltar</button></div>`;
+                return;
+            }
             if (studyPointer >= studyQueue.length) {
                 container.innerHTML = `<div class="py-24 text-center"><div class="text-6xl mb-6">🎯</div><h2 class="text-xl font-black">Meta Batida!</h2><button onclick="window.switchTab('home')" class="mt-8 bg-indigo-600 text-white font-black px-10 py-4 rounded-2xl">Dashboard</button></div>`;
                 return;
@@ -527,8 +617,13 @@
 
         function renderBank() {
             const list = document.getElementById('bank-list');
-            if (state.questions.length === 0) { list.innerHTML = `<div class="py-24 text-center text-slate-300 italic">Vazio.</div>`; return; }
-            list.innerHTML = state.questions.slice().reverse().map(q => `
+            const folderFilter = state.currentFolderId;
+            const filtered = folderFilter === 'all' 
+                ? state.questions 
+                : state.questions.filter(q => q.folderId === folderFilter);
+
+            if (filtered.length === 0) { list.innerHTML = `<div class="py-24 text-center text-slate-300 italic">Nenhum card nesta seleção.</div>`; return; }
+            list.innerHTML = filtered.slice().reverse().map(q => `
                 <div class="bg-white p-5 rounded-3xl border border-slate-100 flex justify-between items-center shadow-sm">
                     <div class="truncate mr-4"><p class="text-[11px] text-slate-700 font-bold truncate">${q.statement}</p></div>
                     <button onclick="window.deleteQ('${q.id}')" class="text-rose-400 p-2">✕</button>
@@ -537,7 +632,7 @@
         }
 
         window.deleteQ = (id) => { if (confirm("Excluir?")) { state.questions = state.questions.filter(q => q.id !== id); delete state.srs[id]; saveLocal(); renderBank(); } };
-        window.clearAll = () => { if (confirm("Limpar?")) { state = { questions: [], srs: {}, history: [] }; saveLocal(); location.reload(); } };
+        window.clearAll = () => { if (confirm("Limpar Tudo?")) { state = { questions: [], srs: {}, history: [], folders: [{id: 'f_default', name: 'Geral'}], currentFolderId: 'all' }; saveLocal(); location.reload(); } };
 
         // INIT
         loadLocal();
