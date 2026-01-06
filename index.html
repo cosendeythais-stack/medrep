@@ -5,16 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>MedRep - Internato & SRS</title>
     
-    <!-- PWA / iOS Tags -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="MedRep">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3063/3063067.png">
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
-    
-    <!-- Google API Scripts -->
     <script src="https://apis.google.com/js/api.js" async defer></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 
@@ -31,188 +27,107 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
         .safe-bottom { padding-bottom: calc(env(safe-area-inset-bottom) + 12px); }
-        input:focus, textarea:focus { outline: none; border-color: #6366f1 !important; }
     </style>
 </head>
 <body class="antialiased pb-24">
 
-    <!-- Gemini Key Header -->
     <div class="bg-slate-900 px-4 py-2 sticky top-0 z-[100] flex items-center gap-2 border-b border-white/10 shadow-lg">
-        <input type="password" id="gemini-key-input" placeholder="API KEY do Gemini..." 
-               class="flex-1 bg-white/5 text-white text-[11px] px-3 py-2 rounded-lg border border-white/10 transition-all">
+        <input type="password" id="gemini-key-input" placeholder="Cole sua API KEY do Gemini aqui..." class="flex-1 bg-white/5 text-white text-[11px] px-3 py-2 rounded-lg border border-white/10 outline-none">
         <button onclick="saveGeminiKey()" class="bg-indigo-500 text-white text-[10px] font-black uppercase px-4 py-2 rounded-lg active:scale-95 transition-all">Salvar</button>
     </div>
 
-    <!-- Main Header -->
     <header class="glass border-b border-slate-100 px-6 py-4 sticky top-[44px] z-50 flex justify-between items-center max-w-lg mx-auto w-full">
-        <div>
-            <div class="flex items-center gap-2">
-                <h1 class="text-xl font-black text-indigo-600 tracking-tighter italic">MedRep</h1>
-                <div id="sync-dot" class="w-2 h-2 rounded-full bg-slate-300 transition-colors"></div>
-            </div>
-            <p id="due-badge" class="hidden text-[8px] font-black bg-rose-100 text-rose-600 px-2 py-0.5 rounded-full uppercase mt-0.5"></p>
+        <div class="flex items-center gap-2">
+            <h1 class="text-xl font-black text-indigo-600 italic">MedRep</h1>
+            <div id="sync-dot" class="w-2 h-2 rounded-full bg-slate-300"></div>
         </div>
-        <div class="text-right">
-            <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest" id="sync-status">Cloud Offline</p>
-        </div>
+        <p id="sync-status" class="text-[8px] font-black text-slate-400 uppercase tracking-widest">Cloud Offline</p>
     </header>
 
-    <main id="app-container" class="max-w-lg mx-auto p-4 w-full min-h-screen">
-        
-        <!-- Tab: Home -->
+    <main id="app-container" class="max-w-lg mx-auto p-4 w-full">
         <section id="tab-home" class="tab-content active animate-in space-y-6">
-            <div class="bg-indigo-600 p-8 rounded-[40px] text-white shadow-2xl shadow-indigo-200">
-                <h2 class="text-xs font-black uppercase tracking-widest opacity-80 mb-1">Status Internato</h2>
-                <p class="text-3xl font-black leading-none mb-6">Sua Evolução</p>
+            <div class="bg-indigo-600 p-8 rounded-[40px] text-white shadow-xl shadow-indigo-100">
+                <p class="text-3xl font-black italic mb-6">Status Internato</p>
                 <div class="grid grid-cols-2 gap-4">
-                    <div class="bg-white/10 p-4 rounded-3xl backdrop-blur-sm">
-                        <p class="text-[10px] font-bold uppercase opacity-60">Questões</p>
-                        <p id="stat-total" class="text-2xl font-black">0</p>
-                    </div>
-                    <div class="bg-white/10 p-4 rounded-3xl backdrop-blur-sm">
-                        <p class="text-[10px] font-bold uppercase opacity-60">Precisão</p>
-                        <p id="stat-correct" class="text-2xl font-black">0%</p>
-                    </div>
+                    <div class="bg-white/10 p-4 rounded-3xl"><p class="text-[10px] font-bold opacity-60">Questões</p><p id="stat-total" class="text-2xl font-black">0</p></div>
+                    <div class="bg-white/10 p-4 rounded-3xl"><p class="text-[10px] font-bold opacity-60">Precisão</p><p id="stat-correct" class="text-2xl font-black">0%</p></div>
                 </div>
             </div>
-            
-            <div class="bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm flex items-center justify-between">
-                <div>
-                    <h3 class="font-black text-slate-800">Próximas Revisões</h3>
-                    <p id="home-due-count" class="text-xs text-slate-400">Verificando dados...</p>
-                </div>
-                <button onclick="switchTab('study')" class="bg-indigo-600 text-white px-6 py-3 rounded-2xl text-[10px] font-black uppercase shadow-lg shadow-indigo-100 active:scale-95 transition-all">Começar</button>
+            <div class="bg-white p-6 rounded-[32px] border border-slate-100 flex justify-between items-center">
+                <div><h3 class="font-black">Revisões Pendentes</h3><p id="home-due-count" class="text-xs text-slate-400">Verificando...</p></div>
+                <button onclick="switchTab('study')" class="bg-indigo-600 text-white px-6 py-3 rounded-2xl text-[10px] font-black uppercase">Começar</button>
             </div>
         </section>
 
-        <!-- Tab: Revisar (SRS) -->
-        <section id="tab-study" class="tab-content animate-in space-y-6">
-            <div id="study-view" class="space-y-6"></div>
-        </section>
-
-        <!-- Tab: Lote / IA -->
         <section id="tab-add" class="tab-content animate-in space-y-6">
-            <div id="batch-input-view" class="bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm space-y-4">
+            <div id="batch-input-view" class="bg-white p-6 rounded-[32px] border border-slate-100 space-y-4 shadow-sm">
                 <div class="flex justify-between items-center">
                     <h2 class="text-lg font-black text-slate-800">Tutor IA Inteligente</h2>
-                    <label class="cursor-pointer bg-slate-100 p-2 rounded-xl active:scale-95 transition-all">
-                        <span class="text-[10px] font-black uppercase text-slate-500">📎 PDF / Imagem</span>
-                        <input type="file" id="file-upload" class="hidden" accept="image/*,application/pdf" onchange="processFileAI()">
-                    </label>
+                    <label class="cursor-pointer bg-slate-100 p-2 rounded-xl"><span class="text-[10px] font-black text-slate-500">📎 PDF/FOTO</span><input type="file" id="file-upload" class="hidden" accept="image/*,application/pdf" onchange="processFileAI()"></label>
                 </div>
-                <textarea id="batch-text" placeholder="Cole enunciados ou digite apenas um TEMA MÉDICO (ex: 'Pneumonia Comunitária')..." class="w-full h-64 bg-slate-50 rounded-2xl p-5 text-xs font-mono border border-slate-100 resize-none"></textarea>
-                <button id="btn-process-batch" onclick="processTextAI()" class="w-full bg-indigo-600 text-white font-black py-4 rounded-2xl uppercase text-[10px] flex items-center justify-center gap-2 active:scale-95 transition-all">
-                    <span id="btn-batch-text">Gerar / Extrair Questões</span>
-                    <div id="batch-loader" class="loading-spinner hidden"></div>
+                <textarea id="batch-text" placeholder="Cole uma questão ou digite um tema (ex: Sepse)..." class="w-full h-64 bg-slate-50 rounded-2xl p-5 text-xs font-mono outline-none"></textarea>
+                <button onclick="processTextAI()" class="w-full bg-indigo-600 text-white font-black py-4 rounded-2xl uppercase text-[10px] flex items-center justify-center gap-2">
+                    <span id="btn-batch-text">Gerar Questões</span>
+                    <div id="batch-loader" class="loading-spinner hidden" style="border-top-color: white;"></div>
                 </button>
             </div>
             <div id="batch-review-view" class="hidden space-y-4">
-                <div class="flex justify-between items-center bg-white/90 backdrop-blur-md p-4 rounded-2xl sticky top-[100px] z-10 border border-slate-100">
-                    <h2 id="review-count" class="text-xs font-black text-slate-800 uppercase">Validar Questões</h2>
-                    <button onclick="saveBatchToBank()" class="bg-emerald-600 text-white text-[8px] font-black uppercase px-4 py-2 rounded-xl active:scale-95">Salvar Todas</button>
+                <div class="flex justify-between items-center bg-white p-4 rounded-2xl sticky top-[100px] z-10 border">
+                    <h2 id="review-count" class="text-xs font-black uppercase">Validar</h2>
+                    <button onclick="saveBatchToBank()" class="bg-emerald-600 text-white text-[8px] font-black uppercase px-4 py-2 rounded-xl">Salvar Todas</button>
                 </div>
                 <div id="review-list" class="space-y-4 pb-20"></div>
             </div>
         </section>
 
-        <!-- Tab: Banco -->
-        <section id="tab-bank" class="tab-content animate-in space-y-4">
-            <h2 class="text-lg font-black text-slate-800 px-2">Gerenciar Banco</h2>
-            <div id="bank-list" class="space-y-3 pb-20"></div>
-        </section>
+        <section id="tab-study" class="tab-content animate-in space-y-6"><div id="study-view"></div></section>
+        
+        <section id="tab-bank" class="tab-content animate-in space-y-4"><h2 class="text-lg font-black px-2">Meu Banco</h2><div id="bank-list"></div></section>
 
-        <!-- Tab: Ajustes -->
         <section id="tab-settings" class="tab-content animate-in space-y-6">
-            <h2 class="text-lg font-black text-slate-800">Nuvem & Sincronização</h2>
-            <div class="bg-white p-6 rounded-[32px] border border-slate-100 space-y-4 shadow-sm">
-                <div class="flex items-center justify-between py-2">
-                    <span class="text-xs font-bold">Status do Google Drive</span>
-                    <button id="btn-drive-login" onclick="driveSignIn()" class="text-[9px] font-black uppercase text-indigo-600 border border-indigo-200 px-3 py-1.5 rounded-lg active:scale-95 transition-all">Conectar</button>
-                </div>
-                <hr class="border-slate-50">
-                <button onclick="syncNow()" class="w-full bg-indigo-600 text-white font-black py-4 rounded-2xl uppercase text-[10px] flex items-center justify-center gap-2 active:scale-95 transition-all">
-                    <span>Sincronizar Agora</span>
-                    <div id="sync-loader" class="loading-spinner hidden" style="width:12px; height:12px; border-color:white; border-top-color:transparent;"></div>
-                </button>
-                <hr class="border-slate-50">
-                <button onclick="clearAllData()" class="w-full text-rose-500 font-black text-[9px] uppercase hover:underline">Zerar todos os dados</button>
-            </div>
-            <div class="p-6 bg-slate-900 rounded-[32px] text-[9px] text-slate-400 font-mono break-all leading-relaxed">
-                ID: 818696814728-a6bhi1eqkhui1k04ooi3kksv17t0gbnd.apps.googleusercontent.com
+            <div class="bg-white p-6 rounded-[32px] border border-slate-100 space-y-4">
+                <button id="btn-drive-login" onclick="driveSignIn()" class="w-full border border-indigo-200 text-indigo-600 font-black py-4 rounded-2xl uppercase text-[10px]">Conectar Google Drive</button>
+                <button onclick="syncNow()" class="w-full bg-indigo-600 text-white font-black py-4 rounded-2xl uppercase text-[10px] flex items-center justify-center gap-2">Sincronizar Agora <div id="sync-loader" class="loading-spinner hidden" style="width:12px; height:12px; border-top-color:white;"></div></button>
+                <button onclick="clearAllData()" class="w-full text-rose-500 font-black text-[9px] uppercase mt-4">Zerar Dados Locais</button>
             </div>
         </section>
     </main>
 
-    <!-- Bottom Navbar -->
-    <nav class="fixed bottom-0 left-0 right-0 max-w-lg mx-auto bg-white/90 backdrop-blur-xl border-t border-slate-100 flex justify-around py-3 px-2 z-50 safe-bottom">
-        <button onclick="switchTab('home')" class="nav-item flex flex-col items-center gap-1 py-2 px-3 text-slate-400 transition-all active" id="nav-home">
-            <span class="text-xl">🏠</span>
-            <span class="text-[9px] font-black uppercase">Home</span>
-        </button>
-        <button onclick="switchTab('study')" class="nav-item flex flex-col items-center gap-1 py-2 px-3 text-slate-400 transition-all" id="nav-study">
-            <span class="text-xl">📖</span>
-            <span class="text-[9px] font-black uppercase">Revisar</span>
-        </button>
-        <button onclick="switchTab('add')" class="nav-item flex flex-col items-center gap-1 py-2 px-3 text-slate-400 transition-all" id="nav-add">
-            <span class="text-xl">📦</span>
-            <span class="text-[9px] font-black uppercase">IA</span>
-        </button>
-        <button onclick="switchTab('bank')" class="nav-item flex flex-col items-center gap-1 py-2 px-3 text-slate-400 transition-all" id="nav-bank">
-            <span class="text-xl">🗂️</span>
-            <span class="text-[9px] font-black uppercase">Banco</span>
-        </button>
-        <button onclick="switchTab('settings')" class="nav-item flex flex-col items-center gap-1 py-2 px-3 text-slate-400 transition-all" id="nav-settings">
-            <span class="text-xl">⚙️</span>
-            <span class="text-[9px] font-black uppercase">Ajustes</span>
-        </button>
+    <nav class="fixed bottom-0 left-0 right-0 max-w-lg mx-auto bg-white/90 backdrop-blur-xl border-t border-slate-100 flex justify-around py-3 z-50 safe-bottom">
+        <button onclick="switchTab('home')" class="nav-item flex flex-col items-center gap-1 active" id="nav-home"><span>🏠</span><span class="text-[9px] font-black uppercase">Home</span></button>
+        <button onclick="switchTab('study')" class="nav-item flex flex-col items-center gap-1" id="nav-study"><span>📖</span><span class="text-[9px] font-black uppercase">Revisar</span></button>
+        <button onclick="switchTab('add')" class="nav-item flex flex-col items-center gap-1" id="nav-add"><span>📦</span><span class="text-[9px] font-black uppercase">IA</span></button>
+        <button onclick="switchTab('bank')" class="nav-item flex flex-col items-center gap-1" id="nav-bank"><span>🗂️</span><span class="text-[9px] font-black uppercase">Banco</span></button>
+        <button onclick="switchTab('settings')" class="nav-item flex flex-col items-center gap-1" id="nav-settings"><span>⚙️</span><span class="text-[9px] font-black uppercase">Nuvem</span></button>
     </nav>
 
     <script>
-        // --- CONFIG & STATE ---
         const CLIENT_ID = '818696814728-a6bhi1eqkhui1k04ooi3kksv17t0gbnd.apps.googleusercontent.com';
         const SCOPES = 'https://www.googleapis.com/auth/drive.appdata';
         const BACKUP_NAME = 'medrep_backup.json';
         const DB_KEY = 'medrep_master_v2';
 
-        let state = {
-            questions: [],
-            srs: {}, // id -> { interval, repetitions, easeFactor, nextReview }
-            history: [],
-            geminiKey: ''
-        };
+        let state = { questions: [], srs: {}, history: [], geminiKey: '' };
+        let tokenClient, accessToken = null, driveFileId = null;
 
-        let tokenClient;
-        let accessToken = null;
-        let driveFileId = null;
-
-        // --- INIT ---
-        window.onload = () => {
-            loadLocal();
-            refreshUI();
-            tryInitGoogle();
-        };
-
-        function tryInitGoogle() {
-            if (typeof gapi === 'undefined' || typeof google === 'undefined') {
-                setTimeout(tryInitGoogle, 500);
-                return;
-            }
-            initGapi();
-            initGis();
-        }
+        window.onload = () => { loadLocal(); refreshUI(); initGoogle(); };
 
         function loadLocal() {
             const saved = localStorage.getItem(DB_KEY);
-            if (saved) {
-                try { state = { ...state, ...JSON.parse(saved) }; } catch(e) {}
-            }
+            if (saved) try { state = { ...state, ...JSON.parse(saved) }; } catch(e) {}
             document.getElementById('gemini-key-input').value = state.geminiKey || '';
         }
 
         function saveLocal() {
             localStorage.setItem(DB_KEY, JSON.stringify(state));
             refreshUI();
-            autoSyncDrive();
+            if (accessToken) autoSyncDrive();
+        }
+
+        function saveGeminiKey() {
+            state.geminiKey = document.getElementById('gemini-key-input').value.trim();
+            saveLocal();
+            alert("API Key salva no navegador!");
         }
 
         function refreshUI() {
@@ -220,220 +135,68 @@
             const due = state.questions.filter(q => !state.srs[q.id] || state.srs[q.id].nextReview <= now).length;
             document.getElementById('stat-total').innerText = state.questions.length;
             document.getElementById('home-due-count').innerText = `${due} questões para revisar.`;
-            
-            const badge = document.getElementById('due-badge');
-            if (due > 0) {
-                badge.innerText = `${due} PENDENTES`;
-                badge.classList.remove('hidden');
-            } else badge.classList.add('hidden');
-
             const recent = state.history.slice(-50);
-            const hits = recent.filter(h => h.success).length;
-            const rate = recent.length ? Math.round((hits / recent.length) * 100) : 0;
+            const rate = recent.length ? Math.round((recent.filter(h => h.success).length / recent.length) * 100) : 0;
             document.getElementById('stat-correct').innerText = `${rate}%`;
         }
 
-        // --- NAVIGATION ---
         function switchTab(id) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active', 'text-indigo-600'));
             document.getElementById(`tab-${id}`).classList.add('active');
-            const navItem = document.getElementById(`nav-${id}`);
-            if (navItem) navItem.classList.add('active', 'text-indigo-600');
+            document.getElementById(`nav-${id}`).classList.add('active', 'text-indigo-600');
             if (id === 'study') initStudy();
             if (id === 'bank') renderBank();
             window.scrollTo(0, 0);
         }
 
-        function saveGeminiKey() {
-            const key = document.getElementById('gemini-key-input').value.trim();
-            if (!key) return alert("Por favor, insira uma chave válida.");
-            state.geminiKey = key;
-            saveLocal();
-            alert("API Key salva com sucesso!");
-        }
-
-        // --- GOOGLE DRIVE SYNC ---
-        function initGapi() {
-            gapi.load('client', async () => {
-                await gapi.client.init({
-                    discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'],
-                });
-            });
-        }
-
-        function initGis() {
-            tokenClient = google.accounts.oauth2.initTokenClient({
-                client_id: CLIENT_ID,
-                scope: SCOPES,
-                callback: async (resp) => {
-                    if (resp.error) return;
-                    accessToken = resp.access_token;
-                    onAuthenticated();
-                },
-            });
-        }
-
-        function driveSignIn() { tokenClient.requestAccessToken({ prompt: 'consent' }); }
-
-        async function onAuthenticated() {
-            document.getElementById('sync-dot').classList.replace('bg-slate-300', 'bg-emerald-500');
-            document.getElementById('sync-status').innerText = 'Cloud Sync On';
-            document.getElementById('btn-drive-login').innerText = 'Logado';
-            await loadFromDrive();
-        }
-
-        async function loadFromDrive() {
-            try {
-                const resp = await gapi.client.drive.files.list({ spaces: 'appDataFolder', fields: 'files(id, name)' });
-                const file = resp.result.files.find(f => f.name === BACKUP_NAME);
-                if (file) {
-                    driveFileId = file.id;
-                    const content = await gapi.client.drive.files.get({ fileId: driveFileId, alt: 'media' });
-                    if (content.result && content.result.questions) {
-                        state = { ...state, ...content.result };
-                        saveLocal();
-                    }
-                }
-            } catch (e) { console.error("Drive Load Error", e); }
-        }
-
-        async function autoSyncDrive() {
-            if (!accessToken) return;
-            const metadata = { name: BACKUP_NAME, parents: ['appDataFolder'] };
-            const file = new Blob([JSON.stringify(state)], { type: 'application/json' });
-            const formData = new FormData();
-            formData.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-            formData.append('file', file);
-
-            try {
-                if (driveFileId) {
-                    await fetch(`https://www.googleapis.com/upload/drive/v3/files/${driveFileId}?uploadType=multipart`, {
-                        method: 'PATCH',
-                        headers: { 'Authorization': 'Bearer ' + accessToken },
-                        body: formData
-                    });
-                } else {
-                    const r = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
-                        method: 'POST',
-                        headers: { 'Authorization': 'Bearer ' + accessToken },
-                        body: formData
-                    });
-                    const j = await r.json();
-                    driveFileId = j.id;
-                }
-            } catch (e) { console.error("Drive Auto-Upload Error", e); }
-        }
-
-        async function syncNow() {
-            if (!accessToken) return driveSignIn();
-            const l = document.getElementById('sync-loader');
-            l.classList.remove('hidden');
-            await loadFromDrive();
-            await autoSyncDrive();
-            l.classList.add('hidden');
-            alert("Sincronizado!");
-        }
-
-        // --- GEMINI IA EXTRACTION ---
-        let extractedTemp = [];
-
-        async function processTextAI() {
-            const text = document.getElementById('batch-text').value.trim();
-            if (!text) return alert("Cole algum conteúdo ou tema médico.");
-            await callGeminiIA({ text });
-        }
-
-        async function processFileAI() {
-            const fileInput = document.getElementById('file-upload');
-            const file = fileInput.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = async () => {
-                const base64 = reader.result.split(',')[1];
-                await callGeminiIA({ file: { data: base64, mimeType: file.type } });
-            };
-            reader.readAsDataURL(file);
-        }
-
         async function callGeminiIA(input) {
-            const keyFromState = state.geminiKey || document.getElementById('gemini-key-input').value.trim();
-            if (!keyFromState) return alert("Por favor, insira sua API Key no topo do aplicativo!");
-            
-            const l = document.getElementById('batch-loader');
-            l.classList.remove('hidden');
-            
-            // IA Criativa e Inteligente: Prompt Otimizado
-            const prompt = `Você é um tutor médico acadêmico de alto nível.
-Se o input for apenas um tema (ex: Sepse, Diabetes Mellitus), crie obrigatoriamente 3 questões de múltipla escolha completas, complexas e acadêmicas.
-Se o input for uma questão incompleta ou um texto médico, extraia ou complete o enunciado, opções, gabarito e forneça uma explicação detalhada.
+            if (!state.geminiKey) return alert("Insira sua API Key!");
+            const loader = document.getElementById('batch-loader');
+            loader.classList.remove('hidden');
 
-Regra de Ouro: Retorne APENAS o array JSON puro. Proibido usar markdown (\`\`\`), crases ou textos explicativos fora do array.
-Estrutura: [ { "statement": "", "options": ["", "", "", ""], "correctIndex": 0-3, "explanation": "", "specialty": "" } ]`;
+            const prompt = `Você é um tutor médico. Se receber um tema, crie 3 questões. Se for incompleto, complete gabarito e explicação médica. 
+            Retorne APENAS um array JSON puro. Estrutura: [{"statement":"","options":["","","",""],"correctIndex":0,"explanation":"","specialty":""}]`;
 
             let parts = [{ text: prompt }];
             if (input.text) parts.push({ text: input.text });
             if (input.file) parts.push({ inlineData: { data: input.file.data, mimeType: input.file.mimeType } });
 
             try {
-                // Conexão Direta e Estável
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${keyFromState}`, {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${state.geminiKey}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ contents: [{ parts }] })
                 });
-                
                 const data = await response.json();
-
-                if (!data || !data.candidates || !data.candidates[0] || !data.candidates[0].content) {
-                    console.error("Resposta API Gemini Errada:", data);
-                    throw new Error("Erro na resposta da API.");
-                }
-
                 let rawText = data.candidates[0].content.parts[0].text;
-                
-                // Limpeza de 'Lixo' na Resposta: Regex para extrair apenas o Array JSON
-                const jsonMatch = rawText.match(/\[[\s\S]*\]/);
-
-                if (jsonMatch) {
-                    try {
-                        extractedTemp = JSON.parse(jsonMatch[0]);
-                        renderReview();
-                    } catch (parseError) {
-                        // Mensagem de Diagnóstico
-                        const diagStr = rawText.substring(0, 100).replace(/\n/g, ' ');
-                        console.error("Erro no Parse. Texto bruto:", rawText);
-                        alert(`Erro de formatação na IA. Resposta iniciada com: "${diagStr}..."`);
-                    }
-                } else {
-                    console.log('IA não retornou colchetes. Bruto:', rawText);
-                    const diagStr = rawText.substring(0, 100).replace(/\n/g, ' ');
-                    alert(`IA não retornou uma lista válida. Diagnóstico: "${diagStr}..."`);
-                }
-                
+                let cleanText = rawText.match(/\[[\s\S]*\]/);
+                if (!cleanText) throw new Error("IA não gerou JSON válido.");
+                return JSON.parse(cleanText[0]);
             } catch (e) {
-                console.error("Falha Crítica na chamada IA:", e);
-                alert("Falha na comunicação com a IA. Verifique sua chave e conexão.");
+                alert("Erro no processamento. Verifique sua Key e Conexão.");
+                console.error(e);
             } finally {
-                l.classList.add('hidden');
+                loader.classList.add('hidden');
             }
+        }
+
+        async function processTextAI() {
+            const text = document.getElementById('batch-text').value.trim();
+            if (!text) return alert("Digite algo.");
+            const res = await callGeminiIA({ text });
+            if (res) { extractedTemp = res; renderReview(); }
         }
 
         function renderReview() {
             document.getElementById('batch-input-view').classList.add('hidden');
             document.getElementById('batch-review-view').classList.remove('hidden');
-            document.getElementById('review-count').innerText = `${extractedTemp.length} Questões Prontas`;
-            const list = document.getElementById('review-list');
-            list.innerHTML = extractedTemp.map(q => `
-                <div class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm animate-in">
-                    <p class="text-[10px] font-black text-indigo-600 uppercase mb-2">${q.specialty || 'Geral'}</p>
-                    <p class="text-[11px] font-bold text-slate-700 mb-4 leading-tight">${q.statement}</p>
-                    <div class="space-y-1">
-                        ${q.options.map((opt, i) => `<div class="text-[9px] p-2 rounded-lg border ${i===q.correctIndex?'border-emerald-200 bg-emerald-50 text-emerald-700 font-bold':'border-slate-50 text-slate-400'}">${opt}</div>`).join('')}
-                    </div>
-                </div>
-            `).join('');
+            document.getElementById('review-list').innerHTML = extractedTemp.map(q => `
+                <div class="bg-white p-5 rounded-3xl border mb-4">
+                    <p class="text-[10px] font-bold text-indigo-600 mb-2 uppercase">${q.specialty || 'Geral'}</p>
+                    <p class="text-[11px] font-bold mb-4">${q.statement}</p>
+                    <div class="space-y-1">${q.options.map((opt, i) => `<div class="text-[9px] p-2 rounded-lg border ${i===q.correctIndex?'bg-emerald-50 border-emerald-200 font-bold':''}">${opt}</div>`).join('')}</div>
+                </div>`).join('');
         }
 
         function saveBatchToBank() {
@@ -446,65 +209,32 @@ Estrutura: [ { "statement": "", "options": ["", "", "", ""], "correctIndex": 0-3
             switchTab('bank');
         }
 
-        // --- SRS SM-2 ---
-        function calculateSM2(q, srs = { interval: 0, repetitions: 0, easeFactor: 2.5 }) {
-            let { interval, repetitions, easeFactor } = srs;
-            if (q >= 3) {
-                if (repetitions === 0) interval = 1;
-                else if (repetitions === 1) interval = 6;
-                else interval = Math.round(interval * easeFactor);
-                repetitions++;
-            } else { repetitions = 0; interval = 1; }
-            easeFactor = easeFactor + (0.1 - (5 - q) * (0.08 + (5 - q) * 0.02));
-            if (easeFactor < 1.3) easeFactor = 1.3;
-            return { interval, repetitions, easeFactor, nextReview: Date.now() + (interval * 24 * 60 * 60 * 1000) };
-        }
-
-        // --- STUDY ---
-        let queue = [], idx = 0, revealed = false;
-
         function initStudy() {
             const now = Date.now();
-            queue = state.questions.filter(q => !state.srs[q.id] || state.srs[q.id].nextReview <= now)
-                    .sort((a,b) => (state.srs[a.id]?.nextReview || 0) - (state.srs[b.id]?.nextReview || 0));
-            idx = 0;
-            renderCard();
+            queue = state.questions.filter(q => !state.srs[q.id] || state.srs[q.id].nextReview <= now).sort(() => Math.random() - 0.5);
+            idx = 0; renderCard();
         }
 
         function renderCard() {
             const v = document.getElementById('study-view');
-            if (!queue.length) { v.innerHTML = `<div class="py-20 text-center animate-in"><h2 class="text-xl font-black">Meta Batida! 🩺</h2><p class="text-xs text-slate-400 mt-2">Nenhuma revisão pendente no momento. Bom descanso!</p></div>`; return; }
+            if (!queue.length) { v.innerHTML = `<div class="py-20 text-center"><h2 class="text-xl font-black">Meta Batida! 🩺</h2></div>`; return; }
             const q = queue[idx]; revealed = false;
             v.innerHTML = `
-                <div class="bg-white p-6 rounded-[32px] border border-slate-100 shadow-xl animate-in">
-                    <div class="flex justify-between items-center mb-6">
-                        <span class="text-[9px] font-black text-indigo-400 uppercase tracking-widest">${q.specialty || 'Geral'}</span>
-                        <span class="text-[9px] text-slate-300 font-bold">${idx+1}/${queue.length}</span>
-                    </div>
-                    <h3 class="text-lg font-bold text-slate-800 leading-tight mb-8">${q.statement}</h3>
-                    <div class="space-y-3">
-                        ${q.options.map((opt, i) => `
-                            <button onclick="checkAnswer(${i})" class="opt-btn w-full text-left p-4 rounded-2xl border-2 border-slate-50 bg-slate-50 text-slate-600 text-sm font-semibold transition-all">
-                                ${String.fromCharCode(65+i)}) ${opt}
-                            </button>
-                        `).join('')}
-                    </div>
-                    <div id="feedback" class="hidden mt-8 pt-8 border-t border-slate-100 animate-in">
-                        <div class="bg-slate-900 text-indigo-100 p-5 rounded-2xl mb-6 text-[10px] leading-relaxed italic"><b>EXPLICAÇÃO MÉDICA:</b> ${q.explanation}</div>
-                        <div class="grid grid-cols-4 gap-2">
-                            ${[1, 3, 4, 5].map(v => `<button onclick="handleSRS(${v})" class="py-3 rounded-xl text-white font-black text-[8px] uppercase ${v===1?'bg-rose-500':v===3?'bg-orange-400':v===4?'bg-blue-500':'bg-emerald-500'} active:scale-95 transition-all">${v===1?'Errei':v===3?'Difícil':v===4?'Bom':'Fácil'}</button>`).join('')}
-                        </div>
+                <div class="bg-white p-6 rounded-[32px] border shadow-xl animate-in">
+                    <h3 class="text-lg font-bold mb-8">${q.statement}</h3>
+                    <div class="space-y-3">${q.options.map((opt, i) => `<button onclick="checkAnswer(${i})" class="opt-btn w-full text-left p-4 rounded-2xl border text-sm font-semibold transition-all">${opt}</button>`).join('')}</div>
+                    <div id="feedback" class="hidden mt-8 pt-8 border-t">
+                        <div class="bg-slate-900 text-white p-4 rounded-2xl mb-6 text-[10px] italic">${q.explanation}</div>
+                        <div class="grid grid-cols-4 gap-2">${[1, 3, 4, 5].map(v => `<button onclick="handleSRS(${v})" class="py-3 rounded-xl text-white font-black text-[8px] uppercase ${v===1?'bg-rose-500':v===3?'bg-orange-400':v===4?'bg-blue-500':'bg-emerald-500'}">${v===1?'Erro':v===3?'Difícil':v===4?'Bom':'Fácil'}</button>`).join('')}</div>
                     </div>
                 </div>`;
         }
 
         window.checkAnswer = (i) => {
-            if (revealed) return; revealed = true;
-            const q = queue[idx], btns = document.querySelectorAll('.opt-btn');
-            btns.forEach((b, j) => {
+            const q = queue[idx];
+            document.querySelectorAll('.opt-btn').forEach((b, j) => {
                 if (j === q.correctIndex) b.classList.add('option-btn-correct');
                 else if (j === i) b.classList.add('option-btn-wrong');
-                b.disabled = true;
             });
             document.getElementById('feedback').classList.remove('hidden');
         };
@@ -517,21 +247,33 @@ Estrutura: [ { "statement": "", "options": ["", "", "", ""], "correctIndex": 0-3
             if (idx < queue.length - 1) { idx++; renderCard(); } else initStudy();
         };
 
-        // --- BANK ---
-        function renderBank() {
-            const l = document.getElementById('bank-list');
-            if (!state.questions.length) { l.innerHTML = `<p class="text-center py-20 text-slate-300 italic text-xs">O banco está vazio. Use a IA para adicionar questões!</p>`; return; }
-            l.innerHTML = state.questions.slice().reverse().map(q => `
-                <div class="bg-white p-4 rounded-2xl border border-slate-100 flex justify-between items-center shadow-sm">
-                    <div class="truncate mr-4"><p class="text-[10px] font-bold text-slate-700 truncate">${q.statement}</p></div>
-                    <button onclick="removeQuestion('${q.id}')" class="text-rose-400 text-xs font-black p-2 active:scale-90">✕</button>
-                </div>
-            `).join('');
+        function calculateSM2(q, srs = { interval: 0, repetitions: 0, easeFactor: 2.5 }) {
+            let { interval, repetitions, easeFactor } = srs;
+            if (q >= 3) {
+                if (repetitions === 0) interval = 1; else if (repetitions === 1) interval = 6; else interval = Math.round(interval * easeFactor);
+                repetitions++;
+            } else { repetitions = 0; interval = 1; }
+            easeFactor = Math.max(1.3, easeFactor + (0.1 - (5 - q) * (0.08 + (5 - q) * 0.02)));
+            return { interval, repetitions, easeFactor, nextReview: Date.now() + (interval * 24 * 60 * 60 * 1000) };
         }
 
-        window.removeQuestion = (id) => { if (confirm("Excluir esta questão permanentemente?")) { state.questions = state.questions.filter(q => q.id !== id); delete state.srs[id]; saveLocal(); renderBank(); } };
-        window.clearAllData = () => { if (confirm("Isso apagará seu progresso local. O backup no Drive será preservado até a próxima sincronização.")) { localStorage.clear(); window.location.reload(); } };
+        function renderBank() {
+            document.getElementById('bank-list').innerHTML = state.questions.slice().reverse().map(q => `
+                <div class="bg-white p-4 rounded-2xl border flex justify-between items-center mb-2 shadow-sm">
+                    <p class="text-[10px] font-bold truncate flex-1">${q.statement}</p>
+                    <button onclick="removeQuestion('${q.id}')" class="text-rose-400 font-black p-2 ml-4">✕</button>
+                </div>`).join('') || '<p class="text-center py-20 text-slate-300">Banco Vazio</p>';
+        }
 
+        window.removeQuestion = (id) => { if (confirm("Excluir?")) { state.questions = state.questions.filter(q => q.id !== id); saveLocal(); renderBank(); } };
+        window.clearAllData = () => { if (confirm("Limpar?")) { localStorage.clear(); window.location.reload(); } };
+
+        function initGoogle() { gapi.load('client', () => gapi.client.init({ discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'] })); tokenClient = google.accounts.oauth2.initTokenClient({ client_id: CLIENT_ID, scope: SCOPES, callback: (r) => { accessToken = r.access_token; onAuthenticated(); } }); }
+        function driveSignIn() { tokenClient.requestAccessToken({ prompt: 'consent' }); }
+        function onAuthenticated() { document.getElementById('sync-dot').classList.replace('bg-slate-300', 'bg-emerald-500'); document.getElementById('sync-status').innerText = 'Cloud On'; loadFromDrive(); }
+        async function loadFromDrive() { const r = await gapi.client.drive.files.list({ spaces: 'appDataFolder' }); const f = r.result.files.find(f => f.name === BACKUP_NAME); if (f) { driveFileId = f.id; const c = await gapi.client.drive.files.get({ fileId: driveFileId, alt: 'media' }); if (c.result) { state = { ...state, ...c.result }; saveLocal(); } } }
+        async function autoSyncDrive() { if (!accessToken) return; const meta = { name: BACKUP_NAME, parents: ['appDataFolder'] }; const form = new FormData(); form.append('metadata', new Blob([JSON.stringify(meta)], { type: 'application/json' })); form.append('file', new Blob([JSON.stringify(state)], { type: 'application/json' })); fetch(`https://www.googleapis.com/upload/drive/v3/files${driveFileId?'/'+driveFileId:''}?uploadType=multipart`, { method: driveFileId?'PATCH':'POST', headers: { Authorization: 'Bearer ' + accessToken }, body: form }).then(r => r.json()).then(j => driveFileId = j.id); }
+        async function syncNow() { document.getElementById('sync-loader').classList.remove('hidden'); await loadFromDrive(); await autoSyncDrive(); document.getElementById('sync-loader').classList.add('hidden'); alert("Sincronizado!"); }
     </script>
 </body>
 </html>
