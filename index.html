@@ -46,9 +46,14 @@
         
         #login-screen { display: flex; }
         #main-app { display: none; }
-        canvas { width: 100% !important; height: 180px !important; }
+        canvas { width: 100% !important; height: 160px !important; }
         
-        .folder-card.active { border-color: #4f46e5; background-color: #eef2ff; }
+        .folder-chip { cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+        .folder-chip.active { background-color: #4f46e5; color: white; transform: scale(1.05); }
+        .folder-chip:active { transform: scale(0.95); }
+
+        /* Estilo Safari iPhone */
+        input, select, textarea { font-size: 16px !important; }
     </style>
 </head>
 <body class="antialiased overflow-x-hidden">
@@ -66,15 +71,17 @@
     <div id="login-screen" class="fixed inset-0 z-[200] bg-white flex flex-col items-center justify-center p-8 text-center pt-24">
         <div class="mb-12">
             <h1 class="text-6xl font-black text-indigo-600 tracking-tighter italic leading-none">MedRep</h1>
-            <p class="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-4">Pastas, IA & Repetição Espaçada</p>
+            <p class="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-4">Cloud Sync & Medicina</p>
         </div>
         <div class="bg-slate-50 p-10 rounded-[40px] w-full max-w-sm border border-slate-100 mb-8 shadow-sm">
+            <p id="login-status-msg" class="text-xs font-semibold text-slate-500 mb-6">Conecte sua conta para começar</p>
             <button onclick="window.fazerLogin()" class="w-full bg-slate-900 text-white font-black py-5 rounded-[22px] shadow-xl flex items-center justify-center gap-4 active:scale-95 transition-transform">
                 <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" class="w-6" alt="Google">
                 <span class="text-xs uppercase tracking-widest">Entrar com Google</span>
             </button>
             <div id="login-loader" class="hidden mt-6 flex justify-center"><div class="loading-spinner"></div></div>
         </div>
+        <p class="text-[9px] font-black text-slate-300 uppercase tracking-[0.4em]">v12.5 PERSISTENT EDITION</p>
     </div>
 
     <!-- MAIN APP -->
@@ -82,9 +89,7 @@
         <header class="glass border-b border-slate-100 px-6 py-4 sticky top-[60px] md:top-[50px] z-50 flex justify-between items-center max-w-xl mx-auto w-full rounded-b-3xl">
             <div class="flex flex-col">
                 <h1 class="text-xl font-black text-indigo-600 tracking-tighter italic leading-none">MedRep</h1>
-                <select id="folder-selector" onchange="window.onFolderChange(this.value)" class="text-[10px] font-bold text-slate-500 uppercase mt-1 tracking-widest bg-transparent outline-none border-none cursor-pointer">
-                    <option value="all">Todas as Pastas</option>
-                </select>
+                <span id="header-subtitle" class="text-[8px] font-bold text-slate-400 uppercase mt-1 tracking-widest">Filtro: Todas as Pastas</span>
             </div>
             <div id="due-badge" class="hidden bg-rose-500 text-white text-[10px] font-black px-2 py-1 rounded-full">0</div>
         </header>
@@ -92,11 +97,12 @@
         <main class="max-w-xl mx-auto p-4 space-y-6 pb-32">
             <!-- ABA HOME -->
             <section id="tab-home" class="tab-content active space-y-6">
+                <!-- Dashboard Analytics -->
                 <div class="bg-indigo-600 p-8 rounded-[40px] text-white shadow-xl relative overflow-hidden">
-                    <p class="text-[9px] font-black uppercase tracking-widest opacity-60 mb-2">Seu Dashboard</p>
+                    <p class="text-[9px] font-black uppercase tracking-widest opacity-60 mb-2">Desempenho Geral</p>
                     <div class="grid grid-cols-2 gap-4 mb-4">
                         <div class="bg-white/10 p-4 rounded-2xl">
-                            <p class="text-[9px] font-bold uppercase opacity-50">Cards</p>
+                            <p class="text-[9px] font-bold uppercase opacity-50">Cards Ativos</p>
                             <p id="stat-total" class="text-2xl font-black">0</p>
                         </div>
                         <div class="bg-white/10 p-4 rounded-2xl">
@@ -104,27 +110,33 @@
                             <p id="stat-accuracy" class="text-2xl font-black">0%</p>
                         </div>
                     </div>
-                    <div class="bg-white/5 p-4 rounded-3xl border border-white/10 h-48 flex items-center justify-center">
+                    <div class="bg-white/5 p-4 rounded-3xl border border-white/10 h-44 flex items-center justify-center">
                         <canvas id="performanceChart"></canvas>
                     </div>
                 </div>
 
-                <!-- PASTAS UI -->
+                <!-- SELEÇÃO DE PASTAS -->
                 <div class="space-y-4">
                     <div class="flex justify-between items-center px-4">
-                        <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Suas Pastas</h2>
-                        <button onclick="window.createNewFolder()" class="text-[10px] font-black text-indigo-600 uppercase">Nova Pasta +</button>
+                        <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Matérias / Pastas</h2>
+                        <button onclick="window.createNewFolder()" class="text-[10px] font-black text-indigo-600 uppercase">Criar Pasta +</button>
                     </div>
-                    <div id="folders-grid" class="grid grid-cols-2 gap-3"></div>
+                    <div id="folders-scroll" class="flex gap-2 overflow-x-auto pb-2 px-2 no-scrollbar">
+                        <!-- Pastas geradas via JS -->
+                    </div>
                 </div>
 
+                <!-- Botão de Estudo Rápido -->
                 <div onclick="window.switchTab('study')" class="bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm flex items-center justify-between cursor-pointer active:scale-98 transition-all">
                     <div class="flex items-center gap-4">
                         <div class="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center text-xl">⚡</div>
                         <div>
                             <h3 class="font-black text-slate-800">Iniciar Revisão</h3>
-                            <p id="home-due-text" class="text-xs text-slate-400">Clique para estudar agora.</p>
+                            <p id="home-due-text" class="text-xs text-slate-400">0 pendentes hoje.</p>
                         </div>
+                    </div>
+                    <div class="bg-indigo-600 text-white p-2 rounded-xl">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     </div>
                 </div>
             </section>
@@ -134,39 +146,39 @@
                 <div id="study-container" class="space-y-6 min-h-[400px]"></div>
             </section>
 
-            <!-- ABA IA -->
+            <!-- ABA IA (GERADOR) -->
             <section id="tab-add" class="tab-content space-y-6">
                 <div class="bg-white p-8 rounded-[40px] border border-slate-100 shadow-sm space-y-6">
                     <div class="flex items-center gap-4">
                         <div class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-lg">🪄</div>
-                        <h2 class="text-lg font-black text-slate-800">Criar com IA</h2>
+                        <h2 class="text-lg font-black text-slate-800">Gerador IA</h2>
                     </div>
 
-                    <div class="space-y-3">
-                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Destino</label>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Pasta de Destino</label>
                         <select id="ia-folder-target" class="w-full bg-slate-50 p-4 rounded-2xl text-xs font-bold outline-none border border-slate-100"></select>
                     </div>
 
                     <div class="bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl p-6 text-center">
                         <label class="cursor-pointer flex flex-col items-center gap-2">
                             <span class="text-2xl">📄</span>
-                            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Anexar PDF / Word</span>
+                            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Anexar PDF / DOCX</span>
                             <input type="file" id="file-reader" class="hidden" accept=".pdf,.docx">
                             <span id="file-status" class="text-[9px] text-indigo-500 font-bold hidden"></span>
                         </label>
                     </div>
 
-                    <textarea id="ia-prompt" placeholder="Ou cole seu texto de estudo aqui..." class="w-full h-40 bg-slate-50 rounded-[24px] p-6 text-sm border border-slate-100 focus:ring-2 ring-indigo-500 outline-none resize-none"></textarea>
+                    <textarea id="ia-prompt" placeholder="Ou cole seu texto/resumo aqui..." class="w-full h-40 bg-slate-50 rounded-[24px] p-6 text-sm border border-slate-100 focus:ring-2 ring-indigo-500 outline-none resize-none"></textarea>
                     
                     <button onclick="window.processIA()" id="btn-ia" class="w-full bg-slate-900 text-white font-black py-5 rounded-[20px] uppercase text-xs flex items-center justify-center gap-4 shadow-xl active:scale-95 transition-transform">
-                        <span>Gerar Questões</span>
+                        <span>Gerar Flashcards</span>
                         <div id="ia-loader" class="loading-spinner hidden" style="border-top-color: white;"></div>
                     </button>
                 </div>
 
                 <div id="ia-review-area" class="hidden space-y-4">
                     <div class="flex justify-between items-center bg-white p-6 rounded-[24px] border border-slate-100 shadow-xl sticky top-[130px] z-10">
-                        <span id="review-count" class="text-xs font-black text-slate-800">0 Cards</span>
+                        <span id="review-count" class="text-xs font-black text-slate-800">0 Cards Gerados</span>
                         <button onclick="window.confirmBatch()" class="bg-emerald-600 text-white text-[10px] font-black uppercase px-6 py-3 rounded-xl">Importar</button>
                     </div>
                     <div id="review-list" class="space-y-4 pb-20"></div>
@@ -177,13 +189,13 @@
             <section id="tab-bank" class="tab-content space-y-4">
                 <div class="flex justify-between items-center px-4">
                     <h2 class="text-lg font-black text-slate-800">Banco</h2>
-                    <button onclick="window.clearAll()" class="text-[8px] font-black text-rose-500 uppercase tracking-widest bg-rose-50 px-3 py-1.5 rounded-lg">Limpar Tudo</button>
+                    <button onclick="window.clearAll()" class="text-[8px] font-black text-rose-500 uppercase tracking-widest bg-rose-50 px-3 py-1.5 rounded-lg">Limpar Local</button>
                 </div>
                 <div id="bank-list" class="space-y-2 pb-24"></div>
             </section>
         </main>
 
-        <!-- NAVBAR -->
+        <!-- BARRA DE NAVEGAÇÃO -->
         <nav class="fixed bottom-0 left-0 right-0 max-w-xl mx-auto bg-white/90 backdrop-blur-2xl border-t border-slate-100 flex justify-around py-6 px-4 z-50 rounded-t-[32px] shadow-2xl safe-bottom">
             <button onclick="window.switchTab('home')" class="nav-btn flex flex-col items-center gap-1 active text-indigo-600" id="nav-home">
                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3L4 9V21H9V15H15V21H20V9L12 3Z"/></svg>
@@ -195,34 +207,36 @@
             </button>
             <button onclick="window.switchTab('add')" class="nav-btn flex flex-col items-center gap-1 text-slate-400" id="nav-add">
                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L14.5 8.5L21 11L14.5 13.5L12 20L9.5 13.5L3 11L9.5 8.5L12 2Z"/></svg>
-                <span class="text-[8px] font-black uppercase">IA</span>
+                <span class="text-[8px] font-black uppercase">Gerar</span>
             </button>
             <button onclick="window.switchTab('bank')" class="nav-btn flex flex-col items-center gap-1 text-slate-400" id="nav-bank">
                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M4 4H20V20H4V4ZM6 6V18H18V6H6ZM8 8H16V10H8V8ZM8 12H16V14H8V12ZM8 16H13V18H8V16Z"/></svg>
-                <span class="text-[8px] font-black uppercase">Acervo</span>
+                <span class="text-[8px] font-black uppercase">Banco</span>
             </button>
         </nav>
     </div>
 
+    <!-- SCRIPTS CORE -->
     <script type="module">
         import { GoogleGenAI } from "@google/genai";
 
-        // CONFIGS TÉCNICAS (NÃO ALTERAR)
+        // CONFIGS DE SEGURANÇA (ESTRITAS)
         const CLIENT_ID = '648353734848-s9fnmd9tt0i5577grbt3q9oju6h71mpi.apps.googleusercontent.com';
-        const SCOPES = 'https://www.googleapis.com/auth/drive.file'; 
-        const STORAGE_KEY = 'medrep_data_v12_final';
+        const SCOPES = 'https://www.googleapis.com/auth/drive.file';
+        const STORAGE_KEY = 'medrep_data_v12_5';
         const KEY_STORAGE = 'medrep_gemini_key_v11';
         const FILENAME = 'medrep_sync.json';
+        const TOKEN_STORAGE = 'medrep_google_token';
 
         // ESTADO GLOBAL
-        let state = { 
-            questions: [], 
-            srs: {}, 
-            history: [], 
-            folders: [{id: 'f_default', name: 'Geral'}],
-            currentFolderId: 'all'
+        let state = {
+            questions: [],
+            srs: {},
+            history: [],
+            folders: [{id: 'f_all', name: 'Todas as Pastas'}, {id: 'f_default', name: 'Geral'}],
+            currentFolderId: 'f_all'
         };
-        
+
         let tempExtracted = [];
         let studyQueue = [];
         let studyPointer = 0;
@@ -241,22 +255,28 @@
         // EXPOR FUNÇÕES GLOBAIS
         window.saveGeminiKey = () => {
             const key = document.getElementById('gemini-key-input').value.trim();
-            if (!/^AIza[0-9A-Za-z-_]{35}$/.test(key)) return alert("Chave Inválida!");
+            if (!/^AIza[0-9A-Za-z-_]{35}$/.test(key)) return alert("Chave Gemini Inválida!");
             localStorage.setItem(KEY_STORAGE, key);
-            alert("✅ Chave Salva!");
+            alert("✅ Configuração Salva!");
             location.reload();
         };
 
         window.fazerLogin = () => {
             document.getElementById('login-loader').classList.remove('hidden');
-            if (tokenClient) tokenClient.requestAccessToken();
-            else alert("Erro ao carregar Google Auth");
+            if (tokenClient) {
+                tokenClient.requestAccessToken();
+            } else {
+                alert("Erro: Google Services não carregado.");
+                document.getElementById('login-loader').classList.add('hidden');
+            }
         };
 
         window.switchTab = (tabId) => {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active', 'text-indigo-600'));
-            document.querySelectorAll('.nav-btn').forEach(el => el.classList.add('text-slate-400'));
+            document.querySelectorAll('.nav-btn').forEach(el => {
+                el.classList.remove('active', 'text-indigo-600');
+                el.classList.add('text-slate-400');
+            });
             document.getElementById('tab-' + tabId).classList.add('active');
             const btn = document.getElementById('nav-' + tabId);
             btn.classList.add('active', 'text-indigo-600');
@@ -268,24 +288,25 @@
             window.scrollTo(0, 0);
         };
 
-        window.onFolderChange = (val) => {
-            state.currentFolderId = val;
+        window.onFolderChange = (id) => {
+            state.currentFolderId = id;
+            const folderName = state.folders.find(f => f.id === id).name;
+            document.getElementById('header-subtitle').innerText = `Filtro: ${folderName}`;
             updateStats();
             if (document.getElementById('tab-bank').classList.contains('active')) renderBank();
         };
 
         window.createNewFolder = () => {
-            const name = prompt("Nome da nova pasta:");
-            if (name) {
-                const folder = { id: 'f_' + Math.random().toString(36).substr(2, 9), name: name };
+            const name = prompt("Nome da matéria (ex: Ginecologia):");
+            if (name && name.trim()) {
+                const folder = { id: 'f_' + Date.now(), name: name.trim() };
                 state.folders.push(folder);
                 saveLocal();
-                renderFolderSelectors();
                 updateStats();
             }
         };
 
-        // LEITOR DE ARQUIVOS
+        // LEITOR DE ARQUIVOS CONTEXTUAL
         document.getElementById('file-reader').addEventListener('change', async (e) => {
             const file = e.target.files[0];
             if (!file) return;
@@ -309,31 +330,33 @@
                     const result = await mammoth.extractRawText({ arrayBuffer });
                     extractedFileText = result.value;
                 }
-                status.innerText = "✅ " + file.name;
+                status.innerText = "✅ Arquivo Pronto";
             } catch (err) {
-                alert("Erro ao ler arquivo");
+                alert("Erro no arquivo: " + err.message);
                 status.innerText = "";
             }
         });
 
-        // IA PROCESSOR
+        // IA PROCESSOR (PERFEITO)
         window.processIA = async () => {
             const prompt = document.getElementById('ia-prompt').value.trim();
-            if (!prompt && !extractedFileText) return alert("Forneça um texto ou anexo!");
+            if (!prompt && !extractedFileText) return alert("Forneça texto ou arquivo!");
+            
             const loader = document.getElementById('ia-loader');
             const btn = document.getElementById('btn-ia');
             loader.classList.remove('hidden');
             btn.disabled = true;
 
-            const fullContext = extractedFileText + "\n\nComando: " + prompt;
+            const targetFolder = state.folders.find(f => f.id === document.getElementById('ia-folder-target').value);
 
             try {
                 const ai = getAIClient();
+                const context = extractedFileText ? `Contexto do Arquivo: ${extractedFileText}\n\n` : "";
                 const response = await ai.models.generateContent({
                     model: 'gemini-3-flash-preview',
-                    contents: [{ parts: [{ text: fullContext }] }],
+                    contents: [{ parts: [{ text: `${context}Crie flashcards médicos sobre: ${prompt}. Especialidade: ${targetFolder.name}.` }] }],
                     config: { 
-                        systemInstruction: "Crie flashcards médicos em JSON. Retorne apenas o array: [{\"statement\":\"\",\"options\":[],\"correctIndex\":0,\"explanation\":\"\",\"specialty\":\"\"}]" 
+                        systemInstruction: "Retorne APENAS um array JSON puro: [{\"statement\":\"\",\"options\":[],\"correctIndex\":0,\"explanation\":\"\",\"specialty\":\"\"}]" 
                     }
                 });
                 const match = response.text.match(/\[[\s\S]*\]/);
@@ -341,34 +364,35 @@
                     tempExtracted = JSON.parse(match[0]);
                     renderReviewList();
                 }
-            } catch (e) { alert(e.message); }
+            } catch (e) { alert("Erro IA: " + e.message); }
             finally { loader.classList.add('hidden'); btn.disabled = false; }
         };
 
         function renderReviewList() {
-            document.getElementById('ia-input-area').classList.add('hidden');
+            document.getElementById('ia-input-area')?.classList.add('hidden');
             document.getElementById('ia-review-area').classList.remove('hidden');
-            document.getElementById('review-count').innerText = tempExtracted.length + " Cards";
-            document.getElementById('review-list').innerHTML = tempExtracted.map(q => `<div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm text-[12px] font-bold">${q.statement}</div>`).join('');
+            document.getElementById('review-count').innerText = tempExtracted.length + " Cards Gerados";
+            document.getElementById('review-list').innerHTML = tempExtracted.map(q => `
+                <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm text-xs font-bold leading-relaxed">${q.statement}</div>
+            `).join('');
             window.scrollTo(0, 0);
         }
 
         window.confirmBatch = () => {
-            const targetFolderId = document.getElementById('ia-folder-target').value;
+            const folderId = document.getElementById('ia-folder-target').value;
             const news = tempExtracted.map(q => ({ 
                 ...q, 
                 id: 'q_' + Math.random().toString(36).substr(2, 9),
-                folderId: targetFolderId,
-                createdAt: Date.now()
+                folderId: folderId,
+                date: Date.now()
             }));
             state.questions = [...state.questions, ...news];
             saveLocal();
             document.getElementById('ia-review-area').classList.add('hidden');
-            document.getElementById('ia-input-area').classList.remove('hidden');
-            window.switchTab('bank');
+            location.reload(); // Refresh simples para limpar estados de IA
         };
 
-        // GRÁFICO E STATS
+        // ANALYTICS (FILTRÁVEL)
         function initChart() {
             const ctx = document.getElementById('performanceChart').getContext('2d');
             chartInstance = new Chart(ctx, {
@@ -377,13 +401,13 @@
                     labels: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'],
                     datasets: [{
                         label: 'Acertos',
-                        data: [0, 0, 0, 0, 0, 0, 0],
+                        data: [0,0,0,0,0,0,0],
                         borderColor: '#fff',
-                        backgroundColor: 'rgba(255,255,255,0.1)',
+                        backgroundColor: 'rgba(255,255,255,0.2)',
                         fill: true,
                         tension: 0.4,
                         borderWidth: 2,
-                        pointRadius: 3
+                        pointRadius: 2
                     }]
                 },
                 options: {
@@ -391,7 +415,7 @@
                     maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
                     scales: {
-                        x: { display: true, ticks: { color: '#fff', font: { size: 8 } }, grid: { display: false } },
+                        x: { display: true, ticks: { color: 'rgba(255,255,255,0.7)', font: { size: 9 } }, grid: { display: false } },
                         y: { display: false }
                     }
                 }
@@ -399,93 +423,88 @@
         }
 
         function updateStats() {
-            const folderFilter = state.currentFolderId;
+            const folderId = state.currentFolderId;
             const now = Date.now();
             
-            const filteredQuestions = folderFilter === 'all' 
-                ? state.questions 
-                : state.questions.filter(q => q.folderId === folderFilter);
+            // Filtro por Pasta
+            const questions = folderId === 'f_all' ? state.questions : state.questions.filter(q => q.folderId === folderId);
+            const questionIds = new Set(questions.map(q => q.id));
+            const history = state.history.filter(h => folderId === 'f_all' || questionIds.has(h.cardId));
 
-            const due = filteredQuestions.filter(q => !state.srs[q.id] || state.srs[q.id].nextReview <= now).length;
+            const due = questions.filter(q => !state.srs[q.id] || state.srs[q.id].nextReview <= now).length;
             
-            document.getElementById('stat-total').innerText = filteredQuestions.length;
-            document.getElementById('home-due-text').innerText = due > 0 ? `${due} pendentes nesta seleção.` : "Tudo em dia!";
+            document.getElementById('stat-total').innerText = questions.length;
+            document.getElementById('home-due-text').innerText = due > 0 ? `${due} pendentes hoje.` : "Tudo revisado!";
             
             const badge = document.getElementById('due-badge');
             badge.innerText = due;
             badge.classList.toggle('hidden', due === 0);
 
-            // Filtro de Histórico para o Gráfico
-            const folderQuestionIds = new Set(filteredQuestions.map(q => q.id));
-            const filteredHistory = state.history.filter(h => folderQuestionIds.has(h.cardId));
-
-            const hits = filteredHistory.filter(h => h.success).length;
-            const acc = filteredHistory.length ? Math.round((hits / filteredHistory.length) * 100) : 0;
+            const hits = history.filter(h => h.success).length;
+            const acc = history.length ? Math.round((hits / history.length) * 100) : 0;
             document.getElementById('stat-accuracy').innerText = acc + "%";
 
-            // Atualizar Gráfico
+            // Update Chart
             if (chartInstance) {
-                const historyByDay = [0,0,0,0,0,0,0];
-                filteredHistory.forEach(h => {
+                const weeklyData = [0,0,0,0,0,0,0];
+                history.slice(-50).forEach(h => {
                     const day = new Date(h.date).getDay();
-                    if (h.success) historyByDay[day]++;
+                    if (h.success) weeklyData[day]++;
                 });
-                chartInstance.data.datasets[0].data = historyByDay;
+                chartInstance.data.datasets[0].data = weeklyData;
                 chartInstance.update();
             }
 
-            renderFoldersUI();
+            renderFolders();
         }
 
-        function renderFoldersUI() {
-            const grid = document.getElementById('folders-grid');
-            const now = Date.now();
-            grid.innerHTML = state.folders.map(f => {
-                const count = state.questions.filter(q => q.folderId === f.id).length;
-                const due = state.questions.filter(q => q.folderId === f.id && (!state.srs[q.id] || state.srs[q.id].nextReview <= now)).length;
+        function renderFolders() {
+            const scroll = document.getElementById('folders-scroll');
+            scroll.innerHTML = state.folders.map(f => {
                 const isActive = state.currentFolderId === f.id;
-                return `
-                    <div onclick="window.onFolderChange('${f.id}')" class="folder-card bg-white p-4 rounded-3xl border border-slate-100 shadow-sm cursor-pointer ${isActive ? 'active' : ''}">
-                        <div class="flex justify-between items-start mb-2">
-                            <span class="text-xl">📁</span>
-                            ${due > 0 ? `<span class="bg-rose-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded-full">${due}</span>` : ''}
-                        </div>
-                        <h4 class="text-[11px] font-black text-slate-800 truncate">${f.name}</h4>
-                        <p class="text-[9px] text-slate-400 font-bold uppercase mt-1">${count} Cards</p>
-                    </div>
-                `;
+                return `<div onclick="window.onFolderChange('${f.id}')" class="folder-chip px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest border border-slate-200 bg-white ${isActive ? 'active shadow-lg' : 'text-slate-500'}">
+                    ${f.name}
+                </div>`;
             }).join('');
-            renderFolderSelectors();
+
+            const iaTarget = document.getElementById('ia-folder-target');
+            if (iaTarget) {
+                iaTarget.innerHTML = state.folders.filter(f => f.id !== 'f_all').map(f => `
+                    <option value="${f.id}">${f.name}</option>
+                `).join('');
+            }
         }
 
-        function renderFolderSelectors() {
-            const selectors = [document.getElementById('folder-selector'), document.getElementById('ia-folder-target')];
-            selectors.forEach(sel => {
-                if (!sel) return;
-                const currentVal = sel.value;
-                let html = sel.id === 'folder-selector' ? `<option value="all">Todas as Pastas</option>` : "";
-                html += state.folders.map(f => `<option value="${f.id}">${f.name}</option>`).join('');
-                sel.innerHTML = html;
-                if (currentVal) sel.value = currentVal;
-            });
-        }
-
-        // GOOGLE SETUP
+        // GOOGLE DRIVE PERSISTENTE
         function setupGoogle() {
             gapi.load('client', async () => {
                 await gapi.client.init({ discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'] });
             });
+
             tokenClient = google.accounts.oauth2.initTokenClient({
                 client_id: CLIENT_ID,
                 scope: SCOPES,
                 callback: (resp) => {
                     if (resp.error) return;
                     accessToken = resp.access_token;
-                    document.getElementById('login-screen').style.display = 'none';
-                    document.getElementById('main-app').style.display = 'block';
-                    manualSync();
+                    localStorage.setItem(TOKEN_STORAGE, JSON.stringify({ token: accessToken, expiry: Date.now() + 3500 * 1000 }));
+                    onLoginSuccess();
                 }
             });
+
+            // Tentar Auto-Login
+            const savedToken = JSON.parse(localStorage.getItem(TOKEN_STORAGE));
+            if (savedToken && savedToken.expiry > Date.now()) {
+                accessToken = savedToken.token;
+                document.getElementById('login-status-msg').innerText = "Sincronizando banco...";
+                onLoginSuccess();
+            }
+        }
+
+        function onLoginSuccess() {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('main-app').style.display = 'block';
+            manualSync();
         }
 
         async function manualSync() {
@@ -501,7 +520,7 @@
                         updateStats();
                     }
                 }
-            } catch (e) { console.error(e); }
+            } catch (e) { console.error("Sync Erro", e); }
         }
 
         async function autoBackup() {
@@ -520,18 +539,14 @@
                     headers: { 'Authorization': 'Bearer ' + accessToken },
                     body: form
                 });
-            } catch (e) { console.error(e); }
+            } catch (e) { console.error("Backup Erro", e); }
         }
 
-        // SRS ENGINE
+        // SRS ENGINE (SM-2)
         function startStudy() {
             const now = Date.now();
-            const folderFilter = state.currentFolderId;
-            const filteredQuestions = folderFilter === 'all' 
-                ? state.questions 
-                : state.questions.filter(q => q.folderId === folderFilter);
-
-            studyQueue = filteredQuestions.filter(q => !state.srs[q.id] || state.srs[q.id].nextReview <= now);
+            const questions = state.currentFolderId === 'f_all' ? state.questions : state.questions.filter(q => q.folderId === state.currentFolderId);
+            studyQueue = questions.filter(q => !state.srs[q.id] || state.srs[q.id].nextReview <= now);
             studyQueue.sort(() => Math.random() - 0.5);
             studyPointer = 0;
             renderStudyCard();
@@ -540,21 +555,21 @@
         function renderStudyCard() {
             const container = document.getElementById('study-container');
             if (studyQueue.length === 0) {
-                container.innerHTML = `<div class="py-24 text-center"><div class="text-6xl mb-6">✅</div><h2 class="text-xl font-black">Nada para revisar aqui!</h2><button onclick="window.switchTab('home')" class="mt-8 bg-indigo-600 text-white font-black px-10 py-4 rounded-2xl">Voltar</button></div>`;
+                container.innerHTML = `<div class="py-24 text-center"><div class="text-6xl mb-6">✅</div><h2 class="text-xl font-black">Meta Batida!</h2><button onclick="window.switchTab('home')" class="mt-8 bg-indigo-600 text-white font-black px-10 py-4 rounded-2xl">Dashboard</button></div>`;
                 return;
             }
             if (studyPointer >= studyQueue.length) {
-                container.innerHTML = `<div class="py-24 text-center"><div class="text-6xl mb-6">🎯</div><h2 class="text-xl font-black">Meta Batida!</h2><button onclick="window.switchTab('home')" class="mt-8 bg-indigo-600 text-white font-black px-10 py-4 rounded-2xl">Dashboard</button></div>`;
+                container.innerHTML = `<div class="py-24 text-center"><div class="text-6xl mb-6">🎯</div><h2 class="text-xl font-black">Sessão Encerrada</h2><button onclick="window.switchTab('home')" class="mt-8 bg-indigo-600 text-white font-black px-10 py-4 rounded-2xl">Dashboard</button></div>`;
                 return;
             }
             const q = studyQueue[studyPointer];
             isRevealed = false;
             container.innerHTML = `
                 <div class="bg-white p-8 rounded-[40px] border border-slate-100 shadow-xl space-y-6">
-                    <div class="flex justify-between items-center"><span class="text-[10px] font-black text-indigo-500 uppercase">${q.specialty || 'Med'}</span><span class="text-[10px] font-bold text-slate-400">${studyPointer+1}/${studyQueue.length}</span></div>
-                    <h3 class="text-lg font-bold text-slate-800">${q.statement}</h3>
+                    <div class="flex justify-between items-center"><span class="text-[10px] font-black text-indigo-500 uppercase tracking-widest">${q.specialty || 'Medicina'}</span><span class="text-[10px] font-bold text-slate-400">${studyPointer+1}/${studyQueue.length}</span></div>
+                    <h3 class="text-lg font-bold text-slate-800 leading-relaxed">${q.statement}</h3>
                     <div class="space-y-3">
-                        ${q.options.map((opt, i) => `<button onclick="window.reveal(${i})" class="opt-btn w-full text-left p-5 rounded-3xl border-2 border-slate-50 bg-slate-50 text-slate-600 text-sm font-semibold">${opt}</button>`).join('')}
+                        ${q.options.map((opt, i) => `<button onclick="window.reveal(${i})" class="opt-btn w-full text-left p-5 rounded-3xl border-2 border-slate-50 bg-slate-50 text-slate-600 text-sm font-semibold active:scale-95 transition-all">${opt}</button>`).join('')}
                     </div>
                     <div id="study-feedback" class="hidden pt-6 border-t border-slate-50 space-y-6">
                         <div class="bg-slate-900 text-slate-300 p-6 rounded-[28px] text-[11px] border-l-4 border-indigo-500">${q.explanation}</div>
@@ -585,14 +600,17 @@
             const srs = state.srs[q.id] || { interval: 0, repetitions: 0, easeFactor: 2.5 };
             let { interval, repetitions, easeFactor } = srs;
             const score = grade === 1 ? 0 : grade === 2 ? 2 : grade === 3 ? 4 : 5;
+            
             if (score >= 3) {
                 if (repetitions === 0) interval = 1;
                 else if (repetitions === 1) interval = 6;
                 else interval = Math.round(interval * easeFactor);
                 repetitions++;
             } else { repetitions = 0; interval = 1; }
+            
             easeFactor = easeFactor + (0.1 - (5 - score) * (0.08 + (5 - score) * 0.02));
             if (easeFactor < 1.3) easeFactor = 1.3;
+            
             state.srs[q.id] = { interval, repetitions, easeFactor, nextReview: Date.now() + (interval * 24 * 60 * 60 * 1000) };
             state.history.push({ cardId: q.id, success: score >= 3, date: Date.now() });
             saveLocal();
@@ -618,11 +636,9 @@
         function renderBank() {
             const list = document.getElementById('bank-list');
             const folderFilter = state.currentFolderId;
-            const filtered = folderFilter === 'all' 
-                ? state.questions 
-                : state.questions.filter(q => q.folderId === folderFilter);
+            const filtered = folderFilter === 'f_all' ? state.questions : state.questions.filter(q => q.folderId === folderFilter);
 
-            if (filtered.length === 0) { list.innerHTML = `<div class="py-24 text-center text-slate-300 italic">Nenhum card nesta seleção.</div>`; return; }
+            if (filtered.length === 0) { list.innerHTML = `<div class="py-24 text-center text-slate-300 italic">Vazio.</div>`; return; }
             list.innerHTML = filtered.slice().reverse().map(q => `
                 <div class="bg-white p-5 rounded-3xl border border-slate-100 flex justify-between items-center shadow-sm">
                     <div class="truncate mr-4"><p class="text-[11px] text-slate-700 font-bold truncate">${q.statement}</p></div>
@@ -631,8 +647,8 @@
             `).join('');
         }
 
-        window.deleteQ = (id) => { if (confirm("Excluir?")) { state.questions = state.questions.filter(q => q.id !== id); delete state.srs[id]; saveLocal(); renderBank(); } };
-        window.clearAll = () => { if (confirm("Limpar Tudo?")) { state = { questions: [], srs: {}, history: [], folders: [{id: 'f_default', name: 'Geral'}], currentFolderId: 'all' }; saveLocal(); location.reload(); } };
+        window.deleteQ = (id) => { if (confirm("Excluir card?")) { state.questions = state.questions.filter(q => q.id !== id); delete state.srs[id]; saveLocal(); renderBank(); } };
+        window.clearAll = () => { if (confirm("Resetar TUDO?")) { localStorage.clear(); location.reload(); } };
 
         // INIT
         loadLocal();
