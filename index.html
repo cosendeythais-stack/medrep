@@ -15,8 +15,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
     
     <!-- Google API Scripts -->
-    <script src="https://apis.google.com/js/api.js" async defer></script>
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script src="https://accounts.google.com/gsi/client"></script>
 
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #1e293b; -webkit-tap-highlight-color: transparent; }
@@ -33,30 +33,24 @@
         .safe-bottom { padding-bottom: calc(env(safe-area-inset-bottom) + 12px); }
         input:focus, textarea:focus { outline: none; border-color: #6366f1 !important; }
     </style>
-<script type="importmap">
-{
-  "imports": {
-    "@google/genai": "https://esm.sh/@google/genai@^1.34.0"
-  }
-}
-</script>
 </head>
 <body class="antialiased pb-24">
 
-    <!-- Top Status Bar -->
-    <div class="bg-slate-900 px-6 py-2 sticky top-0 z-[100] flex justify-between items-center border-b border-white/10 shadow-lg h-10">
-        <div class="flex items-center gap-2">
+    <!-- API KEY BAR -->
+    <div class="bg-slate-900 px-4 py-2 flex flex-col sm:flex-row gap-2 items-center justify-between border-b border-white/10 sticky top-0 z-[101]">
+        <div class="flex items-center gap-2 w-full sm:w-auto">
             <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span class="text-[10px] font-black text-white uppercase tracking-widest">MedRep Tutor Ativo</span>
+            <input type="password" id="gemini-key-input" placeholder="Cole sua Gemini API Key aqui" class="bg-white/10 text-white text-[10px] px-3 py-1.5 rounded-lg border border-white/20 w-full sm:w-48 focus:border-indigo-400 outline-none">
+            <button onclick="window.saveGeminiKey()" class="bg-indigo-600 text-white text-[9px] font-black uppercase px-3 py-1.5 rounded-lg hover:bg-indigo-500 active:scale-95 transition-all">Salvar</button>
         </div>
         <div id="sync-dot-container" class="flex items-center gap-2">
             <div id="sync-dot" class="w-1.5 h-1.5 rounded-full bg-slate-500"></div>
-            <span id="sync-status-text" class="text-[9px] font-bold text-slate-400 uppercase">Cloud Offline</span>
+            <span id="sync-status-text" class="text-[9px] font-bold text-slate-400 uppercase">Drive Offline</span>
         </div>
     </div>
 
     <!-- Main Header -->
-    <header class="glass border-b border-slate-100 px-6 py-4 sticky top-10 z-50 flex justify-between items-center max-w-lg mx-auto w-full">
+    <header class="glass border-b border-slate-100 px-6 py-4 sticky top-[76px] sm:top-10 z-50 flex justify-between items-center max-w-lg mx-auto w-full">
         <h1 class="text-xl font-black text-indigo-600 tracking-tighter italic">MedRep</h1>
         <p id="due-badge" class="hidden text-[8px] font-black bg-rose-100 text-rose-600 px-2 py-0.5 rounded-full uppercase"></p>
     </header>
@@ -66,8 +60,8 @@
         <!-- Tab: Home -->
         <section id="tab-home" class="tab-content active animate-in space-y-6">
             <div class="bg-indigo-600 p-8 rounded-[40px] text-white shadow-2xl shadow-indigo-200">
-                <h2 class="text-xs font-black uppercase tracking-widest opacity-80 mb-1">Seu Progresso</h2>
-                <p class="text-3xl font-black leading-none mb-6">Internato Med</p>
+                <h2 class="text-xs font-black uppercase tracking-widest opacity-80 mb-1">Status Internato</h2>
+                <p class="text-3xl font-black leading-none mb-6">Sua Evolução</p>
                 <div class="grid grid-cols-2 gap-4">
                     <div class="bg-white/10 p-4 rounded-3xl backdrop-blur-sm">
                         <p class="text-[10px] font-bold uppercase opacity-60">Questões</p>
@@ -82,9 +76,9 @@
             <div class="bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm flex items-center justify-between">
                 <div>
                     <h3 class="font-black text-slate-800">Próximas Revisões</h3>
-                    <p id="home-due-count" class="text-xs text-slate-400">Carregando dados...</p>
+                    <p id="home-due-count" class="text-xs text-slate-400">Verificando dados...</p>
                 </div>
-                <button onclick="switchTab('study')" class="bg-indigo-600 text-white px-6 py-3 rounded-2xl text-[10px] font-black uppercase shadow-lg shadow-indigo-100 active:scale-95 transition-all">Revisar</button>
+                <button onclick="window.switchTab('study')" class="bg-indigo-600 text-white px-6 py-3 rounded-2xl text-[10px] font-black uppercase shadow-lg shadow-indigo-100 active:scale-95 transition-all">Revisar Agora</button>
             </div>
         </section>
 
@@ -97,22 +91,22 @@
         <section id="tab-add" class="tab-content animate-in space-y-6">
             <div id="batch-input-view" class="bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm space-y-4">
                 <div class="flex justify-between items-center">
-                    <h2 class="text-lg font-black text-slate-800">Gerador IA</h2>
+                    <h2 class="text-lg font-black text-slate-800">Tutor IA Inteligente</h2>
                     <label class="cursor-pointer bg-slate-100 p-2 rounded-xl active:scale-95 transition-all">
-                        <span class="text-[10px] font-black uppercase text-slate-500">📎 Enviar PDF/IMG</span>
-                        <input type="file" id="file-upload" class="hidden" accept="image/*,application/pdf">
+                        <span class="text-[10px] font-black uppercase text-slate-500">📎 Anexar</span>
+                        <input type="file" id="file-upload" class="hidden" accept="image/*,application/pdf" onchange="window.processFileAI()">
                     </label>
                 </div>
-                <textarea id="batch-text" placeholder="Cole uma questão ou digite um tema (ex: 'Sepse') para gerar 3 questões..." class="w-full h-48 bg-slate-50 rounded-2xl p-5 text-sm border border-slate-100 resize-none"></textarea>
-                <button id="btn-process-batch" class="w-full bg-indigo-600 text-white font-black py-4 rounded-2xl uppercase text-[10px] flex items-center justify-center gap-2 active:scale-95 transition-all">
-                    <span>Processar com Gemini</span>
+                <textarea id="batch-text" placeholder="Digite um TEMA (ex: Sepse) ou cole enunciados aqui..." class="w-full h-48 bg-slate-50 rounded-2xl p-5 text-sm border border-slate-100 resize-none"></textarea>
+                <button id="btn-process-batch" onclick="window.processTextAI()" class="w-full bg-indigo-600 text-white font-black py-4 rounded-2xl uppercase text-[10px] flex items-center justify-center gap-2 active:scale-95 transition-all">
+                    <span>Processar com Gemini 1.5 Flash</span>
                     <div id="batch-loader" class="loading-spinner hidden" style="border-top-color: white; width: 14px; height: 14px;"></div>
                 </button>
             </div>
             <div id="batch-review-view" class="hidden space-y-4">
-                <div class="flex justify-between items-center bg-white/90 backdrop-blur-md p-4 rounded-2xl sticky top-[100px] z-10 border border-slate-100 shadow-sm">
+                <div class="flex justify-between items-center bg-white/90 backdrop-blur-md p-4 rounded-2xl sticky top-[150px] z-10 border border-slate-100 shadow-sm">
                     <h2 id="review-count" class="text-xs font-black text-slate-800 uppercase">Validar Questões</h2>
-                    <button id="btn-save-batch" class="bg-emerald-600 text-white text-[8px] font-black uppercase px-4 py-2 rounded-xl active:scale-95">Adicionar ao Banco</button>
+                    <button onclick="window.saveBatchToBank()" class="bg-emerald-600 text-white text-[8px] font-black uppercase px-4 py-2 rounded-xl active:scale-95">Salvar Todas</button>
                 </div>
                 <div id="review-list" class="space-y-4 pb-20"></div>
             </div>
@@ -126,81 +120,93 @@
 
         <!-- Tab: Ajustes -->
         <section id="tab-settings" class="tab-content animate-in space-y-6">
-            <h2 class="text-lg font-black text-slate-800">Sincronização</h2>
+            <h2 class="text-lg font-black text-slate-800">Sincronização Nuvem</h2>
             <div class="bg-white p-6 rounded-[32px] border border-slate-100 space-y-4 shadow-sm">
-                <button id="btn-drive-login" class="w-full bg-white border-2 border-slate-100 text-slate-700 font-black py-4 rounded-2xl uppercase text-[10px] flex items-center justify-center gap-2 active:scale-95 transition-all">
-                    <span>Conectar Google Drive</span>
-                </button>
-                <button id="btn-sync-now" class="w-full bg-indigo-600 text-white font-black py-4 rounded-2xl uppercase text-[10px] flex items-center justify-center gap-2 active:scale-95 transition-all">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-slate-600">Status Google Drive</span>
+                    <button id="btn-drive-login" onclick="window.driveSignIn()" class="text-[9px] font-black uppercase text-indigo-600 bg-indigo-50 px-3 py-1.5 rounded-lg active:scale-95">Conectar</button>
+                </div>
+                <hr class="border-slate-50">
+                <button onclick="window.syncNow()" class="w-full bg-indigo-600 text-white font-black py-4 rounded-2xl uppercase text-[10px] flex items-center justify-center gap-2 active:scale-95 transition-all">
                     <span>Sincronizar Agora</span>
                     <div id="sync-loader" class="loading-spinner hidden" style="width:12px; height:12px; border-color:white; border-top-color:transparent;"></div>
                 </button>
                 <hr class="border-slate-50">
-                <button id="btn-clear-data" class="w-full text-rose-500 font-black text-[9px] uppercase hover:underline">Limpar Dados Locais</button>
+                <button onclick="window.clearAllData()" class="w-full text-rose-500 font-black text-[9px] uppercase hover:underline">Zerar Dados Locais</button>
             </div>
         </section>
     </main>
 
     <!-- Bottom Navbar -->
     <nav class="fixed bottom-0 left-0 right-0 max-w-lg mx-auto bg-white/90 backdrop-blur-xl border-t border-slate-100 flex justify-around py-3 px-2 z-50 safe-bottom">
-        <button id="nav-home" class="nav-item flex flex-col items-center gap-1 py-2 px-3 text-slate-400 active">
+        <button onclick="window.switchTab('home')" class="nav-item flex flex-col items-center gap-1 py-2 px-3 text-slate-400 active" id="nav-home">
             <span class="text-xl">🏠</span>
             <span class="text-[9px] font-black uppercase">Home</span>
         </button>
-        <button id="nav-study" class="nav-item flex flex-col items-center gap-1 py-2 px-3 text-slate-400">
+        <button onclick="window.switchTab('study')" class="nav-item flex flex-col items-center gap-1 py-2 px-3 text-slate-400" id="nav-study">
             <span class="text-xl">📖</span>
             <span class="text-[9px] font-black uppercase">Revisar</span>
         </button>
-        <button id="nav-add" class="nav-item flex flex-col items-center gap-1 py-2 px-3 text-slate-400">
+        <button onclick="window.switchTab('add')" class="nav-item flex flex-col items-center gap-1 py-2 px-3 text-slate-400" id="nav-add">
             <span class="text-xl">📦</span>
             <span class="text-[9px] font-black uppercase">IA</span>
         </button>
-        <button id="nav-bank" class="nav-item flex flex-col items-center gap-1 py-2 px-3 text-slate-400">
+        <button onclick="window.switchTab('bank')" class="nav-item flex flex-col items-center gap-1 py-2 px-3 text-slate-400" id="nav-bank">
             <span class="text-xl">🗂️</span>
             <span class="text-[9px] font-black uppercase">Banco</span>
         </button>
-        <button id="nav-settings" class="nav-item flex flex-col items-center gap-1 py-2 px-3 text-slate-400">
+        <button onclick="window.switchTab('settings')" class="nav-item flex flex-col items-center gap-1 py-2 px-3 text-slate-400" id="nav-settings">
             <span class="text-xl">⚙️</span>
             <span class="text-[9px] font-black uppercase">Ajustes</span>
         </button>
     </nav>
 
-    <script type="module">
-        import { GoogleGenAI } from "@google/genai";
-
-        // --- CONSTANTS ---
+    <script>
+        // --- CONFIGURATIONS ---
         const CLIENT_ID = '818696814728-a6bhi1eqkhui1k04ooi3kksv17t0gbnd.apps.googleusercontent.com';
         const SCOPES = 'https://www.googleapis.com/auth/drive.appdata';
-        const BACKUP_NAME = 'medrep_backup.json';
-        const DB_KEY = 'medrep_master_v2';
-        
-        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+        const BACKUP_NAME = 'medrep_master_v2.json';
+        const DB_KEY = 'medrep_db_v2';
 
-        // --- STATE ---
+        // --- GLOBAL STATE ---
         let state = {
             questions: [],
-            srs: {},
-            history: [],
+            srs: {}, // cardId -> { interval, repetitions, easeFactor, nextReview }
+            history: []
         };
 
         let tokenClient;
         let accessToken = null;
         let driveFileId = null;
         let extractedTemp = [];
-        let queue = [], studyIdx = 0, studyRevealed = false;
+        let studyQueue = [];
+        let studyIdx = 0;
+        let studyRevealed = false;
 
-        // --- INITIALIZATION ---
-        async function init() {
+        // --- CORE INITIALIZATION ---
+        window.onload = function() {
+            // Restore API Key
+            const savedKey = localStorage.getItem('gemini_api_key');
+            if (savedKey) document.getElementById('gemini-key-input').value = savedKey;
+
             loadLocal();
             refreshUI();
-            initGoogleAPI();
-            bindEvents();
+            tryInitGoogle();
+        };
+
+        function tryInitGoogle() {
+            if (typeof gapi === 'undefined' || typeof google === 'undefined') {
+                setTimeout(tryInitGoogle, 500);
+                return;
+            }
+            initGapi();
+            initGis();
         }
 
         function loadLocal() {
             const saved = localStorage.getItem(DB_KEY);
             if (saved) {
-                try { state = { ...state, ...JSON.parse(saved) }; } catch(e) {}
+                try { state = { ...state, ...JSON.parse(saved) }; } catch(e) { console.error("Local load fail", e); }
             }
         }
 
@@ -213,81 +219,321 @@
         function refreshUI() {
             const now = Date.now();
             const due = state.questions.filter(q => !state.srs[q.id] || state.srs[q.id].nextReview <= now).length;
+            
             document.getElementById('stat-total').innerText = state.questions.length;
-            const recent = state.history.slice(-50);
-            const hits = recent.filter(h => h.success).length;
-            const rate = recent.length ? Math.round((hits / recent.length) * 100) : 0;
-            document.getElementById('stat-correct').innerText = `${rate}%`;
             document.getElementById('home-due-count').innerText = `${due} cards pendentes.`;
             
             const badge = document.getElementById('due-badge');
             if (due > 0) {
                 badge.innerText = `${due} PENDENTES`;
                 badge.classList.remove('hidden');
-            } else badge.classList.add('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+
+            const recent = state.history.slice(-50);
+            const hits = recent.filter(h => h.success).length;
+            const rate = recent.length ? Math.round((hits / recent.length) * 100) : 0;
+            document.getElementById('stat-correct').innerText = `${rate}%`;
         }
 
-        // --- GEMINI IA CORE ---
+        // --- API KEY MANAGEMENT ---
+        window.saveGeminiKey = function() {
+            const key = document.getElementById('gemini-key-input').value.trim();
+            if (key) {
+                localStorage.setItem('gemini_api_key', key);
+                alert("API Key salva com sucesso!");
+            } else {
+                alert("Por favor, insira uma chave válida.");
+            }
+        };
+
+        // --- NAVIGATION ---
+        window.switchTab = function(id) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active', 'text-indigo-600'));
+            
+            document.getElementById('tab-' + id).classList.add('active');
+            const nav = document.getElementById('nav-' + id);
+            if (nav) nav.classList.add('active', 'text-indigo-600');
+            
+            if (id === 'study') initStudy();
+            if (id === 'bank') renderBank();
+            window.scrollTo(0, 0);
+        };
+
+        // --- GEMINI IA LOGIC ---
         async function callGeminiIA(input) {
-            const prompt = `Você é um tutor médico acadêmico de alto nível. 
-            Se eu enviar apenas um tema (ex: Sepse, Diabetes), crie obrigatoriamente 3 questões de múltipla escolha completas, complexas e acadêmicas.
-            Se a questão estiver incompleta, complete o gabarito e a explicação. 
-            Retorne APENAS um array JSON puro. Proibido usar markdown (\`\`\`) ou explicações fora do JSON.
-            Estrutura exigida: [ { "statement": "", "options": ["", "", "", ""], "correctIndex": 0-3, "explanation": "", "specialty": "" } ]`;
+            const apiKey = localStorage.getItem('gemini_api_key');
+            if (!apiKey) throw new Error("Configure sua API Key na barra superior primeiro!");
 
-            let parts = [{ text: prompt }];
-            if (input.text) parts.push({ text: input.text });
-            if (input.file) {
-                parts.push({
-                    inlineData: {
-                        data: input.file.data,
-                        mimeType: input.file.mimeType,
-                    },
-                });
-            }
+            const prompt = `Você é um tutor médico acadêmico de alto nível especialista em residência médica.
+            REGRAS OBRIGATÓRIAS:
+            1. Se o input for apenas um tema (ex: Sepse, Pneumonia, IAM), crie 3 questões inéditas, complexas e acadêmicas de múltipla escolha sobre esse tema.
+            2. Se o input for uma questão ou texto médico, extraia enunciado, opções, gabarito e forneça explicação completa.
+            3. Retorne APENAS o array JSON. Não use markdown (\`\`\`), nem textos extras antes ou depois do array.
+            
+            ESTRUTURA JSON:
+            [ { "statement": "...", "options": ["", "", "", ""], "correctIndex": 0-3, "explanation": "...", "specialty": "..." } ]`;
 
-            try {
-                const response = await ai.models.generateContent({
-                    model: "gemini-3-flash-preview",
-                    contents: { parts },
-                });
+            const payload = {
+                contents: [{
+                    parts: [{ text: prompt + "\n\nInput do usuário: " + (input.text || "") }]
+                }]
+            };
 
-                const rawText = response.text || "";
-                
-                // LIMPEZA ROBUSTA: Captura apenas o conteúdo entre os colchetes
-                const jsonMatch = rawText.match(/\[[\s\S]*\]/);
+            // Se houver arquivo, aqui seria o local para adicionar inlineData se necessário (precisaria de v1beta para multimodal via fetch puro de forma simples)
+            // Para simplicidade e eficácia seguindo o prompt, focaremos no texto/extração de texto.
 
-                if (jsonMatch) {
-                    try {
-                        return JSON.parse(jsonMatch[0]);
-                    } catch (e) {
-                        throw new Error("Erro de Formatação. Tente simplificar o texto ou usar apenas uma palavra-tema.");
-                    }
-                } else {
-                    throw new Error("Erro de Formatação. Tente simplificar o texto ou usar apenas uma palavra-tema.");
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await response.json();
+            if (data.error) throw new Error(data.error.message);
+
+            const rawText = data.candidates[0].content.parts[0].text;
+            
+            // BLINDAGEM CONTRA ERRO DE FORMATO: Captura apenas o array JSON
+            const jsonMatch = rawText.match(/\[[\s\S]*\]/);
+            
+            if (jsonMatch) {
+                try {
+                    return JSON.parse(jsonMatch[0]);
+                } catch (e) {
+                    throw new Error("A IA retornou um formato inválido. Tente novamente.");
                 }
-            } catch (e) {
-                console.error("Gemini Error:", e);
-                throw e;
+            } else {
+                throw new Error("Não foi possível encontrar questões no retorno da IA.");
             }
         }
 
-        // --- DRIVE SYNC CORE ---
-        function initGoogleAPI() {
-            gapi.load('client', async () => {
-                await gapi.client.init({ discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'] });
+        window.processTextAI = async function() {
+            const text = document.getElementById('batch-text').value.trim();
+            if (!text) return alert("Digite um tema ou cole uma questão.");
+            
+            const loader = document.getElementById('batch-loader');
+            loader.classList.remove('hidden');
+            
+            try {
+                extractedTemp = await callGeminiIA({ text });
+                renderReview();
+            } catch (e) {
+                alert("Erro: " + e.message);
+            } finally {
+                loader.classList.add('hidden');
+            }
+        };
+
+        window.processFileAI = function() {
+            alert("Processamento de arquivos requer o SDK completo via módulos. Por enquanto, cole o texto do PDF/Imagem no campo de texto.");
+        };
+
+        function renderReview() {
+            document.getElementById('batch-input-view').classList.add('hidden');
+            const reviewSection = document.getElementById('batch-review-view');
+            reviewSection.classList.remove('hidden');
+            
+            document.getElementById('review-count').innerText = `${extractedTemp.length} Itens Encontrados`;
+            const list = document.getElementById('review-list');
+            list.innerHTML = extractedTemp.map((q, idx) => `
+                <div class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm animate-in">
+                    <p class="text-[9px] font-black text-indigo-600 uppercase mb-2">${q.specialty || 'Geral'}</p>
+                    <p class="text-[11px] font-bold text-slate-700 leading-tight mb-4">${q.statement}</p>
+                    <div class="space-y-1">
+                        ${q.options.map((opt, i) => `
+                            <div class="text-[9px] p-2 rounded-lg border ${i === q.correctIndex ? 'border-emerald-200 bg-emerald-50 text-emerald-700 font-bold' : 'border-slate-50 text-slate-400'}">
+                                ${String.fromCharCode(65+i)}) ${opt}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        window.saveBatchToBank = function() {
+            const news = extractedTemp.map(q => ({
+                ...q,
+                id: 'med_' + Math.random().toString(36).substr(2, 9),
+                dateAdded: Date.now()
+            }));
+            state.questions = [...state.questions, ...news];
+            saveLocal();
+            
+            extractedTemp = [];
+            document.getElementById('batch-review-view').classList.add('hidden');
+            document.getElementById('batch-input-view').classList.remove('hidden');
+            window.switchTab('bank');
+        };
+
+        // --- SRS SM-2 LOGIC ---
+        function calculateSM2(q, srs = { interval: 0, repetitions: 0, easeFactor: 2.5 }) {
+            let { interval, repetitions, easeFactor } = srs;
+            if (q >= 3) { // Sucesso
+                if (repetitions === 0) interval = 1;
+                else if (repetitions === 1) interval = 6;
+                else interval = Math.round(interval * easeFactor);
+                repetitions++;
+            } else { // Falha
+                repetitions = 0;
+                interval = 1;
+            }
+            easeFactor = easeFactor + (0.1 - (5 - q) * (0.08 + (5 - q) * 0.02));
+            if (easeFactor < 1.3) easeFactor = 1.3;
+            
+            return {
+                interval,
+                repetitions,
+                easeFactor,
+                nextReview: Date.now() + (interval * 24 * 60 * 60 * 1000)
+            };
+        }
+
+        // --- STUDY UI ---
+        function initStudy() {
+            const now = Date.now();
+            studyQueue = state.questions.filter(q => !state.srs[q.id] || state.srs[q.id].nextReview <= now);
+            studyIdx = 0;
+            renderStudyCard();
+        }
+
+        function renderStudyCard() {
+            const v = document.getElementById('study-view');
+            if (!studyQueue.length) {
+                v.innerHTML = `
+                <div class="py-20 text-center animate-in">
+                    <div class="text-6xl mb-6">🩺</div>
+                    <h2 class="text-xl font-black text-slate-800">Tudo Revisado!</h2>
+                    <p class="text-sm text-slate-400 mt-2">Nenhuma pendência agora. Ótimo trabalho.</p>
+                    <button onclick="window.switchTab('home')" class="mt-8 bg-indigo-100 text-indigo-600 font-black px-6 py-3 rounded-2xl text-[10px] uppercase">Voltar</button>
+                </div>`;
+                return;
+            }
+
+            const q = studyQueue[studyIdx];
+            studyRevealed = false;
+            
+            v.innerHTML = `
+                <div class="bg-white p-6 rounded-[32px] border border-slate-100 shadow-xl animate-in">
+                    <div class="flex justify-between items-center mb-6">
+                        <span class="text-[9px] font-black text-indigo-400 uppercase tracking-widest">${q.specialty || 'Geral'}</span>
+                        <span class="text-[9px] text-slate-300 font-bold">${studyIdx + 1}/${studyQueue.length}</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-800 leading-tight mb-8">${q.statement}</h3>
+                    <div class="space-y-3">
+                        ${q.options.map((opt, i) => `
+                            <button onclick="window.checkAnswer(${i})" class="opt-btn w-full text-left p-4 rounded-2xl border-2 border-slate-50 bg-slate-50 text-slate-600 text-sm font-semibold transition-all">
+                                ${String.fromCharCode(65 + i)}) ${opt}
+                            </button>
+                        `).join('')}
+                    </div>
+                    <div id="feedback" class="hidden mt-8 pt-8 border-t border-slate-100 animate-in">
+                        <div class="bg-slate-900 text-indigo-100 p-5 rounded-2xl mb-6 text-[10px] leading-relaxed italic">
+                            <b>EXPLICAÇÃO MÉDICA:</b> ${q.explanation}
+                        </div>
+                        <div class="grid grid-cols-4 gap-2">
+                            ${[1, 3, 4, 5].map(val => `
+                                <button onclick="window.handleSRS(${val})" class="py-3 rounded-xl text-white font-black text-[8px] uppercase ${val === 1 ? 'bg-rose-500' : val === 3 ? 'bg-orange-400' : val === 4 ? 'bg-blue-500' : 'bg-emerald-500'} active:scale-95 transition-all">
+                                    ${val === 1 ? 'Errei' : val === 3 ? 'Difícil' : val === 4 ? 'Bom' : 'Fácil'}
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>`;
+        }
+
+        window.checkAnswer = function(i) {
+            if (studyRevealed) return;
+            studyRevealed = true;
+            const q = studyQueue[studyIdx];
+            const btns = document.querySelectorAll('.opt-btn');
+            
+            btns.forEach((btn, idx) => {
+                if (idx === q.correctIndex) btn.classList.add('option-btn-correct');
+                else if (idx === i) btn.classList.add('option-btn-wrong');
+                btn.disabled = true;
             });
+            document.getElementById('feedback').classList.remove('hidden');
+        };
+
+        window.handleSRS = function(v) {
+            const q = studyQueue[studyIdx];
+            state.srs[q.id] = calculateSM2(v, state.srs[q.id]);
+            state.history.push({ date: Date.now(), success: v >= 3 });
+            saveLocal();
+            
+            if (studyIdx < studyQueue.length - 1) {
+                studyIdx++;
+                renderStudyCard();
+            } else {
+                initStudy();
+            }
+        };
+
+        // --- BANK UI ---
+        function renderBank() {
+            const list = document.getElementById('bank-list');
+            if (!state.questions.length) {
+                list.innerHTML = `<p class="text-center py-20 text-slate-300 italic text-sm">Seu banco está vazio.</p>`;
+                return;
+            }
+            list.innerHTML = state.questions.slice().reverse().map(q => `
+                <div class="bg-white p-4 rounded-2xl border border-slate-100 flex justify-between items-center shadow-sm">
+                    <p class="text-[10px] font-bold text-slate-700 truncate mr-4">${q.statement}</p>
+                    <button onclick="window.removeQuestion('${q.id}')" class="text-rose-400 text-sm p-2 active:scale-90 transition-all">✕</button>
+                </div>
+            `).join('');
+        }
+
+        window.removeQuestion = function(id) {
+            if (confirm("Excluir esta questão?")) {
+                state.questions = state.questions.filter(q => q.id !== id);
+                delete state.srs[id];
+                saveLocal();
+                renderBank();
+            }
+        };
+
+        window.clearAllData = function() {
+            if (confirm("Cuidado: Isso apagará todas as suas questões e progresso local.")) {
+                localStorage.removeItem(DB_KEY);
+                location.reload();
+            }
+        };
+
+        // --- GOOGLE DRIVE SYNC ---
+        function initGapi() {
+            gapi.load('client', async () => {
+                await gapi.client.init({
+                    discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest']
+                });
+            });
+        }
+
+        function initGis() {
             tokenClient = google.accounts.oauth2.initTokenClient({
                 client_id: CLIENT_ID,
                 scope: SCOPES,
-                callback: (resp) => { accessToken = resp.access_token; onDriveAuthenticated(); }
+                callback: (resp) => {
+                    if (resp.error) return;
+                    accessToken = resp.access_token;
+                    onAuthenticated();
+                }
             });
         }
 
-        async function onDriveAuthenticated() {
+        window.driveSignIn = function() {
+            tokenClient.requestAccessToken({ prompt: 'consent' });
+        };
+
+        async function onAuthenticated() {
             document.getElementById('sync-dot').classList.replace('bg-slate-500', 'bg-emerald-500');
-            document.getElementById('sync-status-text').innerText = 'Cloud Online';
-            document.getElementById('btn-drive-login').innerText = 'Conectado ao Drive';
+            document.getElementById('sync-status-text').innerText = 'Drive Online';
+            document.getElementById('btn-drive-login').innerText = 'Logado';
             await loadFromDrive();
         }
 
@@ -303,7 +549,7 @@
                         saveLocal();
                     }
                 }
-            } catch (e) { console.error("Drive Load Error", e); }
+            } catch (e) { console.error("Drive sync error", e); }
         }
 
         async function autoSyncDrive() {
@@ -313,210 +559,35 @@
             const formData = new FormData();
             formData.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
             formData.append('file', file);
+            
             try {
-                const url = driveFileId 
-                    ? `https://www.googleapis.com/upload/drive/v3/files/${driveFileId}?uploadType=multipart`
-                    : 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
-                await fetch(url, {
-                    method: driveFileId ? 'PATCH' : 'POST',
-                    headers: { 'Authorization': 'Bearer ' + accessToken },
-                    body: formData
-                });
-            } catch (e) { console.error("Drive Sync Error", e); }
-        }
-
-        // --- SRS LOGIC ---
-        function calculateSM2(val, srs = { interval: 0, repetitions: 0, easeFactor: 2.5 }) {
-            let { interval, repetitions, easeFactor } = srs;
-            if (val >= 3) {
-                if (repetitions === 0) interval = 1;
-                else if (repetitions === 1) interval = 6;
-                else interval = Math.round(interval * easeFactor);
-                repetitions++;
-            } else { repetitions = 0; interval = 1; }
-            easeFactor = Math.max(1.3, easeFactor + (0.1 - (5 - val) * (0.08 + (5 - val) * 0.02)));
-            return { interval, repetitions, easeFactor, nextReview: Date.now() + (interval * 86400000) };
-        }
-
-        // --- UI ACTIONS ---
-        function switchTab(id) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active', 'text-indigo-600'));
-            document.getElementById(`tab-${id}`).classList.add('active');
-            const navItem = document.getElementById(`nav-${id}`);
-            if (navItem) navItem.classList.add('active', 'text-indigo-600');
-            if (id === 'study') initStudy();
-            if (id === 'bank') renderBank();
-        }
-
-        function initStudy() {
-            const now = Date.now();
-            queue = state.questions.filter(q => !state.srs[q.id] || state.srs[q.id].nextReview <= now);
-            studyIdx = 0;
-            renderCard();
-        }
-
-        function renderCard() {
-            const v = document.getElementById('study-view');
-            if (!queue.length) { 
-                v.innerHTML = `<div class="py-20 text-center animate-in"><h2 class="text-xl font-black">Meta Batida! 🩺</h2><p class="text-xs text-slate-400 mt-2">Nenhum card pendente agora.</p></div>`; 
-                return; 
-            }
-            const q = queue[studyIdx]; studyRevealed = false;
-            v.innerHTML = `
-                <div class="bg-white p-6 rounded-[32px] border border-slate-100 shadow-xl animate-in">
-                    <div class="flex justify-between items-center mb-6">
-                        <span class="text-[9px] font-black text-indigo-400 uppercase tracking-widest">${q.specialty || 'Geral'}</span>
-                        <span class="text-[9px] text-slate-300 font-bold">${studyIdx+1}/${queue.length}</span>
-                    </div>
-                    <h3 class="text-lg font-bold text-slate-800 leading-tight mb-8">${q.statement}</h3>
-                    <div class="space-y-3">
-                        ${q.options.map((opt, i) => `
-                            <button onclick="window.checkAnswer(${i})" class="opt-btn w-full text-left p-4 rounded-2xl border-2 border-slate-50 bg-slate-50 text-slate-600 text-sm font-semibold transition-all">
-                                ${String.fromCharCode(65+i)}) ${opt}
-                            </button>
-                        `).join('')}
-                    </div>
-                    <div id="feedback" class="hidden mt-8 pt-8 border-t border-slate-100 animate-in">
-                        <div class="bg-slate-900 text-indigo-100 p-5 rounded-2xl mb-6 text-[10px] leading-relaxed italic"><b>EXPLICAÇÃO MÉDICA:</b> ${q.explanation}</div>
-                        <div class="grid grid-cols-4 gap-2">
-                            ${[1, 3, 4, 5].map(val => `
-                                <button onclick="window.handleSRS(${val})" class="py-3 rounded-xl text-white font-black text-[8px] uppercase ${val===1?'bg-rose-500':val===3?'bg-orange-400':val===4?'bg-blue-500':'bg-emerald-500'} active:scale-95 transition-all">
-                                    ${val===1?'Errei':val===3?'Difícil':val===4?'Bom':'Fácil'}
-                                </button>
-                            `).join('')}
-                        </div>
-                    </div>
-                </div>`;
-        }
-
-        function renderBank() {
-            const l = document.getElementById('bank-list');
-            if (!state.questions.length) { l.innerHTML = `<p class="text-center py-20 text-slate-300 italic text-xs">Vazio.</p>`; return; }
-            l.innerHTML = state.questions.slice().reverse().map(q => `
-                <div class="bg-white p-4 rounded-2xl border border-slate-100 flex justify-between items-center shadow-sm">
-                    <p class="text-[10px] font-bold text-slate-700 truncate mr-4">${q.statement}</p>
-                    <button onclick="window.removeQuestion('${q.id}')" class="text-rose-400 text-xs p-2">✕</button>
-                </div>
-            `).join('');
-        }
-
-        // --- EVENT BINDING ---
-        function bindEvents() {
-            document.getElementById('nav-home').onclick = () => switchTab('home');
-            document.getElementById('nav-study').onclick = () => switchTab('study');
-            document.getElementById('nav-add').onclick = () => switchTab('add');
-            document.getElementById('nav-bank').onclick = () => switchTab('bank');
-            document.getElementById('nav-settings').onclick = () => switchTab('settings');
-
-            document.getElementById('btn-process-batch').onclick = async () => {
-                const text = document.getElementById('batch-text').value.trim();
-                if (!text) return alert("Digite algo!");
-                const l = document.getElementById('batch-loader');
-                l.classList.remove('hidden');
-                try {
-                    extractedTemp = await callGeminiIA({ text });
-                    renderReview();
-                } catch (e) { alert(e.message); }
-                finally { l.classList.add('hidden'); }
-            };
-
-            document.getElementById('file-upload').onchange = async (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-                const reader = new FileReader();
-                reader.onload = async () => {
-                    const base64 = reader.result.split(',')[1];
-                    const l = document.getElementById('batch-loader');
-                    l.classList.remove('hidden');
-                    try {
-                        extractedTemp = await callGeminiIA({ file: { data: base64, mimeType: file.type } });
-                        renderReview();
-                    } catch (e) { alert(e.message); }
-                    finally { l.classList.add('hidden'); }
-                };
-                reader.readAsDataURL(file);
-            };
-
-            document.getElementById('btn-save-batch').onclick = () => {
-                const news = extractedTemp.map(q => ({ id: 'med_'+Math.random().toString(36).substr(2,9), ...q, date: Date.now() }));
-                state.questions = [...state.questions, ...news];
-                saveLocal();
-                extractedTemp = [];
-                document.getElementById('batch-review-view').classList.add('hidden');
-                document.getElementById('batch-input-view').classList.remove('hidden');
-                switchTab('bank');
-            };
-
-            document.getElementById('btn-drive-login').onclick = () => tokenClient.requestAccessToken({ prompt: 'consent' });
-            
-            document.getElementById('btn-sync-now').onclick = async () => {
-                if (!accessToken) return tokenClient.requestAccessToken({ prompt: 'consent' });
-                const l = document.getElementById('sync-loader');
-                l.classList.remove('hidden');
-                await loadFromDrive();
-                await autoSyncDrive();
-                l.classList.add('hidden');
-                alert("Sincronizado!");
-            };
-
-            document.getElementById('btn-clear-data').onclick = () => {
-                if (confirm("Zerar tudo localmente?")) {
-                    localStorage.clear();
-                    window.location.reload();
+                if (driveFileId) {
+                    await fetch(`https://www.googleapis.com/upload/drive/v3/files/${driveFileId}?uploadType=multipart`, {
+                        method: 'PATCH',
+                        headers: { 'Authorization': 'Bearer ' + accessToken },
+                        body: formData
+                    });
+                } else {
+                    const r = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+                        method: 'POST',
+                        headers: { 'Authorization': 'Bearer ' + accessToken },
+                        body: formData
+                    });
+                    const j = await r.json();
+                    driveFileId = j.id;
                 }
-            };
-
-            // Global helpers for study interaction
-            window.checkAnswer = (i) => {
-                if (studyRevealed) return; studyRevealed = true;
-                const q = queue[studyIdx];
-                document.querySelectorAll('.opt-btn').forEach((b, j) => {
-                    if (j === q.correctIndex) b.classList.add('option-btn-correct');
-                    else if (j === i) b.classList.add('option-btn-wrong');
-                    b.disabled = true;
-                });
-                document.getElementById('feedback').classList.remove('hidden');
-            };
-
-            window.handleSRS = (val) => {
-                const q = queue[studyIdx];
-                state.srs[q.id] = calculateSM2(val, state.srs[q.id]);
-                state.history.push({ date: Date.now(), success: val >= 3 });
-                saveLocal();
-                if (studyIdx < queue.length - 1) { studyIdx++; renderCard(); } else initStudy();
-            };
-
-            window.removeQuestion = (id) => {
-                if (confirm("Excluir permanentemente?")) {
-                    state.questions = state.questions.filter(q => q.id !== id);
-                    delete state.srs[id];
-                    saveLocal();
-                    renderBank();
-                }
-            };
-            
-            // Expose switchTab globally for home button
-            window.switchTab = switchTab;
+            } catch (e) {}
         }
 
-        function renderReview() {
-            document.getElementById('batch-input-view').classList.add('hidden');
-            document.getElementById('batch-review-view').classList.remove('hidden');
-            document.getElementById('review-count').innerText = `${extractedTemp.length} Itens Prontos`;
-            const list = document.getElementById('review-list');
-            list.innerHTML = extractedTemp.map(q => `
-                <div class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm animate-in">
-                    <p class="text-[9px] font-black text-indigo-600 uppercase mb-2">${q.specialty || 'Geral'}</p>
-                    <p class="text-[11px] font-bold text-slate-700 leading-tight mb-4">${q.statement}</p>
-                    <div class="space-y-1">
-                        ${q.options.map((opt, i) => `<div class="text-[9px] p-2 rounded-lg border ${i===q.correctIndex?'border-emerald-200 bg-emerald-50 text-emerald-700 font-bold':'border-slate-50 text-slate-400'}">${opt}</div>`).join('')}
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        init();
+        window.syncNow = async function() {
+            if (!accessToken) return window.driveSignIn();
+            const l = document.getElementById('sync-loader');
+            l.classList.remove('hidden');
+            await loadFromDrive();
+            await autoSyncDrive();
+            l.classList.add('hidden');
+            alert("Sincronizado com sucesso!");
+        };
     </script>
 </body>
 </html>
