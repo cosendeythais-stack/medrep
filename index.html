@@ -5,11 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>MedRep - SRS Médico</title>
     
+    <!-- Meta PWA -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    
+    <meta name="mobile-web-app-capable" content="yes">
+
+    <!-- Bibliotecas Externas -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Google Identity Services & GAPI -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script src="https://apis.google.com/js/api.js" async defer></script>
 
@@ -24,18 +29,23 @@
     <style>
         :root { --ion-safe-area-top: env(safe-area-inset-top); --ion-safe-area-bottom: env(safe-area-inset-bottom); }
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #0f172a; -webkit-tap-highlight-color: transparent; overflow-x: hidden; }
+        
         .tab-content { display: none; }
-        .tab-content.active { display: block; animation: slideUp 0.2s ease-out; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .tab-content.active { display: block; animation: slideUp 0.3s ease-out; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+        
         .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
-        .safe-bottom { padding-bottom: calc(env(safe-area-inset-bottom) + 12px); }
+        .safe-bottom { padding-bottom: calc(env(safe-area-inset-bottom) + 16px); }
+        
         .option-btn-correct { border-color: #10b981 !important; background-color: #ecfdf5 !important; color: #064e3b !important; font-weight: 700; }
         .option-btn-wrong { border-color: #ef4444 !important; background-color: #fef2f2 !important; color: #7f1d1d !important; }
-        .loading-spinner { border: 2px solid #e2e8f0; border-top: 2px solid #4f46e5; border-radius: 50%; width: 18px; height: 18px; animation: spin 0.8s linear infinite; }
+        
+        .loading-spinner { border: 2px solid #e2e8f0; border-top: 2px solid #4f46e5; border-radius: 50%; width: 20px; height: 20px; animation: spin 0.8s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        .btn-active-scale:active { transform: scale(0.96); transition: transform 0.1s; }
         #login-screen { display: flex; }
         #main-app { display: none; }
-        .btn-active-scale:active { transform: scale(0.97); }
     </style>
 </head>
 <body class="antialiased">
@@ -43,157 +53,172 @@
     <!-- TELA DE LOGIN -->
     <div id="login-screen" class="fixed inset-0 z-[200] bg-white flex flex-col items-center justify-center p-8 text-center">
         <div class="mb-12">
-            <h1 class="text-5xl font-black text-indigo-600 tracking-tighter italic leading-none">MedRep</h1>
-            <p class="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-4">Spaced Repetition & AI</p>
+            <h1 class="text-6xl font-black text-indigo-600 tracking-tighter italic leading-none">MedRep</h1>
+            <p class="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-4">Residência Médica & SRS</p>
         </div>
         
         <div class="bg-indigo-50 p-10 rounded-[40px] w-full max-w-sm border border-indigo-100 mb-8 shadow-sm">
-            <div class="w-16 h-16 bg-white rounded-3xl flex items-center justify-center text-3xl mx-auto mb-6 shadow-sm">☁️</div>
-            <p class="text-sm font-semibold text-slate-600 mb-8 leading-relaxed">Acesse seu banco de questões e sincronize com o Drive.</p>
-            <button onclick="window.initiateAuth()" class="w-full bg-indigo-600 text-white font-black py-5 rounded-[20px] shadow-sm flex items-center justify-center gap-4 btn-active-scale transition-all">
+            <div class="w-20 h-20 bg-white rounded-[28px] flex items-center justify-center text-4xl mx-auto mb-6 shadow-sm">☁️</div>
+            <p class="text-sm font-semibold text-slate-600 mb-8 leading-relaxed">Seu acervo médico sempre seguro e sincronizado com o Google Drive.</p>
+            
+            <!-- Botão de Login Simples e Global -->
+            <button id="google-login-btn" onclick="initiateAuth()" class="w-full bg-indigo-600 text-white font-black py-5 rounded-[22px] shadow-lg flex items-center justify-center gap-4 btn-active-scale transition-all">
                 <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" class="w-6 brightness-0 invert" alt="Google">
                 <span class="text-xs uppercase tracking-widest">Entrar com Google</span>
             </button>
-            <div id="login-loader" class="hidden mt-4 flex justify-center"><div class="loading-spinner"></div></div>
+            
+            <div id="login-loader" class="hidden mt-6 flex justify-center"><div class="loading-spinner"></div></div>
         </div>
-        <p class="text-[9px] font-black text-slate-300 uppercase tracking-[0.4em]">v9.5 STABLE</p>
+        <p class="text-[9px] font-black text-slate-300 uppercase tracking-[0.4em]">v10.0 ULTRA STABLE</p>
     </div>
 
-    <!-- APP PRINCIPAL -->
+    <!-- APLICATIVO PRINCIPAL -->
     <div id="main-app">
-        <header class="glass border-b border-slate-100 px-6 py-4 sticky top-0 z-50 flex justify-between items-center max-w-xl mx-auto w-full rounded-b-[24px] shadow-sm">
+        <header class="glass border-b border-slate-100 px-6 py-4 sticky top-0 z-50 flex justify-between items-center max-w-xl mx-auto w-full rounded-b-[28px] shadow-sm">
             <div class="flex flex-col">
-                <h1 class="text-xl font-black text-indigo-600 tracking-tighter italic leading-none">MedRep</h1>
-                <span id="user-display" class="text-[8px] font-bold text-slate-400 uppercase mt-1 tracking-widest truncate max-w-[140px]">Cloud Sync</span>
+                <h1 class="text-2xl font-black text-indigo-600 tracking-tighter italic leading-none">MedRep</h1>
+                <span id="user-display" class="text-[8px] font-bold text-slate-400 uppercase mt-1 tracking-widest truncate max-w-[150px]">Modo Offline Ativo</span>
             </div>
-            <div id="due-badge" class="hidden bg-rose-500 text-white text-[9px] font-black px-2.5 py-1 rounded-full shadow-lg">0</div>
+            <div id="due-badge" class="hidden bg-rose-500 text-white text-[10px] font-black px-2.5 py-1 rounded-full shadow-lg">0</div>
         </header>
 
-        <main class="max-w-xl mx-auto p-4 space-y-6 pb-32">
-            <!-- Home -->
+        <main class="max-w-xl mx-auto p-4 space-y-6 pb-36">
+            <!-- Aba Home -->
             <section id="tab-home" class="tab-content active space-y-6">
                 <div class="bg-gradient-to-br from-indigo-600 to-indigo-900 p-8 rounded-[40px] text-white shadow-2xl relative overflow-hidden">
-                    <div class="absolute -right-8 -top-8 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
+                    <div class="absolute -right-8 -top-8 w-48 h-48 bg-white/10 rounded-full blur-3xl"></div>
                     <p class="text-[9px] font-black uppercase tracking-widest opacity-60 mb-2">Seu Dashboard</p>
                     <h2 class="text-3xl font-black mb-8 tracking-tighter italic">Estatísticas</h2>
                     <div class="grid grid-cols-2 gap-4">
-                        <div class="bg-white/10 p-5 rounded-[24px] border border-white/5 backdrop-blur-sm">
-                            <p class="text-[9px] font-bold uppercase opacity-50 mb-1">Questões</p>
-                            <p id="stat-total" class="text-2xl font-black">0</p>
+                        <div class="bg-white/10 p-5 rounded-[26px] border border-white/5 backdrop-blur-sm">
+                            <p class="text-[9px] font-bold uppercase opacity-50 mb-1">Total de Cards</p>
+                            <p id="stat-total" class="text-3xl font-black">0</p>
                         </div>
-                        <div class="bg-white/10 p-5 rounded-[24px] border border-white/5 backdrop-blur-sm">
-                            <p class="text-[9px] font-bold uppercase opacity-50 mb-1">Precisão</p>
-                            <p id="stat-accuracy" class="text-2xl font-black">0%</p>
+                        <div class="bg-white/10 p-5 rounded-[26px] border border-white/5 backdrop-blur-sm">
+                            <p class="text-[9px] font-bold uppercase opacity-50 mb-1">Aproveitamento</p>
+                            <p id="stat-accuracy" class="text-3xl font-black">0%</p>
                         </div>
                     </div>
                 </div>
                 
-                <div onclick="window.switchTab('study')" class="bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm flex items-center justify-between cursor-pointer btn-active-scale transition-all">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center text-xl shadow-inner">⚡</div>
+                <div onclick="switchTab('study')" class="bg-white p-7 rounded-[32px] border border-slate-100 shadow-sm flex items-center justify-between cursor-pointer btn-active-scale transition-all">
+                    <div class="flex items-center gap-5">
+                        <div class="w-14 h-14 bg-indigo-50 rounded-2xl flex items-center justify-center text-2xl shadow-inner">⚡</div>
                         <div>
-                            <h3 class="font-black text-slate-800 text-md">Sessão de Estudo</h3>
+                            <h3 class="font-black text-slate-800 text-lg">Revisão do Dia</h3>
                             <p id="home-due-text" class="text-xs text-slate-400 font-medium">Analisando cronograma...</p>
                         </div>
                     </div>
-                    <div class="bg-indigo-600 text-white p-2.5 rounded-xl shadow-lg">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"/></svg>
+                    <div class="bg-indigo-600 text-white p-3 rounded-xl shadow-lg">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"/></svg>
                     </div>
                 </div>
             </section>
 
-            <!-- Estudo -->
+            <!-- Aba Estudo -->
             <section id="tab-study" class="tab-content">
-                <div id="study-container" class="space-y-6 min-h-[400px]"></div>
+                <div id="study-container" class="space-y-6 min-h-[450px]"></div>
             </section>
 
-            <!-- IA Gerador -->
+            <!-- Aba IA -->
             <section id="tab-add" class="tab-content space-y-6">
                 <div id="ia-input-area" class="bg-white p-8 rounded-[40px] border border-slate-100 shadow-sm space-y-6">
                     <div class="flex items-center gap-4">
-                        <div class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-lg shadow-inner">🪄</div>
-                        <h2 class="text-lg font-black text-slate-800 tracking-tight">Criador de Flashcards</h2>
+                        <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-xl shadow-inner">🪄</div>
+                        <h2 class="text-xl font-black text-slate-800 tracking-tight">IA Generativa</h2>
                     </div>
-                    <textarea id="ia-prompt" placeholder="Cole textos ou temas para a IA criar as questões..." class="w-full h-64 bg-slate-50 rounded-[24px] p-6 text-sm border border-slate-100 focus:ring-4 ring-indigo-500/10 outline-none resize-none transition-all placeholder:text-slate-300 font-medium"></textarea>
-                    <button onclick="window.processIA()" id="btn-ia" class="w-full bg-slate-900 text-white font-black py-5 rounded-[20px] uppercase text-xs flex items-center justify-center gap-4 btn-active-scale transition-all shadow-xl">
-                        <span>Gerar com Gemini 3</span>
+                    <textarea id="ia-prompt" placeholder="Cole aqui capítulos de livros, resumos ou temas específicos..." class="w-full h-72 bg-slate-50 rounded-[28px] p-7 text-sm border border-slate-100 focus:ring-4 ring-indigo-500/10 outline-none resize-none transition-all placeholder:text-slate-300 font-medium leading-relaxed"></textarea>
+                    <button onclick="processIA()" id="btn-ia" class="w-full bg-slate-900 text-white font-black py-5 rounded-[22px] uppercase text-xs flex items-center justify-center gap-4 btn-active-scale transition-all shadow-xl">
+                        <span>Criar Flashcards com IA</span>
                         <div id="ia-loader" class="loading-spinner hidden" style="border-top-color: white;"></div>
                     </button>
                 </div>
 
                 <div id="ia-review-area" class="hidden space-y-4">
-                    <div class="flex justify-between items-center bg-white/95 backdrop-blur-xl p-6 rounded-[24px] sticky top-28 z-10 border border-slate-100 shadow-xl">
+                    <div class="flex justify-between items-center bg-white/95 backdrop-blur-xl p-6 rounded-[26px] sticky top-28 z-10 border border-slate-100 shadow-xl">
                         <div class="flex flex-col">
-                            <h3 class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Preview</h3>
-                            <span id="review-count" class="text-xs text-slate-800 font-black">0 Cards</span>
+                            <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Cards Criados</h3>
+                            <span id="review-count" class="text-sm text-slate-800 font-black">0 Cards</span>
                         </div>
-                        <button onclick="window.confirmBatch()" class="bg-emerald-600 text-white text-[10px] font-black uppercase px-6 py-3 rounded-xl shadow-lg btn-active-scale">Adicionar Todos</button>
+                        <button onclick="confirmBatch()" class="bg-emerald-600 text-white text-[11px] font-black uppercase px-7 py-3.5 rounded-xl shadow-lg btn-active-scale">Importar Todos</button>
                     </div>
                     <div id="review-list" class="space-y-4 pb-20"></div>
                 </div>
             </section>
 
-            <!-- Banco de Dados -->
+            <!-- Aba Banco -->
             <section id="tab-bank" class="tab-content space-y-4">
                 <div class="flex justify-between items-center px-4">
-                    <h2 class="text-lg font-black text-slate-800">Seu Acervo</h2>
-                    <button onclick="window.clearAll()" class="text-[8px] font-black text-rose-500 uppercase tracking-widest bg-rose-50 px-3 py-1.5 rounded-lg">Reset Local</button>
+                    <h2 class="text-xl font-black text-slate-800">Seu Acervo</h2>
+                    <button onclick="clearAll()" class="text-[9px] font-black text-rose-500 uppercase tracking-widest bg-rose-50 px-4 py-2 rounded-lg">Reset Banco</button>
                 </div>
-                <div id="bank-list" class="space-y-2 pb-24"></div>
+                <div id="bank-list" class="space-y-3 pb-24"></div>
             </section>
 
-            <!-- Configurações -->
+            <!-- Aba Ajustes -->
             <section id="tab-settings" class="tab-content space-y-6">
                 <div class="bg-white p-8 rounded-[40px] border border-slate-100 shadow-sm space-y-6">
-                    <h2 class="text-lg font-black text-slate-800 tracking-tight">Sincronização Cloud</h2>
-                    <div class="p-5 bg-slate-50 rounded-[24px] border border-slate-100 flex items-center justify-between">
+                    <h2 class="text-xl font-black text-slate-800 tracking-tight">Sincronização Cloud</h2>
+                    <div class="p-6 bg-slate-50 rounded-[28px] border border-slate-100 flex items-center justify-between">
                         <div class="flex flex-col text-left">
-                            <span class="text-xs font-black text-slate-700">Google Drive</span>
-                            <span id="sync-status" class="text-[8px] text-emerald-500 font-bold uppercase mt-1 tracking-widest">Conectado</span>
+                            <span class="text-sm font-black text-slate-700">Google Drive</span>
+                            <span id="sync-status" class="text-[9px] text-emerald-500 font-bold uppercase mt-1 tracking-widest">Status: Conectado</span>
                         </div>
-                        <button onclick="window.manualSync()" class="bg-white border border-slate-200 text-[8px] font-black uppercase px-4 py-2 rounded-lg shadow-sm">Sync Agora</button>
+                        <button onclick="manualSync()" class="bg-white border border-slate-200 text-[9px] font-black uppercase px-5 py-2.5 rounded-xl shadow-sm">Sincronizar</button>
                     </div>
-                    <button onclick="window.signOut()" class="w-full bg-rose-50 text-rose-600 font-black py-4 rounded-[20px] uppercase text-[10px] btn-active-scale transition-all">Desconectar Conta</button>
+                    <button onclick="signOut()" class="w-full bg-rose-50 text-rose-600 font-black py-5 rounded-[22px] uppercase text-[11px] btn-active-scale transition-all">Sair da Conta</button>
+                </div>
+                <div class="text-center py-4">
+                    <p class="text-[9px] font-black text-slate-300 uppercase tracking-[0.4em]">MEDREP ECOSYSTEM</p>
                 </div>
             </section>
         </main>
 
-        <nav class="fixed bottom-0 left-0 right-0 max-w-xl mx-auto bg-white/90 backdrop-blur-2xl border-t border-slate-100 flex justify-around py-5 px-4 z-50 safe-bottom rounded-t-[32px] shadow-2xl">
-            <button onclick="window.switchTab('home')" class="nav-btn flex flex-col items-center gap-1 active text-indigo-600" id="nav-home">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3L4 9V21H9V15H15V21H20V9L12 3Z"/></svg>
-                <span class="text-[8px] font-black uppercase tracking-widest">Início</span>
+        <!-- Navbar Fixa -->
+        <nav class="fixed bottom-0 left-0 right-0 max-w-xl mx-auto bg-white/90 backdrop-blur-2xl border-t border-slate-100 flex justify-around py-6 px-4 z-50 safe-bottom rounded-t-[36px] shadow-2xl">
+            <button onclick="switchTab('home')" class="nav-btn flex flex-col items-center gap-1 active text-indigo-600" id="nav-home">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3L4 9V21H9V15H15V21H20V9L12 3Z"/></svg>
+                <span class="text-[9px] font-black uppercase tracking-widest">Home</span>
             </button>
-            <button onclick="window.switchTab('study')" class="nav-btn flex flex-col items-center gap-1 text-slate-400" id="nav-study">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L4.5 20.29L5.21 21L12 18L18.79 21L19.5 20.29L12 2Z"/></svg>
-                <span class="text-[8px] font-black uppercase tracking-widest">Revisar</span>
+            <button onclick="switchTab('study')" class="nav-btn flex flex-col items-center gap-1 text-slate-400" id="nav-study">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L4.5 20.29L5.21 21L12 18L18.79 21L19.5 20.29L12 2Z"/></svg>
+                <span class="text-[9px] font-black uppercase tracking-widest">Estudar</span>
             </button>
-            <button onclick="window.switchTab('add')" class="nav-btn flex flex-col items-center gap-1 text-slate-400" id="nav-add">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L14.5 8.5L21 11L14.5 13.5L12 20L9.5 13.5L3 11L9.5 8.5L12 2Z"/></svg>
-                <span class="text-[8px] font-black uppercase tracking-widest">IA</span>
+            <button onclick="switchTab('add')" class="nav-btn flex flex-col items-center gap-1 text-slate-400" id="nav-add">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L14.5 8.5L21 11L14.5 13.5L12 20L9.5 13.5L3 11L9.5 8.5L12 2Z"/></svg>
+                <span class="text-[9px] font-black uppercase tracking-widest">IA</span>
             </button>
-            <button onclick="window.switchTab('bank')" class="nav-btn flex flex-col items-center gap-1 text-slate-400" id="nav-bank">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M4 4H20V20H4V4ZM6 6V18H18V6H6ZM8 8H16V10H8V8ZM8 12H16V14H8V12ZM8 16H13V18H8V16Z"/></svg>
-                <span class="text-[8px] font-black uppercase tracking-widest">Cards</span>
+            <button onclick="switchTab('bank')" class="nav-btn flex flex-col items-center gap-1 text-slate-400" id="nav-bank">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M4 4H20V20H4V4ZM6 6V18H18V6H6ZM8 8H16V10H8V8ZM8 12H16V14H8V12ZM8 16H13V18H8V16Z"/></svg>
+                <span class="text-[9px] font-black uppercase tracking-widest">Acervo</span>
             </button>
-            <button onclick="window.switchTab('settings')" class="nav-btn flex flex-col items-center gap-1 text-slate-400" id="nav-settings">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 15.5A3.5 3.5 0 0 1 8.5 12A3.5 3.5 0 0 1 12 8.5A3.5 3.5 0 0 1 15.5 12A3.5 3.5 0 0 1 12 15.5M19.43 12.97c.04-.32.07-.65.07-.97c0-.33-.03-.66-.07-.98l2.11-1.63c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.31-.61-.22l-2.49 1c-.52-.39-1.09-.73-1.69-.98l-.37-2.65c-.04-.24-.25-.42-.5-.42h-4c-.25 0-.46.18-.5.42l-.37 2.65c-.6.25-1.17.59-1.69.98l-2.49-1c-.22-.09-.49 0-.61.22l-2 3.46c-.12.22-.07.49.12.64l2.11 1.63c-.04.32-.07.65-.07.97c0 .33.03.66.07.98l-2.11 1.63c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.31.61.22l2.49-1c.52.39 1.09.73 1.69.98l.37 2.65c.04.24.25.42.5.42h4c.25 0 .46-.18.5-.42l.37-2.65c.6-.25-1.17.59-1.69.98l2.49 1c.22.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.63Z"/></svg>
-                <span class="text-[8px] font-black uppercase tracking-widest">Ajustes</span>
+            <button onclick="switchTab('settings')" class="nav-btn flex flex-col items-center gap-1 text-slate-400" id="nav-settings">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 15.5A3.5 3.5 0 0 1 8.5 12A3.5 3.5 0 0 1 12 8.5A3.5 3.5 0 0 1 15.5 12A3.5 3.5 0 0 1 12 15.5M19.43 12.97c.04-.32.07-.65.07-.97c0-.33-.03-.66-.07-.98l2.11-1.63c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.31-.61-.22l-2.49 1c-.52-.39-1.09-.73-1.69-.98l-.37-2.65c-.04-.24-.25-.42-.5-.42h-4c-.25 0-.46.18-.5.42l-.37 2.65c-.6.25-1.17.59-1.69.98l-2.49-1c-.22-.09-.49 0-.61.22l-2 3.46c-.12.22-.07.49.12.64l2.11 1.63c-.04.32-.07.65-.07.97c0 .33.03.66.07.98l-2.11 1.63c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.31.61.22l2.49-1c.52.39 1.09.73 1.69.98l.37 2.65c.04.24.25.42.5.42h4c.25 0 .46-.18.5-.42l.37-2.65c.6-.25-1.17.59-1.69.98l2.49 1c.22.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.63Z"/></svg>
+                <span class="text-[9px] font-black uppercase tracking-widest">Menu</span>
             </button>
         </nav>
     </div>
 
+    <!-- Script Principal -->
     <script type="module">
         import { GoogleGenAI } from "@google/genai";
 
-        // CONFIGS - ESCOPO UNIFICADO 'drive.file' PARA EVITAR ERRO 400
+        // CONFIGURAÇÕES GLOBAIS
         const CLIENT_ID = '648353734848-s9fnmd9tt0i5577grbt3q9oju6h71mpi.apps.googleusercontent.com';
-        const SCOPES = 'https://www.googleapis.com/auth/drive.file'; 
-        const STORAGE_KEY = 'medrep_data_v9_storage';
-        const FILENAME = 'medrep_data.json';
+        const SCOPE = 'https://www.googleapis.com/auth/drive.file'; 
+        const STORAGE_KEY = 'medrep_data_v10';
+        const FILENAME = 'medrep_sync.json';
 
-        const genAI = new GoogleGenAI({ apiKey: process.env.API_KEY });
+        // Gemini AI Setup
+        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
-        let state = { questions: [], srs: {}, history: [] };
+        // ESTADO GLOBAL
+        let state = {
+            questions: [],
+            srs: {},
+            history: []
+        };
+
         let tempExtracted = [];
         let studyQueue = [];
         let studyPointer = 0;
@@ -201,17 +226,120 @@
         let accessToken = null;
         let tokenClient = null;
 
-        // PERSISTÊNCIA
+        // INICIALIZAÇÃO DE FUNÇÕES GLOBAIS (window.func)
+        window.initiateAuth = () => {
+            const loader = document.getElementById('login-loader');
+            if (loader) loader.classList.remove('hidden');
+            if (tokenClient) {
+                tokenClient.requestAccessToken();
+            } else {
+                alert("Serviços do Google carregando... Tente novamente em segundos.");
+            }
+        };
+
+        window.signOut = () => {
+            if (accessToken) google.accounts.oauth2.revoke(accessToken);
+            location.reload();
+        };
+
+        window.switchTab = (tabId) => {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active', 'text-indigo-600'));
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.add('text-slate-400'));
+
+            const target = document.getElementById('tab-' + tabId);
+            const btn = document.getElementById('nav-' + tabId);
+            if (target) target.classList.add('active');
+            if (btn) {
+                btn.classList.add('active', 'text-indigo-600');
+                btn.classList.remove('text-slate-400');
+            }
+
+            if (tabId === 'study') startStudy();
+            if (tabId === 'bank') renderBank();
+            window.scrollTo(0, 0);
+        };
+
+        // GOOGLE API SETUP
+        function setupGoogle() {
+            gapi.load('client', async () => {
+                await gapi.client.init({
+                    discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest']
+                });
+            });
+
+            tokenClient = google.accounts.oauth2.initTokenClient({
+                client_id: CLIENT_ID,
+                scope: SCOPE,
+                callback: (resp) => {
+                    const loader = document.getElementById('login-loader');
+                    if (loader) loader.classList.add('hidden');
+                    if (resp.error) return;
+                    accessToken = resp.access_token;
+                    onLoginSuccess();
+                }
+            });
+        }
+
+        function onLoginSuccess() {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('main-app').style.display = 'block';
+            manualSync();
+        }
+
+        // GOOGLE DRIVE SYNC
+        window.manualSync = async () => {
+            if (!accessToken) return;
+            try {
+                const list = await gapi.client.drive.files.list({ q: `name = '${FILENAME}' and trashed = false` });
+                const file = list.result.files[0];
+                if (file) {
+                    const resp = await gapi.client.drive.files.get({ fileId: file.id, alt: 'media' });
+                    if (resp.result && resp.result.questions) {
+                        state = resp.result;
+                        saveLocal(false); // Salva local mas não dispara outro backup circular
+                        updateStats();
+                        alert("Sincronização Cloud concluída!");
+                    }
+                }
+            } catch (e) { console.error("Sync Error", e); }
+        };
+
+        async function autoCloudBackup() {
+            if (!accessToken) return;
+            try {
+                const list = await gapi.client.drive.files.list({ q: `name = '${FILENAME}' and trashed = false` });
+                let file = list.result.files[0];
+                
+                const metadata = { name: FILENAME, mimeType: 'application/json' };
+                const blob = new Blob([JSON.stringify(state)], { type: 'application/json' });
+                const form = new FormData();
+                form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+                form.append('file', blob);
+
+                const url = file 
+                    ? `https://www.googleapis.com/upload/drive/v3/files/${file.id}?uploadType=multipart`
+                    : `https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart`;
+
+                await fetch(url, {
+                    method: file ? 'PATCH' : 'POST',
+                    headers: { 'Authorization': 'Bearer ' + accessToken },
+                    body: form
+                });
+            } catch (e) { console.error("Backup Error", e); }
+        }
+
+        // PERSISTÊNCIA LOCAL
         function loadLocal() {
             const data = localStorage.getItem(STORAGE_KEY);
             if (data) state = JSON.parse(data);
             updateStats();
         }
 
-        function saveLocal() {
+        function saveLocal(syncCloud = true) {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
             updateStats();
-            autoCloudBackup();
+            if (syncCloud) autoCloudBackup();
         }
 
         function updateStats() {
@@ -219,7 +347,7 @@
             const dueCount = state.questions.filter(q => !state.srs[q.id] || state.srs[q.id].nextReview <= now).length;
             
             document.getElementById('stat-total').innerText = state.questions.length;
-            document.getElementById('home-due-text').innerText = dueCount > 0 ? `${dueCount} pendentes hoje.` : "Tudo em dia!";
+            document.getElementById('home-due-text').innerText = dueCount > 0 ? `${dueCount} cards pendentes agora.` : "Nenhum card para hoje!";
             
             const badge = document.getElementById('due-badge');
             badge.innerText = dueCount;
@@ -231,89 +359,7 @@
             document.getElementById('stat-accuracy').innerText = acc + "%";
         }
 
-        // GOOGLE AUTH & DRIVE
-        window.initGoogleAPI = function() {
-            gapi.load('client', async () => {
-                await gapi.client.init({
-                    discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest']
-                });
-            });
-
-            tokenClient = google.accounts.oauth2.initTokenClient({
-                client_id: CLIENT_ID,
-                scope: SCOPES,
-                callback: (resp) => {
-                    document.getElementById('login-loader').classList.add('hidden');
-                    if (resp.error) return alert("Erro: " + resp.error);
-                    accessToken = resp.access_token;
-                    onAuthSuccess();
-                }
-            });
-        };
-
-        window.initiateAuth = function() {
-            document.getElementById('login-loader').classList.remove('hidden');
-            tokenClient.requestAccessToken();
-        };
-
-        function onAuthSuccess() {
-            document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('main-app').style.display = 'block';
-            window.manualSync();
-        }
-
-        window.signOut = () => { if (accessToken) google.accounts.oauth2.revoke(accessToken); location.reload(); };
-
-        window.manualSync = async () => {
-            if (!accessToken) return;
-            try {
-                const list = await gapi.client.drive.files.list({ q: `name = '${FILENAME}' and trashed = false` });
-                const file = list.result.files[0];
-                if (file) {
-                    const resp = await gapi.client.drive.files.get({ fileId: file.id, alt: 'media' });
-                    if (resp.result && resp.result.questions) {
-                        state = resp.result;
-                        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-                        updateStats();
-                    }
-                }
-            } catch (e) { console.error(e); }
-        };
-
-        async function autoCloudBackup() {
-            if (!accessToken) return;
-            try {
-                const list = await gapi.client.drive.files.list({ q: `name = '${FILENAME}' and trashed = false` });
-                let file = list.result.files[0];
-                const metadata = { name: FILENAME, mimeType: 'application/json' };
-                const blob = new Blob([JSON.stringify(state)], { type: 'application/json' });
-                const form = new FormData();
-                form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-                form.append('file', blob);
-
-                await fetch(file ? `https://www.googleapis.com/upload/drive/v3/files/${file.id}?uploadType=multipart` : 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
-                    method: file ? 'PATCH' : 'POST',
-                    headers: { 'Authorization': 'Bearer ' + accessToken },
-                    body: form
-                });
-            } catch (e) { console.error(e); }
-        }
-
-        // NAVEGAÇÃO
-        window.switchTab = (tabId) => {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active', 'text-indigo-600'));
-            document.querySelectorAll('.nav-btn').forEach(el => el.classList.add('text-slate-400'));
-            document.getElementById('tab-' + tabId).classList.add('active');
-            const btn = document.getElementById('nav-' + tabId);
-            btn.classList.add('active', 'text-indigo-600');
-            btn.classList.remove('text-slate-400');
-            if (tabId === 'study') startStudy();
-            if (tabId === 'bank') renderBank();
-            window.scrollTo(0, 0);
-        };
-
-        // ALGORITMO SM-2
+        // ALGORITMO SM-2 (SRS)
         function startStudy() {
             const now = Date.now();
             studyQueue = state.questions.filter(q => !state.srs[q.id] || state.srs[q.id].nextReview <= now);
@@ -325,25 +371,43 @@
         function renderStudyCard() {
             const container = document.getElementById('study-container');
             if (studyPointer >= studyQueue.length) {
-                container.innerHTML = `<div class="py-24 text-center"><div class="text-6xl mb-6">🏆</div><h2 class="text-xl font-black text-slate-800">Concluído!</h2><button onclick="window.switchTab('home')" class="mt-8 bg-indigo-50 text-indigo-600 font-black px-10 py-4 rounded-[16px] text-[10px] uppercase">Início</button></div>`;
+                container.innerHTML = `
+                    <div class="py-24 text-center">
+                        <div class="text-7xl mb-6">🎯</div>
+                        <h2 class="text-2xl font-black text-slate-800 tracking-tight">Caminho Concluído</h2>
+                        <p class="text-sm text-slate-400 mt-2 font-medium">Você revisou todo o conteúdo agendado.</p>
+                        <button onclick="switchTab('home')" class="mt-10 bg-indigo-50 text-indigo-600 font-black px-12 py-5 rounded-[20px] text-[11px] uppercase shadow-sm">Dashboard</button>
+                    </div>`;
                 return;
             }
+
             const q = studyQueue[studyPointer];
             isRevealed = false;
+
             container.innerHTML = `
-                <div class="bg-white p-8 rounded-[32px] border border-slate-100 shadow-xl space-y-6">
-                    <div class="flex justify-between items-center"><span class="text-[9px] font-black text-indigo-500 uppercase">${q.specialty || 'Med'}</span></div>
-                    <h3 class="text-md font-bold text-slate-800 leading-relaxed">${q.statement}</h3>
-                    <div class="space-y-2">
-                        ${q.options.map((opt, i) => `<button onclick="window.reveal(${i})" class="opt-btn w-full text-left p-4 rounded-[20px] border-2 border-slate-50 bg-slate-50 text-slate-600 text-xs font-semibold">${opt}</button>`).join('')}
+                <div class="bg-white p-8 rounded-[40px] border border-slate-100 shadow-xl space-y-6">
+                    <div class="flex justify-between items-center">
+                        <span class="text-[10px] font-black text-indigo-500 uppercase tracking-widest">${q.specialty || 'Medicina'}</span>
+                        <div class="px-4 py-1.5 bg-slate-50 rounded-full text-[10px] font-black text-slate-400">${studyPointer + 1}/${studyQueue.length}</div>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-800 leading-relaxed">${q.statement}</h3>
+                    <div class="space-y-3">
+                        ${q.options.map((opt, i) => `
+                            <button onclick="reveal(${i})" class="opt-btn w-full text-left p-5 rounded-[24px] border-2 border-slate-50 bg-slate-50 text-slate-600 text-[13px] font-semibold transition-all">
+                                ${opt}
+                            </button>
+                        `).join('')}
                     </div>
                     <div id="study-feedback" class="hidden pt-6 border-t border-slate-50 space-y-6">
-                        <div class="bg-slate-900 text-slate-300 p-6 rounded-[24px] text-[10px] leading-relaxed border-l-4 border-indigo-500">${q.explanation}</div>
-                        <div class="grid grid-cols-4 gap-2">
-                            <button onclick="window.submitSRS(1)" class="bg-rose-500 py-4 rounded-[16px] text-white font-black text-[8px] uppercase">Errei</button>
-                            <button onclick="window.submitSRS(2)" class="bg-orange-400 py-4 rounded-[16px] text-white font-black text-[8px] uppercase">Difícil</button>
-                            <button onclick="window.submitSRS(3)" class="bg-indigo-500 py-4 rounded-[16px] text-white font-black text-[8px] uppercase">Bom</button>
-                            <button onclick="window.submitSRS(4)" class="bg-emerald-500 py-4 rounded-[16px] text-white font-black text-[8px] uppercase">Fácil</button>
+                        <div class="bg-slate-900 text-slate-300 p-6 rounded-[28px] text-[11px] leading-relaxed border-l-4 border-indigo-500">
+                            <b class="text-indigo-400 uppercase text-[9px] font-black block mb-2">Comentário Acadêmico</b>
+                            ${q.explanation}
+                        </div>
+                        <div class="grid grid-cols-4 gap-2.5">
+                            <button onclick="submitSRS(1)" class="bg-rose-500 py-5 rounded-[20px] text-white font-black text-[9px] uppercase active:scale-95 shadow-lg">Errei</button>
+                            <button onclick="submitSRS(2)" class="bg-orange-400 py-5 rounded-[20px] text-white font-black text-[9px] uppercase active:scale-95 shadow-lg">Difícil</button>
+                            <button onclick="submitSRS(3)" class="bg-indigo-500 py-5 rounded-[20px] text-white font-black text-[9px] uppercase active:scale-95 shadow-lg">Bom</button>
+                            <button onclick="submitSRS(4)" class="bg-emerald-500 py-5 rounded-[20px] text-white font-black text-[9px] uppercase active:scale-95 shadow-lg">Fácil</button>
                         </div>
                     </div>
                 </div>`;
@@ -354,77 +418,153 @@
             isRevealed = true;
             const q = studyQueue[studyPointer];
             const btns = document.querySelectorAll('.opt-btn');
-            btns.forEach((btn, i) => { if (i === q.correctIndex) btn.classList.add('option-btn-correct'); else if (i === idx) btn.classList.add('option-btn-wrong'); btn.disabled = true; });
+            btns.forEach((btn, i) => {
+                if (i === q.correctIndex) btn.classList.add('option-btn-correct');
+                else if (i === idx) btn.classList.add('option-btn-wrong');
+                btn.disabled = true;
+            });
             document.getElementById('study-feedback').classList.remove('hidden');
         };
 
         window.submitSRS = (grade) => {
             const q = studyQueue[studyPointer];
             const srs = state.srs[q.id] || { interval: 0, repetitions: 0, easeFactor: 2.5 };
+            
             let { interval, repetitions, easeFactor } = srs;
             const score = grade === 1 ? 0 : grade === 2 ? 2 : grade === 3 ? 4 : 5;
+
             if (score >= 3) {
                 if (repetitions === 0) interval = 1;
                 else if (repetitions === 1) interval = 6;
                 else interval = Math.round(interval * easeFactor);
                 repetitions++;
-            } else { repetitions = 0; interval = 1; }
+            } else {
+                repetitions = 0;
+                interval = 1;
+            }
+            
             easeFactor = easeFactor + (0.1 - (5 - score) * (0.08 + (5 - score) * 0.02));
             if (easeFactor < 1.3) easeFactor = 1.3;
-            state.srs[q.id] = { interval, repetitions, easeFactor, nextReview: Date.now() + (interval * 24 * 60 * 60 * 1000) };
+
+            state.srs[q.id] = {
+                interval,
+                repetitions,
+                easeFactor,
+                nextReview: Date.now() + (interval * 24 * 60 * 60 * 1000)
+            };
+
             state.history.push({ cardId: q.id, success: score >= 3, date: Date.now() });
             saveLocal();
+            
             studyPointer++;
             renderStudyCard();
         };
 
-        // IA GEMINI
+        // IA GEMINI - GERAÇÃO DE FLASHCARDS
         window.processIA = async () => {
             const promptInput = document.getElementById('ia-prompt').value.trim();
-            if (!promptInput) return;
+            if (!promptInput) return alert("Cole algum conteúdo para processar.");
+
             const loader = document.getElementById('ia-loader');
             const btn = document.getElementById('btn-ia');
             loader.classList.remove('hidden');
             btn.disabled = true;
+
+            const systemPrompt = `Você é um preceptor médico experiente. Crie flashcards de alta qualidade baseados no texto fornecido.
+            Retorne APENAS um array JSON válido: [{"statement": "pergunta?", "options": ["A","B","C","D"], "correctIndex": 0, "explanation": "comentário médico", "specialty": "clínica"}]`;
+
             try {
-                const response = await genAI.models.generateContent({
+                const response = await ai.models.generateContent({
                     model: 'gemini-3-flash-preview',
-                    contents: [{ parts: [{ text: `Conteúdo: ${promptInput}` }] }],
-                    config: { systemInstruction: "Crie flashcards médicos em JSON: [{\"statement\":\"\",\"options\":[],\"correctIndex\":0,\"explanation\":\"\",\"specialty\":\"\"}]" }
+                    contents: [{ parts: [{ text: `Conteúdo para flashcards: ${promptInput}` }] }],
+                    config: { systemInstruction: systemPrompt }
                 });
-                const match = response.text.match(/\[[\s\S]*\]/);
-                if (match) { tempExtracted = JSON.parse(match[0]); renderReviewList(); }
-            } catch (e) { alert(e.message); } finally { loader.classList.add('hidden'); btn.disabled = false; }
+
+                const text = response.text;
+                const match = text.match(/\[[\s\S]*\]/);
+                if (match) {
+                    tempExtracted = JSON.parse(match[0]);
+                    renderReviewList();
+                } else {
+                    throw new Error("Não foi possível processar a resposta da IA.");
+                }
+            } catch (e) {
+                alert("Erro IA: " + e.message);
+            } finally {
+                loader.classList.add('hidden');
+                btn.disabled = false;
+            }
         };
 
         function renderReviewList() {
             document.getElementById('ia-input-area').classList.add('hidden');
             document.getElementById('ia-review-area').classList.remove('hidden');
-            document.getElementById('review-count').innerText = tempExtracted.length + " Cards";
-            document.getElementById('review-list').innerHTML = tempExtracted.map(q => `<div class="bg-white p-6 rounded-[24px] border border-slate-100"><p class="text-xs font-bold text-slate-800">${q.statement}</p></div>`).join('');
+            document.getElementById('review-count').innerText = tempExtracted.length + " Cards Gerados";
+            
+            const list = document.getElementById('review-list');
+            list.innerHTML = tempExtracted.map((q) => `
+                <div class="bg-white p-6 rounded-[28px] border border-slate-100 shadow-sm text-left">
+                    <span class="text-[9px] font-black text-indigo-500 uppercase tracking-widest">${q.specialty || 'Geral'}</span>
+                    <p class="text-[13px] font-bold text-slate-800 mt-2 leading-relaxed">${q.statement}</p>
+                </div>
+            `).join('');
             window.scrollTo(0, 0);
         }
 
         window.confirmBatch = () => {
-            const news = tempExtracted.map(q => ({ ...q, id: 'q_' + Math.random().toString(36).substr(2, 9) }));
+            const news = tempExtracted.map(q => ({
+                ...q,
+                id: 'q_' + Math.random().toString(36).substr(2, 9),
+                createdAt: Date.now()
+            }));
             state.questions = [...state.questions, ...news];
             saveLocal();
+            
+            tempExtracted = [];
             document.getElementById('ia-review-area').classList.add('hidden');
             document.getElementById('ia-input-area').classList.remove('hidden');
-            window.switchTab('bank');
+            switchTab('bank');
         };
 
+        // ACERVO
         function renderBank() {
             const list = document.getElementById('bank-list');
-            if (state.questions.length === 0) { list.innerHTML = `<div class="py-20 text-center text-slate-300 italic text-xs">Vazio.</div>`; return; }
-            list.innerHTML = state.questions.slice().reverse().map(q => `<div class="bg-white p-5 rounded-[24px] border border-slate-100 flex justify-between items-center shadow-sm"><div class="truncate"><p class="text-[11px] text-slate-700 font-bold truncate">${q.statement}</p></div><button onclick="window.deleteQ('${q.id}')" class="text-rose-400 p-2">✕</button></div>`).join('');
+            if (state.questions.length === 0) {
+                list.innerHTML = `<div class="py-24 text-center text-slate-300 italic text-sm">Seu banco está vazio. Use a IA para começar.</div>`;
+                return;
+            }
+            list.innerHTML = state.questions.slice().reverse().map((q) => `
+                <div class="bg-white p-5 rounded-[26px] border border-slate-100 flex justify-between items-center shadow-sm">
+                    <div class="truncate mr-4 text-left">
+                        <p class="text-[9px] font-black text-indigo-500 uppercase mb-0.5">${q.specialty || 'Geral'}</p>
+                        <p class="text-[13px] text-slate-700 font-bold truncate">${q.statement}</p>
+                    </div>
+                    <button onclick="deleteQ('${q.id}')" class="text-rose-400 p-2 text-xl active:scale-90 transition-all">✕</button>
+                </div>
+            `).join('');
         }
 
-        window.deleteQ = (id) => { if (confirm("Excluir?")) { state.questions = state.questions.filter(q => q.id !== id); delete state.srs[id]; saveLocal(); renderBank(); } };
-        window.clearAll = () => { if (confirm("Apagar tudo?")) { state = { questions: [], srs: {}, history: [] }; saveLocal(); location.reload(); } };
+        window.deleteQ = (id) => {
+            if (confirm("Excluir este card permanentemente?")) {
+                state.questions = state.questions.filter(q => q.id !== id);
+                delete state.srs[id];
+                saveLocal();
+                renderBank();
+            }
+        };
 
+        window.clearAll = () => {
+            if (confirm("Ação Crítica: Apagar todo o banco de dados local?")) {
+                state = { questions: [], srs: {}, history: [] };
+                saveLocal();
+                location.reload();
+            }
+        };
+
+        // Init
         loadLocal();
-        window.initGoogleAPI();
+        setupGoogle();
+
     </script>
 </body>
 </html>
