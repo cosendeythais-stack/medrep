@@ -73,17 +73,17 @@
     <div id="login-screen" class="fixed inset-0 z-[200] bg-white flex flex-col items-center justify-center p-8 text-center pt-24">
         <div class="mb-12">
             <h1 class="text-6xl font-black text-indigo-600 tracking-tighter italic leading-none">MedRep</h1>
-            <p class="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-4">Cloud Medicina & SRS</p>
+            <p class="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-4">Fiel Reformatador & SRS</p>
         </div>
         <div class="bg-slate-50 p-10 rounded-[40px] w-full max-w-sm border border-slate-100 mb-8 shadow-sm">
-            <p id="login-status-msg" class="text-xs font-semibold text-slate-500 mb-6">Iniciando serviços...</p>
+            <p id="login-status-msg" class="text-xs font-semibold text-slate-500 mb-6">Aguardando Serviços Google...</p>
             <button onclick="window.fazerLogin()" class="w-full bg-slate-900 text-white font-black py-5 rounded-[22px] shadow-xl flex items-center justify-center gap-4 active:scale-95 transition-transform">
                 <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" class="w-6" alt="Google">
                 <span class="text-xs uppercase tracking-widest">Entrar com Google</span>
             </button>
             <div id="login-loader" class="hidden mt-6 flex justify-center"><div class="loading-spinner"></div></div>
         </div>
-        <p class="text-[9px] font-black text-slate-300 uppercase tracking-[0.4em]">v12.7 SEARCH & STABILITY</p>
+        <p class="text-[9px] font-black text-slate-300 uppercase tracking-[0.4em]">v12.8 INPUT FIEL</p>
     </div>
 
     <!-- MAIN APP -->
@@ -140,20 +140,20 @@
                 <div id="study-container" class="space-y-6 min-h-[400px]"></div>
             </section>
 
-            <!-- GERADOR IA -->
+            <!-- REFORMATADOR IA -->
             <section id="tab-add" class="tab-content space-y-6">
                 <div class="bg-white p-8 rounded-[40px] border border-slate-100 shadow-sm space-y-6">
                     <div class="flex items-center gap-4">
                         <div class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-lg">🪄</div>
-                        <h2 class="text-lg font-black text-slate-800">Gerador</h2>
+                        <h2 class="text-lg font-black text-slate-800">Reformatar para Card</h2>
                     </div>
 
                     <div id="ia-folder-warning" class="bg-amber-50 border border-amber-100 p-4 rounded-2xl hidden">
-                        <p class="text-[10px] text-amber-700 font-bold uppercase leading-tight">⚠️ Por favor, selecione ou crie uma pasta primeiro no menu Dashboard.</p>
+                        <p class="text-[10px] text-amber-700 font-bold uppercase leading-tight">⚠️ Selecione uma pasta no Dashboard antes de formatar!</p>
                     </div>
 
                     <div class="space-y-2">
-                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Gravando em:</label>
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Pasta Destino:</label>
                         <div id="active-folder-display" class="w-full bg-slate-50 p-4 rounded-2xl text-xs font-black text-indigo-600 uppercase border border-slate-100">
                             Nenhuma pasta selecionada
                         </div>
@@ -162,16 +162,16 @@
                     <div class="bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl p-6 text-center">
                         <label class="cursor-pointer flex flex-col items-center gap-2">
                             <span class="text-2xl">📄</span>
-                            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Anexar PDF/Docx</span>
+                            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Anexar Texto/PDF</span>
                             <input type="file" id="file-reader" class="hidden" accept=".pdf,.docx">
                             <span id="file-status" class="text-[9px] text-indigo-500 font-bold hidden"></span>
                         </label>
                     </div>
 
-                    <textarea id="ia-prompt" placeholder="Digite o tema para gerar cards..." class="w-full h-40 bg-slate-50 rounded-[24px] p-6 text-sm border border-slate-100 focus:ring-2 ring-indigo-500 outline-none resize-none"></textarea>
+                    <textarea id="ia-prompt" placeholder="Cole aqui a pergunta, alternativas e anotações exatamente como você as tem..." class="w-full h-40 bg-slate-50 rounded-[24px] p-6 text-sm border border-slate-100 focus:ring-2 ring-indigo-500 outline-none resize-none"></textarea>
                     
                     <button onclick="window.processIA()" id="btn-ia" class="w-full bg-slate-900 text-white font-black py-5 rounded-[20px] uppercase text-xs flex items-center justify-center gap-4 shadow-xl active:scale-95 transition-transform">
-                        <span>Gerar Cards</span>
+                        <span>Converter para Card</span>
                         <div id="ia-loader" class="loading-spinner hidden" style="border-top-color: white;"></div>
                     </button>
                 </div>
@@ -185,11 +185,11 @@
                 </div>
             </section>
 
-            <!-- ACERVO COM BUSCA -->
+            <!-- ACERVO -->
             <section id="tab-bank" class="tab-content space-y-4">
                 <div class="flex justify-between items-center px-4">
-                    <h2 class="text-lg font-black text-slate-800">Seu Acervo</h2>
-                    <button onclick="window.clearAll()" class="text-[8px] font-black text-rose-500 uppercase tracking-widest bg-rose-50 px-3 py-1.5 rounded-lg">Resetar Banco</button>
+                    <h2 class="text-lg font-black text-slate-800">Acervo</h2>
+                    <button onclick="window.clearAll()" class="text-[8px] font-black text-rose-500 uppercase tracking-widest bg-rose-50 px-3 py-1.5 rounded-lg">Limpar Local</button>
                 </div>
                 
                 <div class="px-2">
@@ -200,7 +200,7 @@
             </section>
         </main>
 
-        <!-- NAV BOTTOM -->
+        <!-- NAVEGAÇÃO -->
         <nav class="fixed bottom-0 left-0 right-0 max-w-xl mx-auto bg-white/95 backdrop-blur-2xl border-t border-slate-100 flex justify-around py-6 px-4 z-50 rounded-t-[32px] shadow-2xl safe-bottom">
             <button onclick="window.switchTab('home')" class="nav-btn flex flex-col items-center gap-1 active text-indigo-600" id="nav-home">
                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3L4 9V21H9V15H15V21H20V9L12 3Z"/></svg>
@@ -208,11 +208,11 @@
             </button>
             <button onclick="window.switchTab('study')" class="nav-btn flex flex-col items-center gap-1 text-slate-400" id="nav-study">
                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L4.5 20.29L5.21 21L12 18L18.79 21L19.5 20.29L12 2Z"/></svg>
-                <span class="text-[8px] font-black uppercase">Estudar</span>
+                <span class="text-[8px] font-black uppercase">Estudo</span>
             </button>
             <button onclick="window.switchTab('add')" class="nav-btn flex flex-col items-center gap-1 text-slate-400" id="nav-add">
                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L14.5 8.5L21 11L14.5 13.5L12 20L9.5 13.5L3 11L9.5 8.5L12 2Z"/></svg>
-                <span class="text-[8px] font-black uppercase">Gerar</span>
+                <span class="text-[8px] font-black uppercase">Fiel</span>
             </button>
             <button onclick="window.switchTab('bank')" class="nav-btn flex flex-col items-center gap-1 text-slate-400" id="nav-bank">
                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M4 4H20V20H4V4ZM6 6V18H18V6H6ZM8 8H16V10H8V8ZM8 12H16V14H8V12ZM8 16H13V18H8V16Z"/></svg>
@@ -221,19 +221,19 @@
         </nav>
     </div>
 
-    <!-- SCRIPT PRINCIPAL -->
+    <!-- LOGICA -->
     <script type="module">
         import { GoogleGenAI } from "@google/genai";
 
-        // CONFIGS IMUTÁVEIS
+        // CONFIGS DRIVE
         const CLIENT_ID = '648353734848-s9fnmd9tt0i5577grbt3q9oju6h71mpi.apps.googleusercontent.com';
         const SCOPES = 'https://www.googleapis.com/auth/drive.file';
-        const STORAGE_KEY = 'medrep_data_v12_7';
+        const STORAGE_KEY = 'medrep_data_v12_8';
         const KEY_STORAGE = 'medrep_gemini_key_v11';
         const TOKEN_STORAGE = 'medrep_google_token_persist';
         const FILENAME = 'medrep_data.json';
 
-        // ESTADO GLOBAL
+        // ESTADO
         let state = {
             questions: [],
             srs: {},
@@ -252,18 +252,18 @@
         let extractedFileText = "";
         let googleRetries = 0;
 
-        // IA CLIENT
+        // IA
         const getAIClient = () => {
             const key = localStorage.getItem(KEY_STORAGE) || process.env.API_KEY;
             return new GoogleGenAI({ apiKey: key });
         };
 
-        // EXPOR FUNÇÕES GLOBAIS PARA WINDOW
+        // EXPORTS
         window.saveGeminiKey = () => {
             const key = document.getElementById('gemini-key-input').value.trim();
             if (!/^AIza[0-9A-Za-z-_]{35}$/.test(key)) return alert("Chave Inválida!");
             localStorage.setItem(KEY_STORAGE, key);
-            alert("✅ Chave Salva!");
+            alert("✅ Salvo!");
             location.reload();
         };
 
@@ -272,7 +272,7 @@
             if (tokenClient) {
                 tokenClient.requestAccessToken();
             } else {
-                alert("Google Services ainda não pronto. Aguarde...");
+                alert("Serviços Google ainda não prontos. Aguarde ou recarregue.");
                 document.getElementById('login-loader').classList.add('hidden');
             }
         };
@@ -305,7 +305,7 @@
         };
 
         window.createNewFolder = () => {
-            const name = prompt("Matéria (ex: Ginecologia):");
+            const name = prompt("Nome da matéria:");
             if (name && name.trim()) {
                 const folder = { id: 'f_' + Date.now(), name: name.trim() };
                 state.folders.push(folder);
@@ -320,23 +320,23 @@
             const display = document.getElementById('active-folder-display');
             if (state.currentFolderId === 'f_all') {
                 warning.classList.remove('hidden');
-                display.innerText = "Nenhuma pasta ativa";
+                display.innerText = "ESCOLHA UMA MATÉRIA";
                 display.className = "w-full bg-slate-50 p-4 rounded-2xl text-xs font-black text-rose-500 uppercase border border-slate-100";
             } else {
                 warning.classList.add('hidden');
                 const folder = state.folders.find(f => f.id === state.currentFolderId);
-                display.innerText = "Gravando em: " + folder.name.toUpperCase();
+                display.innerText = "GRAVANDO EM: " + folder.name.toUpperCase();
                 display.className = "w-full bg-slate-50 p-4 rounded-2xl text-xs font-black text-indigo-600 uppercase border border-slate-100";
             }
         }
 
-        // CARREGAMENTO ROBUSTO DO GOOGLE
+        // RETRY GOOGLE
         function initGoogleWithRetry() {
             if (window.google && window.google.accounts && window.gapi) {
                 setupGoogle();
             } else if (googleRetries < 3) {
                 googleRetries++;
-                document.getElementById('login-status-msg').innerText = `Carregando APIs (${googleRetries}/3)...`;
+                document.getElementById('login-status-msg').innerText = `Iniciando Google API (${googleRetries}/3)...`;
                 setTimeout(initGoogleWithRetry, 1000);
             } else {
                 document.getElementById('login-status-msg').innerText = "Erro: Reinicie o app ou verifique sua conexão.";
@@ -360,14 +360,13 @@
                 }
             });
 
-            // Auto-Login
             const saved = JSON.parse(localStorage.getItem(TOKEN_STORAGE));
             if (saved && saved.expiry > Date.now()) {
                 accessToken = saved.token;
-                document.getElementById('login-status-msg').innerText = "Bem-vindo de volta! Sincronizando...";
+                document.getElementById('login-status-msg').innerText = "Sincronizando banco...";
                 onLoginSuccess();
             } else {
-                document.getElementById('login-status-msg').innerText = "Pronto para entrar";
+                document.getElementById('login-status-msg').innerText = "Pronto para Conectar";
             }
         }
 
@@ -377,7 +376,6 @@
             manualSync();
         }
 
-        // SYNC & BACKUP
         async function manualSync() {
             if (!accessToken) return;
             try {
@@ -413,29 +411,41 @@
             } catch (e) { console.warn(e); }
         }
 
-        // IA GERADOR
+        // FIEL REFORMATADOR IA
         window.processIA = async () => {
-            if (state.currentFolderId === 'f_all') return alert("Selecione uma pasta no Dashboard!");
-            const prompt = document.getElementById('ia-prompt').value.trim();
-            if (!prompt && !extractedFileText) return alert("Texto ou arquivo necessário!");
+            if (state.currentFolderId === 'f_all') return alert("Selecione uma pasta ativa!");
+            const userInput = document.getElementById('ia-prompt').value.trim();
+            if (!userInput && !extractedFileText) return alert("Nada para processar!");
             
             const loader = document.getElementById('ia-loader');
             const btn = document.getElementById('btn-ia');
             loader.classList.remove('hidden');
             btn.disabled = true;
 
-            const folderName = state.folders.find(f => f.id === state.currentFolderId).name;
+            const currentFolder = state.folders.find(f => f.id === state.currentFolderId);
 
             try {
                 const ai = getAIClient();
-                const context = extractedFileText ? `Contexto extraído: ${extractedFileText}\n\n` : "";
+                const sourceData = extractedFileText ? `DADOS DO ARQUIVO: ${extractedFileText}\n\nTEXTO ADICIONAL: ${userInput}` : userInput;
+                
                 const response = await ai.models.generateContent({
                     model: 'gemini-3-flash-preview',
-                    contents: [{ parts: [{ text: `${context}Crie 5 flashcards sobre: ${prompt}. Especialidade: ${folderName}.` }] }],
+                    contents: [{ parts: [{ text: sourceData }] }],
                     config: { 
-                        systemInstruction: "Formato JSON: [{\"statement\":\"\",\"options\":[],\"correctIndex\":0,\"explanation\":\"\",\"specialty\":\"\"}]" 
+                        systemInstruction: `A partir de agora, seu papel é estritamente de reformatador de dados. Você não é mais um gerador de conteúdo. 
+                        Regra 'Input Fiel': Tudo o que for enviado deve ser tratado como a única fonte de verdade. Se houver um enunciado, copie palavra por palavra. Se houver alternativas, mantenha-as exatamente como estão.
+                        Mapeamento:
+                        - Enunciado da pergunta -> field "statement"
+                        - Opções de escolha -> field "options" (array de strings)
+                        - Indicação da resposta certa -> field "correctIndex" (número base-zero)
+                        - Anotações extras/comentários -> field "explanation"
+                        
+                        Proibição: É terminantemente proibido adicionar informações, explicações extras ou criar novas perguntas. Se faltar alguma informação, deixe o campo vazio no JSON, mas não invente nada.
+                        
+                        Retorne APENAS o JSON puro no formato: [{\"statement\":\"\",\"options\":[],\"correctIndex\":0,\"explanation\":\"\",\"specialty\":\"\"}]`
                     }
                 });
+
                 const match = response.text.match(/\[[\s\S]*\]/);
                 if (match) {
                     tempExtracted = JSON.parse(match[0]);
@@ -447,17 +457,19 @@
 
         function renderReviewList() {
             document.getElementById('ia-review-area').classList.remove('hidden');
-            document.getElementById('review-count').innerText = tempExtracted.length + " Cards";
-            document.getElementById('review-list').innerHTML = tempExtracted.map(q => `<div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm text-xs font-bold leading-relaxed">${q.statement}</div>`).join('');
+            document.getElementById('review-count').innerText = tempExtracted.length + " Card(s)";
+            document.getElementById('review-list').innerHTML = tempExtracted.map(q => `<div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm text-xs font-bold leading-relaxed">${q.statement || '(Enunciado Vazio)'}</div>`).join('');
             window.scrollTo(0, 0);
         }
 
         window.confirmBatch = () => {
             const folderId = state.currentFolderId;
+            const folderName = state.folders.find(f => f.id === folderId).name;
             const news = tempExtracted.map(q => ({ 
                 ...q, 
                 id: 'q_' + Math.random().toString(36).substr(2, 9),
                 folderId: folderId,
+                specialty: folderName,
                 date: Date.now()
             }));
             state.questions = [...state.questions, ...news];
@@ -466,10 +478,10 @@
             document.getElementById('ia-prompt').value = "";
             extractedFileText = "";
             document.getElementById('file-status').classList.add('hidden');
-            alert("Sucesso! Cards adicionados.");
+            alert("Cards importados fielmente!");
         };
 
-        // ANALYTICS & STATS
+        // ANALYTICS
         function initChart() {
             const ctx = document.getElementById('performanceChart').getContext('2d');
             chartInstance = new Chart(ctx, {
@@ -480,7 +492,7 @@
                         label: 'Acertos',
                         data: [0,0,0,0,0,0,0],
                         borderColor: '#fff',
-                        backgroundColor: 'rgba(255,255,255,0.15)',
+                        backgroundColor: 'rgba(255,255,255,0.1)',
                         fill: true,
                         tension: 0.4,
                         borderWidth: 2,
@@ -510,7 +522,7 @@
             document.getElementById('stat-total').innerText = questions.length;
             const hits = history.filter(h => h.success).length;
             document.getElementById('stat-accuracy').innerText = history.length ? Math.round((hits / history.length) * 100) + "%" : "0%";
-            document.getElementById('home-due-text').innerText = due > 0 ? `${due} pendentes hoje.` : "Tudo revisado!";
+            document.getElementById('home-due-text').innerText = due > 0 ? `${due} cards esperando.` : "Tudo em dia!";
             
             const badge = document.getElementById('due-badge');
             badge.innerText = due;
@@ -536,26 +548,19 @@
             }).join('');
         }
 
-        // ACERVO E BUSCA
+        // BUSCA
         window.renderBank = () => {
             const searchTerm = document.getElementById('bank-search').value.toLowerCase();
             const list = document.getElementById('bank-list');
             const folderFilter = state.currentFolderId;
-            
             let filtered = folderFilter === 'f_all' ? state.questions : state.questions.filter(q => q.folderId === folderFilter);
-            
             if (searchTerm) {
-                filtered = filtered.filter(q => 
-                    q.statement.toLowerCase().includes(searchTerm) || 
-                    (q.specialty && q.specialty.toLowerCase().includes(searchTerm))
-                );
+                filtered = filtered.filter(q => q.statement.toLowerCase().includes(searchTerm) || (q.explanation && q.explanation.toLowerCase().includes(searchTerm)));
             }
-
             if (filtered.length === 0) {
-                list.innerHTML = `<div class="py-24 text-center text-slate-300 italic text-xs">Nenhum card encontrado.</div>`;
+                list.innerHTML = `<div class="py-24 text-center text-slate-300 italic text-xs">Sem resultados nesta matéria.</div>`;
                 return;
             }
-
             list.innerHTML = filtered.slice().reverse().map(q => `
                 <div class="bg-white p-5 rounded-3xl border border-slate-100 flex justify-between items-center shadow-sm">
                     <div class="truncate mr-4">
@@ -567,7 +572,7 @@
             `).join('');
         };
 
-        // SRS ENGINE
+        // SRS
         function startStudy() {
             const now = Date.now();
             const questions = state.currentFolderId === 'f_all' ? state.questions : state.questions.filter(q => q.folderId === state.currentFolderId);
@@ -580,11 +585,11 @@
         function renderStudyCard() {
             const container = document.getElementById('study-container');
             if (studyQueue.length === 0) {
-                container.innerHTML = `<div class="py-24 text-center"><div class="text-6xl mb-6">✅</div><h2 class="text-xl font-black">Meta Batida!</h2><button onclick="window.switchTab('home')" class="mt-8 bg-indigo-600 text-white font-black px-10 py-4 rounded-2xl">Dashboard</button></div>`;
+                container.innerHTML = `<div class="py-24 text-center"><div class="text-6xl mb-6">✅</div><h2 class="text-xl font-black">Meta Batida!</h2><button onclick="window.switchTab('home')" class="mt-8 bg-indigo-600 text-white font-black px-10 py-4 rounded-2xl">Voltar Home</button></div>`;
                 return;
             }
             if (studyPointer >= studyQueue.length) {
-                container.innerHTML = `<div class="py-24 text-center"><div class="text-6xl mb-6">🎯</div><h2 class="text-xl font-black">Sessão Encerrada</h2><button onclick="window.switchTab('home')" class="mt-8 bg-indigo-600 text-white font-black px-10 py-4 rounded-2xl">Dashboard</button></div>`;
+                container.innerHTML = `<div class="py-24 text-center"><div class="text-6xl mb-6">🎯</div><h2 class="text-xl font-black">Sessão Finalizada</h2><button onclick="window.switchTab('home')" class="mt-8 bg-indigo-600 text-white font-black px-10 py-4 rounded-2xl">Voltar Home</button></div>`;
                 return;
             }
             const q = studyQueue[studyPointer];
@@ -597,12 +602,12 @@
                         ${q.options.map((opt, i) => `<button onclick="window.reveal(${i})" class="opt-btn w-full text-left p-5 rounded-3xl border-2 border-slate-50 bg-slate-50 text-slate-600 text-sm font-semibold active:scale-95 transition-all">${opt}</button>`).join('')}
                     </div>
                     <div id="study-feedback" class="hidden pt-6 border-t border-slate-50 space-y-6">
-                        <div class="bg-slate-900 text-slate-300 p-6 rounded-[28px] text-[11px] border-l-4 border-indigo-500 leading-relaxed">${q.explanation}</div>
+                        <div class="bg-slate-900 text-slate-300 p-6 rounded-[28px] text-[11px] border-l-4 border-indigo-500 leading-relaxed">${q.explanation || 'Sem anotações extras.'}</div>
                         <div class="grid grid-cols-4 gap-2">
                             <button onclick="window.submitSRS(1)" class="bg-rose-500 py-5 rounded-2xl text-white font-black text-[9px] uppercase">Errei</button>
-                            <button onclick="window.submitSRS(2)" class="bg-orange-400 py-5 rounded-2xl text-white font-black text-[9px] uppercase">Dificil</button>
+                            <button onclick="window.submitSRS(2)" class="bg-orange-400 py-5 rounded-2xl text-white font-black text-[9px] uppercase">Difícil</button>
                             <button onclick="window.submitSRS(3)" class="bg-indigo-500 py-5 rounded-2xl text-white font-black text-[9px] uppercase">Bom</button>
-                            <button onclick="window.submitSRS(4)" class="bg-emerald-500 py-5 rounded-2xl text-white font-black text-[9px] uppercase">Facil</button>
+                            <button onclick="window.submitSRS(4)" class="bg-emerald-500 py-5 rounded-2xl text-white font-black text-[9px] uppercase">Fácil</button>
                         </div>
                     </div>
                 </div>`;
@@ -640,7 +645,7 @@
             renderStudyCard();
         };
 
-        // AUXILIARES
+        // HELPERS
         function saveLocal(cloud = true) {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
             updateStats();
@@ -658,7 +663,7 @@
         window.deleteQ = (id) => { if (confirm("Excluir card?")) { state.questions = state.questions.filter(q => q.id !== id); delete state.srs[id]; saveLocal(); renderBank(); } };
         window.clearAll = () => { if (confirm("Limpar todo o banco local?")) { localStorage.removeItem(STORAGE_KEY); location.reload(); } };
 
-        // FILE READER
+        // FILE
         document.getElementById('file-reader').addEventListener('change', async (e) => {
             const file = e.target.files[0];
             if (!file) return;
@@ -692,5 +697,4 @@
     </script>
 </body>
 </html>
-
 
