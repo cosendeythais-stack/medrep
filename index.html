@@ -83,7 +83,7 @@
             </button>
             <div id="login-loader" class="hidden mt-6 flex justify-center"><div class="loading-spinner"></div></div>
         </div>
-        <p class="text-[9px] font-black text-slate-300 uppercase tracking-[0.4em]">v12.8 INPUT FIEL</p>
+        <p class="text-[9px] font-black text-slate-300 uppercase tracking-[0.4em]">v12.9 FIEL REFORMATADOR</p>
     </div>
 
     <!-- MAIN APP -->
@@ -168,10 +168,10 @@
                         </label>
                     </div>
 
-                    <textarea id="ia-prompt" placeholder="Cole aqui a pergunta, alternativas e anotações exatamente como você as tem..." class="w-full h-40 bg-slate-50 rounded-[24px] p-6 text-sm border border-slate-100 focus:ring-2 ring-indigo-500 outline-none resize-none"></textarea>
+                    <textarea id="ia-prompt" placeholder="Cole aqui o enunciado, as alternativas e suas anotações extras. A IA irá apenas organizar os dados fielmente..." class="w-full h-40 bg-slate-50 rounded-[24px] p-6 text-sm border border-slate-100 focus:ring-2 ring-indigo-500 outline-none resize-none"></textarea>
                     
                     <button onclick="window.processIA()" id="btn-ia" class="w-full bg-slate-900 text-white font-black py-5 rounded-[20px] uppercase text-xs flex items-center justify-center gap-4 shadow-xl active:scale-95 transition-transform">
-                        <span>Converter para Card</span>
+                        <span>Converter Fielmente</span>
                         <div id="ia-loader" class="loading-spinner hidden" style="border-top-color: white;"></div>
                     </button>
                 </div>
@@ -228,7 +228,7 @@
         // CONFIGS DRIVE
         const CLIENT_ID = '648353734848-s9fnmd9tt0i5577grbt3q9oju6h71mpi.apps.googleusercontent.com';
         const SCOPES = 'https://www.googleapis.com/auth/drive.file';
-        const STORAGE_KEY = 'medrep_data_v12_8';
+        const STORAGE_KEY = 'medrep_data_v12_9';
         const KEY_STORAGE = 'medrep_gemini_key_v11';
         const TOKEN_STORAGE = 'medrep_google_token_persist';
         const FILENAME = 'medrep_data.json';
@@ -263,7 +263,7 @@
             const key = document.getElementById('gemini-key-input').value.trim();
             if (!/^AIza[0-9A-Za-z-_]{35}$/.test(key)) return alert("Chave Inválida!");
             localStorage.setItem(KEY_STORAGE, key);
-            alert("✅ Salvo!");
+            alert("✅ Chave Salva!");
             location.reload();
         };
 
@@ -320,7 +320,7 @@
             const display = document.getElementById('active-folder-display');
             if (state.currentFolderId === 'f_all') {
                 warning.classList.remove('hidden');
-                display.innerText = "ESCOLHA UMA MATÉRIA";
+                display.innerText = "ESCOLHA UMA MATÉRIA NO DASHBOARD";
                 display.className = "w-full bg-slate-50 p-4 rounded-2xl text-xs font-black text-rose-500 uppercase border border-slate-100";
             } else {
                 warning.classList.add('hidden');
@@ -411,38 +411,42 @@
             } catch (e) { console.warn(e); }
         }
 
-        // FIEL REFORMATADOR IA
+        // FIEL REFORMATADOR IA - PROTOCOLO v12.9
         window.processIA = async () => {
-            if (state.currentFolderId === 'f_all') return alert("Selecione uma pasta ativa!");
+            if (state.currentFolderId === 'f_all') return alert("Selecione uma pasta ativa no Dashboard!");
             const userInput = document.getElementById('ia-prompt').value.trim();
-            if (!userInput && !extractedFileText) return alert("Nada para processar!");
+            if (!userInput && !extractedFileText) return alert("Forneça o conteúdo (texto ou arquivo) para converter.");
             
             const loader = document.getElementById('ia-loader');
             const btn = document.getElementById('btn-ia');
             loader.classList.remove('hidden');
             btn.disabled = true;
 
-            const currentFolder = state.folders.find(f => f.id === state.currentFolderId);
-
             try {
                 const ai = getAIClient();
-                const sourceData = extractedFileText ? `DADOS DO ARQUIVO: ${extractedFileText}\n\nTEXTO ADICIONAL: ${userInput}` : userInput;
+                const sourceData = extractedFileText ? `CONTEÚDO DO ARQUIVO:\n${extractedFileText}\n\nTEXTO ADICIONAL DO USUÁRIO:\n${userInput}` : userInput;
                 
                 const response = await ai.models.generateContent({
                     model: 'gemini-3-flash-preview',
                     contents: [{ parts: [{ text: sourceData }] }],
                     config: { 
+                        maxOutputTokens: 8192,
                         systemInstruction: `A partir de agora, seu papel é estritamente de reformatador de dados. Você não é mais um gerador de conteúdo. 
-                        Regra 'Input Fiel': Tudo o que for enviado deve ser tratado como a única fonte de verdade. Se houver um enunciado, copie palavra por palavra. Se houver alternativas, mantenha-as exatamente como estão.
-                        Mapeamento:
-                        - Enunciado da pergunta -> field "statement"
-                        - Opções de escolha -> field "options" (array de strings)
-                        - Indicação da resposta certa -> field "correctIndex" (número base-zero)
-                        - Anotações extras/comentários -> field "explanation"
                         
-                        Proibição: É terminantemente proibido adicionar informações, explicações extras ou criar novas perguntas. Se faltar alguma informação, deixe o campo vazio no JSON, mas não invente nada.
+                        Regra do 'Input Fiel': Tudo o que o usuário escrever ou enviar deve ser tratado como a única fonte de verdade. Se houver um enunciado, ele deve ser copiado PALAVRA POR PALAVRA. Se houver alternativas, elas devem ser mantidas EXATAMENTE como estão. 
                         
-                        Retorne APENAS o JSON puro no formato: [{\"statement\":\"\",\"options\":[],\"correctIndex\":0,\"explanation\":\"\",\"specialty\":\"\"}]`
+                        Instruções Críticas:
+                        1. Leia todo o conteúdo fornecido, por maior que seja (incluindo casos clínicos extensos), e mapeie cada parte para o campo correto sem omitir detalhes técnicos.
+                        2. NÃO tente resumir. Se o texto for longo, mantenha-o longo.
+                        3. Mapeamento de campos:
+                           - O que for a pergunta/contexto vai para "statement" (enunciado).
+                           - As opções de escolha vão para "options" (array de strings).
+                           - A indicação de qual é a certa vai para "correctIndex" (índice 0, 1, 2...).
+                           - Anotações extras, justificativas ou comentários do usuário vão para "explanation".
+                        
+                        Proibição de Acréscimos: É TERMINANTEMENTE PROIBIDO adicionar informações, explicações extras ou criar novas perguntas que não estejam no input original. Se faltar alguma informação no que foi enviado, deixe o campo vazio no JSON, mas não invente absolutamente nada.
+                        
+                        Retorne APENAS o JSON no formato: [{"statement":"","options":[],"correctIndex":0,"explanation":"","specialty":""}]`
                     }
                 });
 
@@ -450,15 +454,26 @@
                 if (match) {
                     tempExtracted = JSON.parse(match[0]);
                     renderReviewList();
+                } else {
+                    alert("Não foi possível formatar os dados. Verifique o input.");
                 }
-            } catch (e) { alert("IA Falhou: " + e.message); }
-            finally { loader.classList.add('hidden'); btn.disabled = false; }
+            } catch (e) { 
+                alert("Erro no Processamento: " + e.message); 
+            } finally { 
+                loader.classList.add('hidden'); 
+                btn.disabled = false; 
+            }
         };
 
         function renderReviewList() {
             document.getElementById('ia-review-area').classList.remove('hidden');
-            document.getElementById('review-count').innerText = tempExtracted.length + " Card(s)";
-            document.getElementById('review-list').innerHTML = tempExtracted.map(q => `<div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm text-xs font-bold leading-relaxed">${q.statement || '(Enunciado Vazio)'}</div>`).join('');
+            document.getElementById('review-count').innerText = tempExtracted.length + " Card(s) Organizados";
+            document.getElementById('review-list').innerHTML = tempExtracted.map(q => `
+                <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+                    <p class="text-[10px] font-black text-indigo-500 uppercase mb-2">Prévia do Enunciado:</p>
+                    <p class="text-xs font-bold text-slate-700 leading-relaxed truncate">${q.statement || '(Vazio)'}</p>
+                </div>
+            `).join('');
             window.scrollTo(0, 0);
         }
 
@@ -478,7 +493,7 @@
             document.getElementById('ia-prompt').value = "";
             extractedFileText = "";
             document.getElementById('file-status').classList.add('hidden');
-            alert("Cards importados fielmente!");
+            alert("Card(s) importado(s) fielmente à pasta " + folderName + "!");
         };
 
         // ANALYTICS
@@ -697,4 +712,5 @@
     </script>
 </body>
 </html>
+
 
