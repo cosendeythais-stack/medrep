@@ -60,9 +60,13 @@
         
         .case-text { line-height: 1.6; word-break: break-word; }
         .case-text b { color: #4338ca; font-weight: 800; }
+
+        #sync-toast { position: fixed; top: 70px; left: 50%; transform: translateX(-50%); z-index: 2000; padding: 8px 16px; border-radius: 12px; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; display: none; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
     </style>
 </head>
 <body class="antialiased overflow-x-hidden">
+
+    <div id="sync-toast"></div>
 
     <!-- BARRA DE CONFIGURAÇÃO DE CHAVE -->
     <div id="api-key-bar" class="fixed top-0 left-0 right-0 bg-slate-900 text-white p-3 shadow-2xl flex flex-col md:flex-row items-center justify-center gap-3 border-b border-white/10">
@@ -260,6 +264,23 @@
             return new GoogleGenAI({ apiKey: key });
         };
 
+        function showSyncStatus(msg, type = 'info') {
+            const toast = document.getElementById('sync-toast');
+            toast.innerText = msg;
+            toast.style.display = 'block';
+            if (type === 'success') {
+                toast.style.backgroundColor = '#10b981';
+                toast.style.color = 'white';
+            } else if (type === 'error') {
+                toast.style.backgroundColor = '#ef4444';
+                toast.style.color = 'white';
+            } else {
+                toast.style.backgroundColor = '#4f46e5';
+                toast.style.color = 'white';
+            }
+            setTimeout(() => { toast.style.display = 'none'; }, 2000);
+        }
+
         window.saveGeminiKey = () => {
             const key = document.getElementById('gemini-key-input').value.trim();
             if (!key.startsWith('AIza')) return alert("Chave Gemini inválida.");
@@ -274,7 +295,7 @@
                 tokenClient.requestAccessToken();
             } else {
                 console.log("Reiniciando inicialização Google...");
-                setupGoogle(); // Tenta inicializar novamente se falhou antes
+                setupGoogle();
             }
         };
 
@@ -301,11 +322,15 @@
                         state = resp.result;
                         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
                         console.log("Sincronização: Dados carregados via nome: " + driveFileId);
+                        showSyncStatus("✅ Drive Sincronizado", 'success');
                     }
                 } else {
                     console.log("Sincronização: Nenhum arquivo encontrado no Drive.");
                 }
-            } catch (e) { console.error("ManualSync falhou", e); }
+            } catch (e) { 
+                console.error("ManualSync falhou", e);
+                showSyncStatus("❌ Falha na Sincronia", 'error');
+            }
             updateStats();
         }
 
@@ -321,7 +346,7 @@
                 }
 
                 const metadata = { name: FILENAME, mimeType: 'application/json' };
-                const boundary = 'medrep_sync_v13_3_master_final';
+                const boundary = 'medrep_sync_master_final_v2';
                 const delimiter = "\r\n--" + boundary + "\r\n";
                 const close_delim = "\r\n--" + boundary + "--";
 
@@ -346,16 +371,20 @@
                 if (!response.ok) {
                     const errorText = await response.text();
                     console.error("AutoBackup: Erro na resposta HTTP - Status:", response.status, "Erro:", errorText);
+                    showSyncStatus("❌ Erro ao Salvar no Drive", 'error');
                 } else {
                     if (!driveFileId) {
                         const result = await response.json();
                         driveFileId = result.id;
                         console.log("AutoBackup: Novo arquivo criado com ID: " + driveFileId);
-                    } else {
-                        console.log("AutoBackup: Arquivo atualizado com sucesso no Drive.");
                     }
+                    console.log("AutoBackup: Arquivo atualizado no Drive.");
+                    showSyncStatus("✅ Salvo no Drive", 'success');
                 }
-            } catch (e) { console.error("AutoBackup falhou criticamente", e); }
+            } catch (e) { 
+                console.error("AutoBackup falhou criticamente", e);
+                showSyncStatus("❌ Erro Crítico Drive", 'error');
+            }
         }
 
         // --- LÓGICA SRS (SM-2) ---
@@ -387,7 +416,10 @@
             };
             
             state.history.push({ cardId: q.id, success: score >= 3, date: Date.now() });
-            saveLocal();
+            
+            // Persistência Mandatória
+            saveLocal(true);
+            
             studyPointer++;
             renderStudyCard();
         };
@@ -454,12 +486,15 @@
                 date: Date.now()
             }));
             state.questions = [...state.questions, ...news];
-            saveLocal();
+            
+            // Persistência Mandatória
+            saveLocal(true);
+            
             document.getElementById('ia-review-area').classList.add('hidden');
             document.getElementById('ia-prompt').value = "";
             extractedFileText = "";
             document.getElementById('file-status').classList.add('hidden');
-            alert("✅ Sincronizado com Drive.");
+            alert("✅ Lote salvo e sincronizado com Drive.");
         };
 
         // --- ANALYTICS (CHART.JS) ---
@@ -565,7 +600,9 @@
                 const folder = { id: 'f_' + Date.now(), name: name.trim() };
                 state.folders.push(folder);
                 state.currentFolderId = folder.id;
-                saveLocal();
+                
+                // Persistência Mandatória
+                saveLocal(true);
                 updateStats();
             }
         };
@@ -671,7 +708,6 @@
 
         function initGoogleWithRetry() {
             console.log("Tentando inicializar APIs Google...");
-            // Verifica se as bibliotecas base já foram carregadas pelo navegador
             if (window.gapi && window.google && window.google.accounts) {
                 setupGoogle();
             } else if (googleRetries < 15) {
@@ -692,7 +728,7 @@
                     tokenClient = google.accounts.oauth2.initTokenClient({
                         client_id: CLIENT_ID,
                         scope: SCOPES,
-                        prompt: 'consent', // Força o prompt de consentimento para garantir permissões de escrita
+                        prompt: 'consent',
                         callback: (resp) => {
                             if (resp.error) {
                                 console.error("Erro no TokenClient Callback:", resp.error);
@@ -705,7 +741,6 @@
                     });
                     console.log("GIS TokenClient configurado.");
 
-                    // Verifica se já temos um token válido salvo
                     const saved = JSON.parse(localStorage.getItem(TOKEN_STORAGE));
                     if (saved && saved.expiry > Date.now()) {
                         accessToken = saved.token;
@@ -730,7 +765,7 @@
         function saveLocal(cloud = true) {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
             updateStats();
-            if (cloud) autoBackup();
+            if (cloud && accessToken) autoBackup();
         }
 
         function loadLocal() {
@@ -741,8 +776,21 @@
             updateStats();
         }
 
-        window.deleteQ = (id) => { if (confirm("Excluir card permanentemente?")) { state.questions = state.questions.filter(q => q.id !== id); delete state.srs[id]; saveLocal(); renderBank(); } };
-        window.clearAll = () => { if (confirm("Apagar cache local? Isso exigirá novo login para baixar dados do Drive.")) { localStorage.removeItem(STORAGE_KEY); location.reload(); } };
+        window.deleteQ = (id) => { 
+            if (confirm("Excluir card permanentemente?")) { 
+                state.questions = state.questions.filter(q => q.id !== id); 
+                delete state.srs[id]; 
+                saveLocal(true); 
+                renderBank(); 
+            } 
+        };
+
+        window.clearAll = () => { 
+            if (confirm("Apagar cache local? Isso exigirá novo login para baixar dados do Drive.")) { 
+                localStorage.removeItem(STORAGE_KEY); 
+                location.reload(); 
+            } 
+        };
 
         document.getElementById('file-reader').addEventListener('change', async (e) => {
             const file = e.target.files[0];
@@ -777,6 +825,7 @@
     </script>
 </body>
 </html>
+
 
 
 
