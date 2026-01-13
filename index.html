@@ -56,11 +56,13 @@
 
         .search-bar { background: rgba(248, 250, 252, 0.8); border: 1px solid #e2e8f0; border-radius: 16px; padding: 12px 16px; width: 100%; font-size: 14px; transition: all 0.2s; }
         .search-bar:focus { border-color: #4f46e5; background: #fff; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); outline: none; }
+        
+        .safe-bottom { padding-bottom: calc(1.5rem + env(safe-area-inset-bottom)); }
     </style>
 </head>
 <body class="antialiased overflow-x-hidden">
 
-    <!-- BARRA DE CONFIGURAÇÃO (FIXA) -->
+    <!-- CONFIG KEY BAR -->
     <div id="api-key-bar" class="fixed top-0 left-0 right-0 bg-slate-900 text-white p-3 shadow-2xl flex flex-col md:flex-row items-center justify-center gap-3 border-b border-white/10">
         <div class="flex items-center gap-2">
             <span class="text-[10px] font-black uppercase tracking-widest text-indigo-400">Gemini Key:</span>
@@ -69,21 +71,21 @@
         <button onclick="window.saveGeminiKey()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-black uppercase px-4 py-1.5 rounded-lg transition-colors">Salvar Chave</button>
     </div>
 
-    <!-- TELA DE LOGIN -->
+    <!-- LOGIN SCREEN -->
     <div id="login-screen" class="fixed inset-0 z-[200] bg-white flex flex-col items-center justify-center p-8 text-center pt-24">
         <div class="mb-12">
             <h1 class="text-6xl font-black text-indigo-600 tracking-tighter italic leading-none">MedRep</h1>
-            <p class="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-4">Fiel Reformatador & SRS</p>
+            <p class="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-4">Banco de Questões Personalizado</p>
         </div>
         <div class="bg-slate-50 p-10 rounded-[40px] w-full max-w-sm border border-slate-100 mb-8 shadow-sm">
-            <p id="login-status-msg" class="text-xs font-semibold text-slate-500 mb-6">Aguardando Serviços Google...</p>
+            <p id="login-status-msg" class="text-xs font-semibold text-slate-500 mb-6">Iniciando serviços integrados...</p>
             <button onclick="window.fazerLogin()" class="w-full bg-slate-900 text-white font-black py-5 rounded-[22px] shadow-xl flex items-center justify-center gap-4 active:scale-95 transition-transform">
                 <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" class="w-6" alt="Google">
                 <span class="text-xs uppercase tracking-widest">Entrar com Google</span>
             </button>
             <div id="login-loader" class="hidden mt-6 flex justify-center"><div class="loading-spinner"></div></div>
         </div>
-        <p class="text-[9px] font-black text-slate-300 uppercase tracking-[0.4em]">v12.9 FIEL REFORMATADOR</p>
+        <p class="text-[9px] font-black text-slate-300 uppercase tracking-[0.4em]">v13.0 FIEL REFORMATADOR</p>
     </div>
 
     <!-- MAIN APP -->
@@ -91,19 +93,20 @@
         <header class="glass border-b border-slate-100 px-6 py-4 sticky top-[60px] md:top-[50px] z-50 flex justify-between items-center max-w-xl mx-auto w-full rounded-b-3xl">
             <div class="flex flex-col">
                 <h1 class="text-xl font-black text-indigo-600 tracking-tighter italic leading-none">MedRep</h1>
-                <span id="header-subtitle" class="text-[8px] font-bold text-slate-400 uppercase mt-1 tracking-widest">Todas as Pastas</span>
+                <span id="header-subtitle" class="text-[8px] font-bold text-slate-400 uppercase mt-1 tracking-widest">Global</span>
             </div>
             <div id="due-badge" class="hidden bg-rose-500 text-white text-[10px] font-black px-2 py-1 rounded-full">0</div>
         </header>
 
         <main class="max-w-xl mx-auto p-4 space-y-6 pb-32">
-            <!-- DASHBOARD -->
+            
+            <!-- ABA: DASHBOARD -->
             <section id="tab-home" class="tab-content active space-y-6">
                 <div class="bg-indigo-600 p-8 rounded-[40px] text-white shadow-xl relative overflow-hidden">
-                    <p class="text-[9px] font-black uppercase tracking-widest opacity-60 mb-2">Desempenho da Seleção</p>
+                    <p class="text-[9px] font-black uppercase tracking-widest opacity-60 mb-2">Desempenho Médico</p>
                     <div class="grid grid-cols-2 gap-4 mb-4">
                         <div class="bg-white/10 p-4 rounded-2xl">
-                            <p class="text-[9px] font-bold uppercase opacity-50">Cards</p>
+                            <p class="text-[9px] font-bold uppercase opacity-50">Acervo</p>
                             <p id="stat-total" class="text-2xl font-black">0</p>
                         </div>
                         <div class="bg-white/10 p-4 rounded-2xl">
@@ -118,8 +121,8 @@
 
                 <div class="space-y-4">
                     <div class="flex justify-between items-center px-4">
-                        <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Matérias</h2>
-                        <button onclick="window.createNewFolder()" class="text-[10px] font-black text-indigo-600 uppercase">Nova Pasta +</button>
+                        <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Matérias / Pastas</h2>
+                        <button onclick="window.createNewFolder()" class="text-[10px] font-black text-indigo-600 uppercase">Nova Matéria +</button>
                     </div>
                     <div id="folders-scroll" class="flex gap-2 overflow-x-auto pb-2 px-2 no-scrollbar"></div>
                 </div>
@@ -128,79 +131,79 @@
                     <div class="flex items-center gap-4">
                         <div class="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center text-xl">⚡</div>
                         <div>
-                            <h3 class="font-black text-slate-800">Iniciar Revisão</h3>
-                            <p id="home-due-text" class="text-xs text-slate-400">0 cards esperando.</p>
+                            <h3 class="font-black text-slate-800">Iniciar Revisão SRS</h3>
+                            <p id="home-due-text" class="text-xs text-slate-400">Clique para estudar agora.</p>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <!-- REVISÃO -->
+            <!-- ABA: ESTUDO (SRS) -->
             <section id="tab-study" class="tab-content">
                 <div id="study-container" class="space-y-6 min-h-[400px]"></div>
             </section>
 
-            <!-- REFORMATADOR IA -->
+            <!-- ABA: CONVERSOR FIEL (IA) -->
             <section id="tab-add" class="tab-content space-y-6">
                 <div class="bg-white p-8 rounded-[40px] border border-slate-100 shadow-sm space-y-6">
                     <div class="flex items-center gap-4">
                         <div class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-lg">🪄</div>
-                        <h2 class="text-lg font-black text-slate-800">Reformatar para Card</h2>
+                        <h2 class="text-lg font-black text-slate-800">Converter Fielmente</h2>
                     </div>
 
                     <div id="ia-folder-warning" class="bg-amber-50 border border-amber-100 p-4 rounded-2xl hidden">
-                        <p class="text-[10px] text-amber-700 font-bold uppercase leading-tight">⚠️ Selecione uma pasta no Dashboard antes de formatar!</p>
+                        <p class="text-[10px] text-amber-700 font-bold uppercase leading-tight">⚠️ Atenção: Selecione uma pasta no Dashboard antes de processar os dados.</p>
                     </div>
 
                     <div class="space-y-2">
-                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Pasta Destino:</label>
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Pasta de Destino:</label>
                         <div id="active-folder-display" class="w-full bg-slate-50 p-4 rounded-2xl text-xs font-black text-indigo-600 uppercase border border-slate-100">
-                            Nenhuma pasta selecionada
+                            Nenhuma selecionada
                         </div>
                     </div>
 
                     <div class="bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl p-6 text-center">
                         <label class="cursor-pointer flex flex-col items-center gap-2">
                             <span class="text-2xl">📄</span>
-                            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Anexar Texto/PDF</span>
+                            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Anexar Questão (PDF/Docx)</span>
                             <input type="file" id="file-reader" class="hidden" accept=".pdf,.docx">
                             <span id="file-status" class="text-[9px] text-indigo-500 font-bold hidden"></span>
                         </label>
                     </div>
 
-                    <textarea id="ia-prompt" placeholder="Cole aqui o enunciado, as alternativas e suas anotações extras. A IA irá apenas organizar os dados fielmente..." class="w-full h-40 bg-slate-50 rounded-[24px] p-6 text-sm border border-slate-100 focus:ring-2 ring-indigo-500 outline-none resize-none"></textarea>
+                    <textarea id="ia-prompt" placeholder="Cole aqui o texto bruto da questão, as alternativas e suas anotações. A IA não resumirá nada." class="w-full h-40 bg-slate-50 rounded-[24px] p-6 text-sm border border-slate-100 focus:ring-2 ring-indigo-500 outline-none resize-none"></textarea>
                     
                     <button onclick="window.processIA()" id="btn-ia" class="w-full bg-slate-900 text-white font-black py-5 rounded-[20px] uppercase text-xs flex items-center justify-center gap-4 shadow-xl active:scale-95 transition-transform">
-                        <span>Converter Fielmente</span>
+                        <span>Organizar Card Fielmente</span>
                         <div id="ia-loader" class="loading-spinner hidden" style="border-top-color: white;"></div>
                     </button>
                 </div>
 
                 <div id="ia-review-area" class="hidden space-y-4">
                     <div class="flex justify-between items-center bg-white p-6 rounded-[24px] border border-slate-100 shadow-xl sticky top-[130px] z-10">
-                        <span id="review-count" class="text-xs font-black text-slate-800">0 Cards</span>
-                        <button onclick="window.confirmBatch()" class="bg-emerald-600 text-white text-[10px] font-black uppercase px-6 py-3 rounded-xl">Confirmar</button>
+                        <span id="review-count" class="text-xs font-black text-slate-800">Card Detectado</span>
+                        <button onclick="window.confirmBatch()" class="bg-emerald-600 text-white text-[10px] font-black uppercase px-6 py-3 rounded-xl">Salvar no Banco</button>
                     </div>
                     <div id="review-list" class="space-y-4 pb-20"></div>
                 </div>
             </section>
 
-            <!-- ACERVO -->
+            <!-- ABA: ACERVO E BUSCA -->
             <section id="tab-bank" class="tab-content space-y-4">
                 <div class="flex justify-between items-center px-4">
-                    <h2 class="text-lg font-black text-slate-800">Acervo</h2>
-                    <button onclick="window.clearAll()" class="text-[8px] font-black text-rose-500 uppercase tracking-widest bg-rose-50 px-3 py-1.5 rounded-lg">Limpar Local</button>
+                    <h2 class="text-lg font-black text-slate-800">Seu Acervo</h2>
+                    <button onclick="window.clearAll()" class="text-[8px] font-black text-rose-500 uppercase tracking-widest bg-rose-50 px-3 py-1.5 rounded-lg">Resetar Dados</button>
                 </div>
                 
                 <div class="px-2">
-                    <input type="text" id="bank-search" oninput="window.renderBank()" placeholder="🔎 Buscar por tema (ex: DPOC, Asma)..." class="search-bar">
+                    <input type="text" id="bank-search" oninput="window.renderBank()" placeholder="🔎 Filtrar por tema (ex: Cardiologia, DPOC)..." class="search-bar">
                 </div>
 
                 <div id="bank-list" class="space-y-2 pb-24 px-2"></div>
             </section>
         </main>
 
-        <!-- NAVEGAÇÃO -->
+        <!-- NAVEGAÇÃO INFERIOR -->
         <nav class="fixed bottom-0 left-0 right-0 max-w-xl mx-auto bg-white/95 backdrop-blur-2xl border-t border-slate-100 flex justify-around py-6 px-4 z-50 rounded-t-[32px] shadow-2xl safe-bottom">
             <button onclick="window.switchTab('home')" class="nav-btn flex flex-col items-center gap-1 active text-indigo-600" id="nav-home">
                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3L4 9V21H9V15H15V21H20V9L12 3Z"/></svg>
@@ -208,32 +211,32 @@
             </button>
             <button onclick="window.switchTab('study')" class="nav-btn flex flex-col items-center gap-1 text-slate-400" id="nav-study">
                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L4.5 20.29L5.21 21L12 18L18.79 21L19.5 20.29L12 2Z"/></svg>
-                <span class="text-[8px] font-black uppercase">Estudo</span>
+                <span class="text-[8px] font-black uppercase">Revisar</span>
             </button>
             <button onclick="window.switchTab('add')" class="nav-btn flex flex-col items-center gap-1 text-slate-400" id="nav-add">
                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L14.5 8.5L21 11L14.5 13.5L12 20L9.5 13.5L3 11L9.5 8.5L12 2Z"/></svg>
-                <span class="text-[8px] font-black uppercase">Fiel</span>
+                <span class="text-[8px] font-black uppercase">Conversor</span>
             </button>
             <button onclick="window.switchTab('bank')" class="nav-btn flex flex-col items-center gap-1 text-slate-400" id="nav-bank">
                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M4 4H20V20H4V4ZM6 6V18H18V6H6ZM8 8H16V10H8V8ZM8 12H16V14H8V12ZM8 16H13V18H8V16Z"/></svg>
-                <span class="text-[8px] font-black uppercase">Acervo</span>
+                <span class="text-[8px] font-black uppercase">Banco</span>
             </button>
         </nav>
     </div>
 
-    <!-- LOGICA -->
+    <!-- LOGICA UNIFICADA -->
     <script type="module">
         import { GoogleGenAI } from "@google/genai";
 
-        // CONFIGS DRIVE
+        // CONFIGURAÇÕES DRIVE
         const CLIENT_ID = '648353734848-s9fnmd9tt0i5577grbt3q9oju6h71mpi.apps.googleusercontent.com';
         const SCOPES = 'https://www.googleapis.com/auth/drive.file';
-        const STORAGE_KEY = 'medrep_data_v12_9';
+        const STORAGE_KEY = 'medrep_data_v13_0';
         const KEY_STORAGE = 'medrep_gemini_key_v11';
         const TOKEN_STORAGE = 'medrep_google_token_persist';
         const FILENAME = 'medrep_data.json';
 
-        // ESTADO
+        // ESTADO CENTRAL
         let state = {
             questions: [],
             srs: {},
@@ -252,18 +255,18 @@
         let extractedFileText = "";
         let googleRetries = 0;
 
-        // IA
+        // CLIENTE IA
         const getAIClient = () => {
             const key = localStorage.getItem(KEY_STORAGE) || process.env.API_KEY;
             return new GoogleGenAI({ apiKey: key });
         };
 
-        // EXPORTS
+        // EXPORTS GLOBAIS
         window.saveGeminiKey = () => {
             const key = document.getElementById('gemini-key-input').value.trim();
-            if (!/^AIza[0-9A-Za-z-_]{35}$/.test(key)) return alert("Chave Inválida!");
+            if (!/^AIza[0-9A-Za-z-_]{35}$/.test(key)) return alert("Chave Gemini inválida.");
             localStorage.setItem(KEY_STORAGE, key);
-            alert("✅ Chave Salva!");
+            alert("Configuração de IA salva com sucesso.");
             location.reload();
         };
 
@@ -272,7 +275,7 @@
             if (tokenClient) {
                 tokenClient.requestAccessToken();
             } else {
-                alert("Serviços Google ainda não prontos. Aguarde ou recarregue.");
+                alert("Serviços do Google não detectados. Verifique se o Safari/Chrome está permitindo cookies de terceiros.");
                 document.getElementById('login-loader').classList.add('hidden');
             }
         };
@@ -305,7 +308,7 @@
         };
 
         window.createNewFolder = () => {
-            const name = prompt("Nome da matéria:");
+            const name = prompt("Nome da matéria (Ex: Infectologia):");
             if (name && name.trim()) {
                 const folder = { id: 'f_' + Date.now(), name: name.trim() };
                 state.folders.push(folder);
@@ -320,26 +323,26 @@
             const display = document.getElementById('active-folder-display');
             if (state.currentFolderId === 'f_all') {
                 warning.classList.remove('hidden');
-                display.innerText = "ESCOLHA UMA MATÉRIA NO DASHBOARD";
+                display.innerText = "ESCOLHA UMA PASTA NA HOME";
                 display.className = "w-full bg-slate-50 p-4 rounded-2xl text-xs font-black text-rose-500 uppercase border border-slate-100";
             } else {
                 warning.classList.add('hidden');
                 const folder = state.folders.find(f => f.id === state.currentFolderId);
-                display.innerText = "GRAVANDO EM: " + folder.name.toUpperCase();
+                display.innerText = "MATÉRIA ATIVA: " + folder.name.toUpperCase();
                 display.className = "w-full bg-slate-50 p-4 rounded-2xl text-xs font-black text-indigo-600 uppercase border border-slate-100";
             }
         }
 
-        // RETRY GOOGLE
+        // CARREGAMENTO SEGURO GOOGLE
         function initGoogleWithRetry() {
             if (window.google && window.google.accounts && window.gapi) {
                 setupGoogle();
             } else if (googleRetries < 3) {
                 googleRetries++;
-                document.getElementById('login-status-msg').innerText = `Iniciando Google API (${googleRetries}/3)...`;
+                document.getElementById('login-status-msg').innerText = `Sincronizando APIs (${googleRetries}/3)...`;
                 setTimeout(initGoogleWithRetry, 1000);
             } else {
-                document.getElementById('login-status-msg').innerText = "Erro: Reinicie o app ou verifique sua conexão.";
+                document.getElementById('login-status-msg').innerText = "Serviços indisponíveis. Recarregue a página.";
                 document.getElementById('login-status-msg').className = "text-xs font-bold text-rose-500 mb-6";
             }
         }
@@ -363,10 +366,10 @@
             const saved = JSON.parse(localStorage.getItem(TOKEN_STORAGE));
             if (saved && saved.expiry > Date.now()) {
                 accessToken = saved.token;
-                document.getElementById('login-status-msg').innerText = "Sincronizando banco...";
+                document.getElementById('login-status-msg').innerText = "Usuário reconhecido. Restaurando banco...";
                 onLoginSuccess();
             } else {
-                document.getElementById('login-status-msg').innerText = "Pronto para Conectar";
+                document.getElementById('login-status-msg').innerText = "Pronto para sincronizar.";
             }
         }
 
@@ -388,7 +391,7 @@
                         saveLocal(false);
                     }
                 }
-            } catch (e) { console.warn(e); }
+            } catch (e) { console.warn("Sync Drive falhou", e); }
             updateStats();
         }
 
@@ -408,14 +411,14 @@
                     headers: { 'Authorization': 'Bearer ' + accessToken },
                     body: form
                 });
-            } catch (e) { console.warn(e); }
+            } catch (e) { console.warn("Backup Drive falhou", e); }
         }
 
-        // FIEL REFORMATADOR IA - PROTOCOLO v12.9
+        // PROTOCOLO FIEL REFORMATADOR v13.0
         window.processIA = async () => {
-            if (state.currentFolderId === 'f_all') return alert("Selecione uma pasta ativa no Dashboard!");
+            if (state.currentFolderId === 'f_all') return alert("Selecione uma pasta ativa primeiro.");
             const userInput = document.getElementById('ia-prompt').value.trim();
-            if (!userInput && !extractedFileText) return alert("Forneça o conteúdo (texto ou arquivo) para converter.");
+            if (!userInput && !extractedFileText) return alert("Nada para converter. Envie texto ou anexo.");
             
             const loader = document.getElementById('ia-loader');
             const btn = document.getElementById('btn-ia');
@@ -424,29 +427,26 @@
 
             try {
                 const ai = getAIClient();
-                const sourceData = extractedFileText ? `CONTEÚDO DO ARQUIVO:\n${extractedFileText}\n\nTEXTO ADICIONAL DO USUÁRIO:\n${userInput}` : userInput;
+                const sourceData = extractedFileText ? `CONTEÚDO DO DOCUMENTO:\n${extractedFileText}\n\nCOMENTÁRIO/TEXTO ADICIONAL:\n${userInput}` : userInput;
                 
                 const response = await ai.models.generateContent({
                     model: 'gemini-3-flash-preview',
                     contents: [{ parts: [{ text: sourceData }] }],
                     config: { 
                         maxOutputTokens: 8192,
-                        systemInstruction: `A partir de agora, seu papel é estritamente de reformatador de dados. Você não é mais um gerador de conteúdo. 
-                        
-                        Regra do 'Input Fiel': Tudo o que o usuário escrever ou enviar deve ser tratado como a única fonte de verdade. Se houver um enunciado, ele deve ser copiado PALAVRA POR PALAVRA. Se houver alternativas, elas devem ser mantidas EXATAMENTE como estão. 
-                        
-                        Instruções Críticas:
-                        1. Leia todo o conteúdo fornecido, por maior que seja (incluindo casos clínicos extensos), e mapeie cada parte para o campo correto sem omitir detalhes técnicos.
-                        2. NÃO tente resumir. Se o texto for longo, mantenha-o longo.
-                        3. Mapeamento de campos:
-                           - O que for a pergunta/contexto vai para "statement" (enunciado).
-                           - As opções de escolha vão para "options" (array de strings).
-                           - A indicação de qual é a certa vai para "correctIndex" (índice 0, 1, 2...).
-                           - Anotações extras, justificativas ou comentários do usuário vão para "explanation".
-                        
-                        Proibição de Acréscimos: É TERMINANTEMENTE PROIBIDO adicionar informações, explicações extras ou criar novas perguntas que não estejam no input original. Se faltar alguma informação no que foi enviado, deixe o campo vazio no JSON, mas não invente absolutamente nada.
-                        
-                        Retorne APENAS o JSON no formato: [{"statement":"","options":[],"correctIndex":0,"explanation":"","specialty":""}]`
+                        systemInstruction: `A partir de agora, seu papel é estritamente de reformatador de dados. Você não é mais um gerador de conteúdo.
+
+REGRA DO 'INPUT FIEL': Tudo o que o usuário enviar deve ser tratado como a única fonte de verdade. Se houver um enunciado, ele deve ser copiado palavra por palavra. Se houver alternativas, elas devem ser mantidas exatamente como estão.
+
+MAPEAMENTO EXATO:
+- O que for a pergunta ou o caso clínico vai para o campo "statement".
+- As opções de escolha vão para o array "options".
+- A indicação de qual é a alternativa correta vai para o "correctIndex" (índice 0, 1, 2...).
+- Anotações extras, justificativas ou anotações técnicas vão para "explanation".
+
+INSTRUÇÃO DE PROCESSAMENTO: O usuário enviará textos extensos. Você deve processar o conteúdo INTEGRALMENTE sem omitir detalhes técnicos e sem tentar resumir. Se faltar alguma informação, deixe o campo vazio no JSON, mas NÃO INVENTE NADA.
+
+Retorne APENAS o JSON puro no formato: [{"statement":"","options":[],"correctIndex":0,"explanation":"","specialty":""}]`
                     }
                 });
 
@@ -455,10 +455,10 @@
                     tempExtracted = JSON.parse(match[0]);
                     renderReviewList();
                 } else {
-                    alert("Não foi possível formatar os dados. Verifique o input.");
+                    alert("A IA não conseguiu identificar os campos da questão. Tente colar o texto novamente.");
                 }
             } catch (e) { 
-                alert("Erro no Processamento: " + e.message); 
+                alert("Falha no processamento: " + e.message); 
             } finally { 
                 loader.classList.add('hidden'); 
                 btn.disabled = false; 
@@ -467,11 +467,13 @@
 
         function renderReviewList() {
             document.getElementById('ia-review-area').classList.remove('hidden');
-            document.getElementById('review-count').innerText = tempExtracted.length + " Card(s) Organizados";
+            document.getElementById('review-count').innerText = "Card Detectado";
             document.getElementById('review-list').innerHTML = tempExtracted.map(q => `
-                <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
-                    <p class="text-[10px] font-black text-indigo-500 uppercase mb-2">Prévia do Enunciado:</p>
-                    <p class="text-xs font-bold text-slate-700 leading-relaxed truncate">${q.statement || '(Vazio)'}</p>
+                <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-3">
+                    <p class="text-[10px] font-black text-indigo-500 uppercase">Enunciado Mapeado:</p>
+                    <p class="text-xs font-bold text-slate-700 leading-relaxed max-h-40 overflow-hidden text-ellipsis">${q.statement || '(Vazio)'}</p>
+                    <hr class="border-slate-50">
+                    <p class="text-[10px] font-black text-emerald-500 uppercase">Opções detectadas: ${q.options.length}</p>
                 </div>
             `).join('');
             window.scrollTo(0, 0);
@@ -493,10 +495,10 @@
             document.getElementById('ia-prompt').value = "";
             extractedFileText = "";
             document.getElementById('file-status').classList.add('hidden');
-            alert("Card(s) importado(s) fielmente à pasta " + folderName + "!");
+            alert("Questão importada com sucesso para: " + folderName);
         };
 
-        // ANALYTICS
+        // ANALYTICS & STATS
         function initChart() {
             const ctx = document.getElementById('performanceChart').getContext('2d');
             chartInstance = new Chart(ctx, {
@@ -537,7 +539,7 @@
             document.getElementById('stat-total').innerText = questions.length;
             const hits = history.filter(h => h.success).length;
             document.getElementById('stat-accuracy').innerText = history.length ? Math.round((hits / history.length) * 100) + "%" : "0%";
-            document.getElementById('home-due-text').innerText = due > 0 ? `${due} cards esperando.` : "Tudo em dia!";
+            document.getElementById('home-due-text').innerText = due > 0 ? `${due} pendentes para hoje.` : "Revisões em dia!";
             
             const badge = document.getElementById('due-badge');
             badge.innerText = due;
@@ -573,21 +575,21 @@
                 filtered = filtered.filter(q => q.statement.toLowerCase().includes(searchTerm) || (q.explanation && q.explanation.toLowerCase().includes(searchTerm)));
             }
             if (filtered.length === 0) {
-                list.innerHTML = `<div class="py-24 text-center text-slate-300 italic text-xs">Sem resultados nesta matéria.</div>`;
+                list.innerHTML = `<div class="py-24 text-center text-slate-300 italic text-xs">Nenhum resultado para esta matéria.</div>`;
                 return;
             }
             list.innerHTML = filtered.slice().reverse().map(q => `
                 <div class="bg-white p-5 rounded-3xl border border-slate-100 flex justify-between items-center shadow-sm">
                     <div class="truncate mr-4">
                         <p class="text-[11px] text-slate-700 font-bold truncate">${q.statement}</p>
-                        <p class="text-[8px] text-slate-400 font-black uppercase mt-1 tracking-tighter">${q.specialty || 'Geral'}</p>
+                        <p class="text-[8px] text-slate-400 font-black uppercase mt-1 tracking-tighter">${q.specialty || 'Global'}</p>
                     </div>
                     <button onclick="window.deleteQ('${q.id}')" class="text-rose-400 p-2 active:scale-90 transition-transform">✕</button>
                 </div>
             `).join('');
         };
 
-        // SRS
+        // SRS ENGINE
         function startStudy() {
             const now = Date.now();
             const questions = state.currentFolderId === 'f_all' ? state.questions : state.questions.filter(q => q.folderId === state.currentFolderId);
@@ -604,20 +606,23 @@
                 return;
             }
             if (studyPointer >= studyQueue.length) {
-                container.innerHTML = `<div class="py-24 text-center"><div class="text-6xl mb-6">🎯</div><h2 class="text-xl font-black">Sessão Finalizada</h2><button onclick="window.switchTab('home')" class="mt-8 bg-indigo-600 text-white font-black px-10 py-4 rounded-2xl">Voltar Home</button></div>`;
+                container.innerHTML = `<div class="py-24 text-center"><div class="text-6xl mb-6">🎯</div><h2 class="text-xl font-black">Sessão Encerrada</h2><button onclick="window.switchTab('home')" class="mt-8 bg-indigo-600 text-white font-black px-10 py-4 rounded-2xl">Voltar Home</button></div>`;
                 return;
             }
             const q = studyQueue[studyPointer];
             isRevealed = false;
             container.innerHTML = `
                 <div class="bg-white p-8 rounded-[40px] border border-slate-100 shadow-xl space-y-6">
-                    <div class="flex justify-between items-center"><span class="text-[10px] font-black text-indigo-500 uppercase tracking-widest">${q.specialty || 'Medicina'}</span><span class="text-[10px] font-bold text-slate-400">${studyPointer+1}/${studyQueue.length}</span></div>
+                    <div class="flex justify-between items-center"><span class="text-[10px] font-black text-indigo-500 uppercase tracking-widest">${q.specialty || 'Global'}</span><span class="text-[10px] font-bold text-slate-400">${studyPointer+1}/${studyQueue.length}</span></div>
                     <h3 class="text-lg font-bold text-slate-800 leading-relaxed">${q.statement}</h3>
                     <div class="space-y-3">
                         ${q.options.map((opt, i) => `<button onclick="window.reveal(${i})" class="opt-btn w-full text-left p-5 rounded-3xl border-2 border-slate-50 bg-slate-50 text-slate-600 text-sm font-semibold active:scale-95 transition-all">${opt}</button>`).join('')}
                     </div>
                     <div id="study-feedback" class="hidden pt-6 border-t border-slate-50 space-y-6">
-                        <div class="bg-slate-900 text-slate-300 p-6 rounded-[28px] text-[11px] border-l-4 border-indigo-500 leading-relaxed">${q.explanation || 'Sem anotações extras.'}</div>
+                        <div class="bg-slate-900 text-slate-300 p-6 rounded-[28px] text-[11px] border-l-4 border-indigo-500 leading-relaxed">
+                            <p class="font-black text-white uppercase text-[9px] mb-2 tracking-widest">Anotações / Comentários:</p>
+                            ${q.explanation || 'Sem anotações fielmente registradas.'}
+                        </div>
                         <div class="grid grid-cols-4 gap-2">
                             <button onclick="window.submitSRS(1)" class="bg-rose-500 py-5 rounded-2xl text-white font-black text-[9px] uppercase">Errei</button>
                             <button onclick="window.submitSRS(2)" class="bg-orange-400 py-5 rounded-2xl text-white font-black text-[9px] uppercase">Difícil</button>
@@ -660,7 +665,7 @@
             renderStudyCard();
         };
 
-        // HELPERS
+        // HELPERS PERSISTÊNCIA
         function saveLocal(cloud = true) {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
             updateStats();
@@ -675,10 +680,10 @@
             updateStats();
         }
 
-        window.deleteQ = (id) => { if (confirm("Excluir card?")) { state.questions = state.questions.filter(q => q.id !== id); delete state.srs[id]; saveLocal(); renderBank(); } };
-        window.clearAll = () => { if (confirm("Limpar todo o banco local?")) { localStorage.removeItem(STORAGE_KEY); location.reload(); } };
+        window.deleteQ = (id) => { if (confirm("Excluir esta questão permanentemente?")) { state.questions = state.questions.filter(q => q.id !== id); delete state.srs[id]; saveLocal(); renderBank(); } };
+        window.clearAll = () => { if (confirm("Isso apagará seu banco local. Use apenas para resetar o app.")) { localStorage.removeItem(STORAGE_KEY); location.reload(); } };
 
-        // FILE
+        // FILE READER
         document.getElementById('file-reader').addEventListener('change', async (e) => {
             const file = e.target.files[0];
             if (!file) return;
@@ -705,7 +710,7 @@
             } catch (err) { alert(err.message); status.innerText = ""; }
         });
 
-        // INIT
+        // INICIALIZAÇÃO
         loadLocal();
         initChart();
         initGoogleWithRetry();
