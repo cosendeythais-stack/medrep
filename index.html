@@ -15,9 +15,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
     
-    <!-- Google Identity Services -->
-    <script src="https://accounts.google.com/js/api.js" async defer></script>
+    <!-- Google Identity Services e GAPI -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://apis.google.com/js/api.js" async defer></script>
 
     <script type="importmap">
     {
@@ -80,14 +80,14 @@
             <p class="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-4">Sincronização Master v13.3</p>
         </div>
         <div class="bg-slate-50 p-10 rounded-[40px] w-full max-w-sm border border-slate-100 mb-8 shadow-sm">
-            <p id="login-status-msg" class="text-xs font-semibold text-slate-500 mb-6">Aguardando Conexão Google Drive...</p>
+            <p id="login-status-msg" class="text-xs font-semibold text-slate-500 mb-6">Iniciando Sincronização Global...</p>
             <button onclick="window.fazerLogin()" class="w-full bg-slate-900 text-white font-black py-5 rounded-[22px] shadow-xl flex items-center justify-center gap-4 active:scale-95 transition-transform">
                 <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" class="w-6" alt="Google">
                 <span class="text-xs uppercase tracking-widest">Login via Drive Master</span>
             </button>
             <div id="login-loader" class="hidden mt-6 flex justify-center"><div class="loading-spinner"></div></div>
         </div>
-        <p class="text-[9px] font-black text-slate-300 uppercase tracking-[0.4em]">RESTAURAÇÃO COMPLETA v13.3</p>
+        <p class="text-[9px] font-black text-slate-300 uppercase tracking-[0.4em]">v13.3 FULL RESTORE</p>
     </div>
 
     <!-- APLICATIVO PRINCIPAL -->
@@ -95,7 +95,7 @@
         <header class="glass border-b border-slate-100 px-6 py-4 sticky top-[60px] md:top-[50px] z-50 flex justify-between items-center max-w-xl mx-auto w-full rounded-b-3xl">
             <div class="flex flex-col">
                 <h1 class="text-xl font-black text-indigo-600 tracking-tighter italic leading-none">MedRep</h1>
-                <span id="header-subtitle" class="text-[8px] font-bold text-slate-400 uppercase mt-1 tracking-widest">Global</span>
+                <span id="header-subtitle" class="text-[8px] font-bold text-slate-400 uppercase mt-1 tracking-widest">Sincronizado</span>
             </div>
             <div id="due-badge" class="hidden bg-rose-500 text-white text-[10px] font-black px-2 py-1 rounded-full">0</div>
         </header>
@@ -105,7 +105,7 @@
             <!-- HOME TAB -->
             <section id="tab-home" class="tab-content active space-y-6">
                 <div class="bg-indigo-600 p-8 rounded-[40px] text-white shadow-xl relative overflow-hidden">
-                    <p class="text-[9px] font-black uppercase tracking-widest opacity-60 mb-2">Resumo de Desempenho</p>
+                    <p class="text-[9px] font-black uppercase tracking-widest opacity-60 mb-2">Desempenho Geral</p>
                     <div class="grid grid-cols-2 gap-4 mb-4">
                         <div class="bg-white/10 p-4 rounded-2xl">
                             <p class="text-[9px] font-bold uppercase opacity-50">Cards Totais</p>
@@ -123,8 +123,8 @@
 
                 <div class="space-y-4">
                     <div class="flex justify-between items-center px-4">
-                        <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Suas Pastas</h2>
-                        <button onclick="window.createNewFolder()" class="text-[10px] font-black text-indigo-600 uppercase">Criar Pasta +</button>
+                        <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Matérias</h2>
+                        <button onclick="window.createNewFolder()" class="text-[10px] font-black text-indigo-600 uppercase">Criar +</button>
                     </div>
                     <div id="folders-scroll" class="flex gap-2 overflow-x-auto pb-2 px-2 no-scrollbar"></div>
                 </div>
@@ -133,8 +133,8 @@
                     <div class="flex items-center gap-4">
                         <div class="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center text-xl">⚡</div>
                         <div>
-                            <h3 class="font-black text-slate-800">Sessão de Revisão</h3>
-                            <p id="home-due-text" class="text-xs text-slate-400">Verifique seus cards pendentes.</p>
+                            <h3 class="font-black text-slate-800">Sessão SRS</h3>
+                            <p id="home-due-text" class="text-xs text-slate-400">Verifique os cards pendentes.</p>
                         </div>
                     </div>
                 </div>
@@ -150,7 +150,7 @@
                 <div class="bg-white p-8 rounded-[40px] border border-slate-100 shadow-sm space-y-6">
                     <div class="flex items-center gap-4">
                         <div class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-lg">🪄</div>
-                        <h2 class="text-lg font-black text-slate-800">Importador IA Fiel</h2>
+                        <h2 class="text-lg font-black text-slate-800">Importador Fiel</h2>
                     </div>
 
                     <div id="ia-folder-warning" class="bg-amber-50 border border-amber-100 p-4 rounded-2xl hidden">
@@ -167,24 +167,24 @@
                     <div class="bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl p-6 text-center">
                         <label class="cursor-pointer flex flex-col items-center gap-2">
                             <span class="text-2xl">📄</span>
-                            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Anexar Documento (PDF/Docx)</span>
+                            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Anexar Documento</span>
                             <input type="file" id="file-reader" class="hidden" accept=".pdf,.docx">
                             <span id="file-status" class="text-[9px] text-indigo-500 font-bold hidden"></span>
                         </label>
                     </div>
 
-                    <textarea id="ia-prompt" placeholder="Cole enunciados ou texto livre..." class="w-full h-40 bg-slate-50 rounded-[24px] p-6 text-sm border border-slate-100 focus:ring-2 ring-indigo-500 outline-none resize-none"></textarea>
+                    <textarea id="ia-prompt" placeholder="Cole enunciados ou texto livre..." class="w-full h-40 bg-slate-50 rounded-[24px] p-6 text-sm border border-slate-100 outline-none resize-none"></textarea>
                     
                     <button onclick="window.processIA()" id="btn-ia" class="w-full bg-slate-900 text-white font-black py-5 rounded-[20px] uppercase text-xs flex items-center justify-center gap-4 shadow-xl active:scale-95 transition-transform">
-                        <span>Reformatar Lote com IA</span>
+                        <span>Reformatar com IA</span>
                         <div id="ia-loader" class="loading-spinner hidden" style="border-top-color: white;"></div>
                     </button>
                 </div>
 
                 <div id="ia-review-area" class="hidden space-y-4">
                     <div class="flex justify-between items-center bg-white p-6 rounded-[24px] border border-slate-100 shadow-xl sticky top-[130px] z-10">
-                        <span id="review-count" class="text-xs font-black text-slate-800">Mapeamento Concluído</span>
-                        <button onclick="window.confirmBatch()" class="bg-emerald-600 text-white text-[10px] font-black uppercase px-6 py-3 rounded-xl">Salvar Lote</button>
+                        <span id="review-count" class="text-xs font-black text-slate-800">Cards Identificados</span>
+                        <button onclick="window.confirmBatch()" class="bg-emerald-600 text-white text-[10px] font-black uppercase px-6 py-3 rounded-xl">Confirmar Lote</button>
                     </div>
                     <div id="review-list" class="space-y-4 pb-20"></div>
                 </div>
@@ -193,7 +193,7 @@
             <!-- BANK TAB -->
             <section id="tab-bank" class="tab-content space-y-4">
                 <div class="flex justify-between items-center px-4">
-                    <h2 class="text-lg font-black text-slate-800">Acervo</h2>
+                    <h2 class="text-lg font-black text-slate-800">Banco de Dados</h2>
                     <button onclick="window.clearAll()" class="text-[8px] font-black text-rose-500 uppercase tracking-widest bg-rose-50 px-3 py-1.5 rounded-lg">Reset Local</button>
                 </div>
                 
@@ -231,7 +231,7 @@
         // CONFIGURAÇÕES GLOBAIS
         const CLIENT_ID = '648353734848-s9fnmd9tt0i5577grbt3q9oju6h71mpi.apps.googleusercontent.com';
         const SCOPES = 'https://www.googleapis.com/auth/drive.file';
-        const STORAGE_KEY = 'medrep_data_v13_3_global';
+        const STORAGE_KEY = 'medrep_data_v13_3_final';
         const KEY_STORAGE = 'medrep_gemini_key_v11';
         const TOKEN_STORAGE = 'medrep_google_token_persist';
         const FILENAME = 'medrep_data.json';
@@ -273,17 +273,17 @@
             if (tokenClient) {
                 tokenClient.requestAccessToken();
             } else {
-                alert("Serviços Google carregando...");
+                alert("Serviços Google ainda carregando. Aguarde um instante.");
                 document.getElementById('login-loader').classList.add('hidden');
             }
         };
 
-        // --- LÓGICA DE SINCRONIZAÇÃO MASTER v13.3 - BUSCA POR NOME ---
+        // --- SINCRONIZAÇÃO DRIVE ---
 
         async function manualSync() {
             if (!accessToken) return;
             try {
-                // Busca arquivo pelo nome em todo o Drive para garantir paridade
+                // Busca global por nome para paridade Desktop/Mobile
                 const list = await gapi.client.drive.files.list({ 
                     q: `name = '${FILENAME}' and trashed = false`,
                     spaces: 'drive',
@@ -301,7 +301,7 @@
                     if (resp.result && resp.result.questions) {
                         state = resp.result;
                         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-                        console.log("Sincronização: Dados carregados via nome.");
+                        console.log("Drive: Dados carregados com sucesso.");
                     }
                 }
             } catch (e) { console.error("ManualSync falhou", e); }
@@ -311,7 +311,6 @@
         async function autoBackup() {
             if (!accessToken) return;
             try {
-                // Busca ID se não tiver para evitar duplicatas
                 if (!driveFileId) {
                     const list = await gapi.client.drive.files.list({ 
                         q: `name = '${FILENAME}' and trashed = false`,
@@ -321,7 +320,7 @@
                 }
 
                 const metadata = { name: FILENAME, mimeType: 'application/json' };
-                const boundary = 'medrep_sync_v13_3';
+                const boundary = 'medrep_sync_boundary';
                 const delimiter = "\r\n--" + boundary + "\r\n";
                 const close_delim = "\r\n--" + boundary + "--";
 
@@ -338,7 +337,7 @@
                     method: driveFileId ? 'PATCH' : 'POST',
                     headers: { 
                         'Authorization': 'Bearer ' + accessToken,
-                        'Content-Type': 'multipart/related; boundary=' + boundary
+                        'Content-Type': `multipart/related; boundary=${boundary}`
                     },
                     body: body
                 });
@@ -384,12 +383,12 @@
             renderStudyCard();
         };
 
-        // --- IA E PROCESSAMENTO ---
+        // --- IA PROCESSAMENTO ---
 
         window.processIA = async () => {
-            if (state.currentFolderId === 'f_all') return alert("Escolha uma pasta específica.");
+            if (state.currentFolderId === 'f_all') return alert("Selecione uma matéria específica na Home.");
             const userInput = document.getElementById('ia-prompt').value.trim();
-            if (!userInput && !extractedFileText) return alert("Nada para processar.");
+            if (!userInput && !extractedFileText) return alert("Sem conteúdo para processar.");
             
             const loader = document.getElementById('ia-loader');
             const btn = document.getElementById('btn-ia');
@@ -398,18 +397,18 @@
 
             try {
                 const ai = getAIClient();
-                const sourceData = extractedFileText ? `DOC:\n${extractedFileText}\n\nUSER:\n${userInput}` : userInput;
+                const source = extractedFileText ? `DOC:\n${extractedFileText}\n\nUSER:\n${userInput}` : userInput;
                 const nextNum = state.questions.length + 1;
 
                 const response = await ai.models.generateContent({
                     model: 'gemini-3-flash-preview',
-                    contents: [{ parts: [{ text: sourceData }] }],
+                    contents: [{ parts: [{ text: source }] }],
                     config: { 
                         maxOutputTokens: 8192,
-                        systemInstruction: `Você é um REFORMATADOR MÉDICO FIEL. Organize o input em JSON.
+                        systemInstruction: `Você é um REFORMATADOR MÉDICO FIEL. Organize o conteúdo em JSON. 
                         Regras: 1. COPIE INTEGRALMENTE (Sem resumos). 2. FIDELIDADE TOTAL PALAVRA POR PALAVRA. 
-                        3. NUMERAÇÃO: O banco tem ${state.questions.length} questões. Comece da "Questão ${nextNum}:" sequencialmente. 
-                        Retorne JSON: [{"statement":"","options":[],"correctIndex":0,"explanation":"","specialty":""}]`
+                        3. NUMERAÇÃO SEQUENCIAL: Comece da "Questão ${nextNum}:".
+                        Retorne APENAS JSON: [{"statement":"","options":[],"correctIndex":0,"explanation":""}]`
                     }
                 });
 
@@ -418,7 +417,7 @@
                     tempExtracted = JSON.parse(match[0]);
                     renderReviewList();
                 } else {
-                    alert("A IA não retornou um formato válido.");
+                    alert("A IA não retornou o formato esperado.");
                 }
             } catch (e) { alert("IA Falhou: " + e.message); }
             finally { loader.classList.add('hidden'); btn.disabled = false; }
@@ -427,8 +426,8 @@
         function renderReviewList() {
             document.getElementById('ia-review-area').classList.remove('hidden');
             document.getElementById('review-list').innerHTML = tempExtracted.map(q => `
-                <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-2">
-                    <p class="text-[10px] font-black text-indigo-500">PRÉVIA:</p>
+                <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+                    <p class="text-[10px] font-black text-indigo-500 mb-1">Mapeado:</p>
                     <p class="text-xs font-bold text-slate-700 italic truncate leading-relaxed">"${q.statement}"</p>
                 </div>
             `).join('');
@@ -451,10 +450,10 @@
             document.getElementById('ia-prompt').value = "";
             extractedFileText = "";
             document.getElementById('file-status').classList.add('hidden');
-            alert("✅ Sincronizado com Drive.");
+            alert("✅ Lote salvo e sincronizado.");
         };
 
-        // --- ANALYTICS (CHART.JS) ---
+        // --- ANALYTICS ---
 
         function initChart() {
             const ctx = document.getElementById('performanceChart').getContext('2d');
@@ -496,7 +495,7 @@
             document.getElementById('stat-total').innerText = questions.length;
             const hits = history.filter(h => h.success).length;
             document.getElementById('stat-accuracy').innerText = history.length ? Math.round((hits / history.length) * 100) + "%" : "0%";
-            document.getElementById('home-due-text').innerText = due > 0 ? `${due} cards pendentes.` : "Revisão OK!";
+            document.getElementById('home-due-text').innerText = due > 0 ? `${due} cards para revisar.` : "Revisões em dia!";
             
             const badge = document.getElementById('due-badge');
             badge.innerText = due;
@@ -522,7 +521,7 @@
             }).join('');
         }
 
-        // --- NAVEGAÇÃO E UI ---
+        // --- NAVEGAÇÃO ---
 
         window.switchTab = (tabId) => {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -567,7 +566,7 @@
             const display = document.getElementById('active-folder-display');
             if (state.currentFolderId === 'f_all') {
                 warning.classList.remove('hidden');
-                display.innerText = "ESCOLHA MATÉRIA";
+                display.innerText = "ESCOLHA UMA PASTA";
                 display.className = "w-full bg-slate-50 p-4 rounded-2xl text-xs font-black text-rose-500 border border-slate-100";
             } else {
                 warning.classList.add('hidden');
@@ -621,7 +620,7 @@
                 return;
             }
             if (studyPointer >= studyQueue.length) {
-                container.innerHTML = `<div class="py-24 text-center"><div class="text-6xl mb-6">🎯</div><h2 class="text-xl font-black">Concluído</h2><button onclick="window.switchTab('home')" class="mt-8 bg-indigo-600 text-white font-black px-10 py-4 rounded-2xl">Finalizar</button></div>`;
+                container.innerHTML = `<div class="py-24 text-center"><div class="text-6xl mb-6">🎯</div><h2 class="text-xl font-black">Lote Concluído</h2><button onclick="window.switchTab('home')" class="mt-8 bg-indigo-600 text-white font-black px-10 py-4 rounded-2xl">Finalizar</button></div>`;
                 return;
             }
             const q = studyQueue[studyPointer];
@@ -635,7 +634,7 @@
                     </div>
                     <div id="study-feedback" class="hidden pt-6 border-t border-slate-50 space-y-6">
                         <div class="bg-slate-900 text-slate-300 p-6 rounded-[28px] text-[11px] leading-relaxed italic">
-                            ${q.explanation || 'Sem notas.'}
+                            ${q.explanation || 'Sem anotações registradas.'}
                         </div>
                         <div class="grid grid-cols-4 gap-2">
                             <button onclick="window.submitSRS(1)" class="bg-rose-500 py-5 rounded-2xl text-white font-black text-[9px] uppercase">Errei</button>
@@ -659,39 +658,48 @@
             document.getElementById('study-feedback').classList.remove('hidden');
         };
 
-        // --- INICIALIZAÇÃO E STORAGE ---
+        // --- INICIALIZAÇÃO GOOGLE ---
 
         function initGoogleWithRetry() {
-            if (window.google && window.google.accounts && window.gapi) {
+            // Garantia de que tanto o GAPI quanto o Google Identity Services (google.accounts) estão carregados
+            if (window.gapi && window.google && window.google.accounts) {
                 setupGoogle();
-            } else if (googleRetries < 5) {
+            } else if (googleRetries < 15) { // Aumentado limite para garantir carregamento em conexões instáveis
                 googleRetries++;
-                document.getElementById('login-status-msg').innerText = `Sync... (${googleRetries}/5)`;
+                document.getElementById('login-status-msg').innerText = `Carregando serviços Google... (${googleRetries})`;
                 setTimeout(initGoogleWithRetry, 1000);
+            } else {
+                alert("Falha ao carregar serviços Google. Verifique sua conexão e recarregue.");
+                document.getElementById('login-status-msg').innerText = "Erro de carregamento.";
             }
         }
 
         function setupGoogle() {
             gapi.load('client', async () => {
-                await gapi.client.init({ discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'] });
-                
-                tokenClient = google.accounts.oauth2.initTokenClient({
-                    client_id: CLIENT_ID,
-                    scope: SCOPES,
-                    callback: (resp) => {
-                        if (resp.error) return;
-                        accessToken = resp.access_token;
-                        localStorage.setItem(TOKEN_STORAGE, JSON.stringify({ token: accessToken, expiry: Date.now() + 3500 * 1000 }));
-                        onLoginSuccess();
-                    }
-                });
+                try {
+                    await gapi.client.init({ discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'] });
+                    
+                    tokenClient = google.accounts.oauth2.initTokenClient({
+                        client_id: CLIENT_ID,
+                        scope: SCOPES,
+                        callback: (resp) => {
+                            if (resp.error) return;
+                            accessToken = resp.access_token;
+                            localStorage.setItem(TOKEN_STORAGE, JSON.stringify({ token: accessToken, expiry: Date.now() + 3500 * 1000 }));
+                            onLoginSuccess();
+                        }
+                    });
 
-                const saved = JSON.parse(localStorage.getItem(TOKEN_STORAGE));
-                if (saved && saved.expiry > Date.now()) {
-                    accessToken = saved.token;
-                    onLoginSuccess();
-                } else {
-                    document.getElementById('login-status-msg').innerText = "Pronto para Login.";
+                    const saved = JSON.parse(localStorage.getItem(TOKEN_STORAGE));
+                    if (saved && saved.expiry > Date.now()) {
+                        accessToken = saved.token;
+                        onLoginSuccess();
+                    } else {
+                        document.getElementById('login-status-msg').innerText = "Conectado. Pronto para entrar.";
+                    }
+                } catch (err) {
+                    console.error("GAPI init failed", err);
+                    alert("Erro ao inicializar API do Drive.");
                 }
             });
         }
@@ -716,8 +724,8 @@
             updateStats();
         }
 
-        window.deleteQ = (id) => { if (confirm("Excluir card?")) { state.questions = state.questions.filter(q => q.id !== id); delete state.srs[id]; saveLocal(); renderBank(); } };
-        window.clearAll = () => { if (confirm("Apagar cache local?")) { localStorage.removeItem(STORAGE_KEY); location.reload(); } };
+        window.deleteQ = (id) => { if (confirm("Excluir card permanentemente?")) { state.questions = state.questions.filter(q => q.id !== id); delete state.srs[id]; saveLocal(); renderBank(); } };
+        window.clearAll = () => { if (confirm("Apagar cache local? Você precisará sincronizar novamente com o Drive.")) { localStorage.removeItem(STORAGE_KEY); location.reload(); } };
 
         document.getElementById('file-reader').addEventListener('change', async (e) => {
             const file = e.target.files[0];
@@ -751,7 +759,6 @@
     </script>
 </body>
 </html>
-
 
 
 
