@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>MedRep - Sincronização Fiel</title>
+    <title>MedRep - Sincronização Master</title>
     
     <!-- PWA & Mobile Optimization -->
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -59,7 +59,6 @@
         
         .safe-bottom { padding-bottom: calc(1.5rem + env(safe-area-inset-bottom)); }
         
-        /* Otimização para textos longos de medicina */
         .case-text { line-height: 1.6; word-break: break-word; }
         .case-text b { color: #4338ca; }
     </style>
@@ -79,17 +78,17 @@
     <div id="login-screen" class="fixed inset-0 z-[200] bg-white flex flex-col items-center justify-center p-8 text-center pt-24">
         <div class="mb-12">
             <h1 class="text-6xl font-black text-indigo-600 tracking-tighter italic leading-none">MedRep</h1>
-            <p class="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-4">Sincronização Fiel & SRS</p>
+            <p class="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-4">Sincronização Master & SRS</p>
         </div>
         <div class="bg-slate-50 p-10 rounded-[40px] w-full max-w-sm border border-slate-100 mb-8 shadow-sm">
-            <p id="login-status-msg" class="text-xs font-semibold text-slate-500 mb-6">Aguardando Drive...</p>
+            <p id="login-status-msg" class="text-xs font-semibold text-slate-500 mb-6">Conectando ao Drive Principal...</p>
             <button onclick="window.fazerLogin()" class="w-full bg-slate-900 text-white font-black py-5 rounded-[22px] shadow-xl flex items-center justify-center gap-4 active:scale-95 transition-transform">
                 <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" class="w-6" alt="Google">
                 <span class="text-xs uppercase tracking-widest">Login via Google Drive</span>
             </button>
             <div id="login-loader" class="hidden mt-6 flex justify-center"><div class="loading-spinner"></div></div>
         </div>
-        <p class="text-[9px] font-black text-slate-300 uppercase tracking-[0.4em]">v13.1 DATA FIDELITY</p>
+        <p class="text-[9px] font-black text-slate-300 uppercase tracking-[0.4em]">v13.2 MASTER SYNC</p>
     </div>
 
     <!-- MAIN APP -->
@@ -97,14 +96,13 @@
         <header class="glass border-b border-slate-100 px-6 py-4 sticky top-[60px] md:top-[50px] z-50 flex justify-between items-center max-w-xl mx-auto w-full rounded-b-3xl">
             <div class="flex flex-col">
                 <h1 class="text-xl font-black text-indigo-600 tracking-tighter italic leading-none">MedRep</h1>
-                <span id="header-subtitle" class="text-[8px] font-bold text-slate-400 uppercase mt-1 tracking-widest">Acervo Central</span>
+                <span id="header-subtitle" class="text-[8px] font-bold text-slate-400 uppercase mt-1 tracking-widest">Sincronizado</span>
             </div>
             <div id="due-badge" class="hidden bg-rose-500 text-white text-[10px] font-black px-2 py-1 rounded-full">0</div>
         </header>
 
         <main class="max-w-xl mx-auto p-4 space-y-6 pb-32">
             
-            <!-- ABA: DASHBOARD -->
             <section id="tab-home" class="tab-content active space-y-6">
                 <div class="bg-indigo-600 p-8 rounded-[40px] text-white shadow-xl relative overflow-hidden">
                     <p class="text-[9px] font-black uppercase tracking-widest opacity-60 mb-2">Desempenho da Sincronização</p>
@@ -135,19 +133,17 @@
                     <div class="flex items-center gap-4">
                         <div class="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center text-xl">⚡</div>
                         <div>
-                            <h3 class="font-black text-slate-800">Sessão de Repetição</h3>
+                            <h3 class="font-black text-slate-800">Iniciar Revisão</h3>
                             <p id="home-due-text" class="text-xs text-slate-400">Clique para iniciar.</p>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <!-- ABA: ESTUDO (SRS) -->
             <section id="tab-study" class="tab-content">
                 <div id="study-container" class="space-y-6 min-h-[400px]"></div>
             </section>
 
-            <!-- ABA: CONVERSOR FIEL -->
             <section id="tab-add" class="tab-content space-y-6">
                 <div class="bg-white p-8 rounded-[40px] border border-slate-100 shadow-sm space-y-6">
                     <div class="flex items-center gap-4">
@@ -156,7 +152,7 @@
                     </div>
 
                     <div id="ia-folder-warning" class="bg-amber-50 border border-amber-100 p-4 rounded-2xl hidden">
-                        <p class="text-[10px] text-amber-700 font-bold uppercase leading-tight">⚠️ Por favor, selecione uma pasta específica na Home antes de continuar.</p>
+                        <p class="text-[10px] text-amber-700 font-bold uppercase leading-tight">⚠️ Por favor, selecione uma pasta específica na Home.</p>
                     </div>
 
                     <div class="space-y-2">
@@ -175,39 +171,37 @@
                         </label>
                     </div>
 
-                    <textarea id="ia-prompt" placeholder="Cole aqui as questões na íntegra. A IA numerará automaticamente e manterá cada palavra do original..." class="w-full h-40 bg-slate-50 rounded-[24px] p-6 text-sm border border-slate-100 focus:ring-2 ring-indigo-500 outline-none resize-none"></textarea>
+                    <textarea id="ia-prompt" placeholder="Cole as questões aqui. A IA manterá o texto fiel e numerará sequencialmente..." class="w-full h-40 bg-slate-50 rounded-[24px] p-6 text-sm border border-slate-100 focus:ring-2 ring-indigo-500 outline-none resize-none"></textarea>
                     
                     <button onclick="window.processIA()" id="btn-ia" class="w-full bg-slate-900 text-white font-black py-5 rounded-[20px] uppercase text-xs flex items-center justify-center gap-4 shadow-xl active:scale-95 transition-transform">
-                        <span>Organizar Lote de Questões</span>
+                        <span>Converter Questões</span>
                         <div id="ia-loader" class="loading-spinner hidden" style="border-top-color: white;"></div>
                     </button>
                 </div>
 
                 <div id="ia-review-area" class="hidden space-y-4">
                     <div class="flex justify-between items-center bg-white p-6 rounded-[24px] border border-slate-100 shadow-xl sticky top-[130px] z-10">
-                        <span id="review-count" class="text-xs font-black text-slate-800">Mapeamento Pronto</span>
-                        <button onclick="window.confirmBatch()" class="bg-emerald-600 text-white text-[10px] font-black uppercase px-6 py-3 rounded-xl">Confirmar e Salvar</button>
+                        <span id="review-count" class="text-xs font-black text-slate-800">Pronto</span>
+                        <button onclick="window.confirmBatch()" class="bg-emerald-600 text-white text-[10px] font-black uppercase px-6 py-3 rounded-xl">Confirmar e Sincronizar</button>
                     </div>
                     <div id="review-list" class="space-y-4 pb-20"></div>
                 </div>
             </section>
 
-            <!-- ABA: ACERVO -->
             <section id="tab-bank" class="tab-content space-y-4">
                 <div class="flex justify-between items-center px-4">
                     <h2 class="text-lg font-black text-slate-800">Acervo</h2>
-                    <button onclick="window.clearAll()" class="text-[8px] font-black text-rose-500 uppercase tracking-widest bg-rose-50 px-3 py-1.5 rounded-lg">Limpar Banco Local</button>
+                    <button onclick="window.clearAll()" class="text-[8px] font-black text-rose-500 uppercase tracking-widest bg-rose-50 px-3 py-1.5 rounded-lg">Reset Local</button>
                 </div>
                 
                 <div class="px-2">
-                    <input type="text" id="bank-search" oninput="window.renderBank()" placeholder="🔎 Buscar por tema (Pediatria, DPOC, etc)..." class="search-bar">
+                    <input type="text" id="bank-search" oninput="window.renderBank()" placeholder="🔎 Buscar Pediatria, DPOC, etc..." class="search-bar">
                 </div>
 
                 <div id="bank-list" class="space-y-2 pb-24 px-2"></div>
             </section>
         </main>
 
-        <!-- NAVEGAÇÃO -->
         <nav class="fixed bottom-0 left-0 right-0 max-w-xl mx-auto bg-white/95 backdrop-blur-2xl border-t border-slate-100 flex justify-around py-6 px-4 z-50 rounded-t-[32px] shadow-2xl safe-bottom">
             <button onclick="window.switchTab('home')" class="nav-btn flex flex-col items-center gap-1 active text-indigo-600" id="nav-home">
                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3L4 9V21H9V15H15V21H20V9L12 3Z"/></svg>
@@ -219,7 +213,7 @@
             </button>
             <button onclick="window.switchTab('add')" class="nav-btn flex flex-col items-center gap-1 text-slate-400" id="nav-add">
                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L14.5 8.5L21 11L14.5 13.5L12 20L9.5 13.5L3 11L9.5 8.5L12 2Z"/></svg>
-                <span class="text-[8px] font-black uppercase">Add Fiel</span>
+                <span class="text-[8px] font-black uppercase">Add</span>
             </button>
             <button onclick="window.switchTab('bank')" class="nav-btn flex flex-col items-center gap-1 text-slate-400" id="nav-bank">
                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M4 4H20V20H4V4ZM6 6V18H18V6H6ZM8 8H16V10H8V8ZM8 12H16V14H8V12ZM8 16H13V18H8V16Z"/></svg>
@@ -228,19 +222,18 @@
         </nav>
     </div>
 
-    <!-- LOGICA SINC E REFORMATADOR -->
     <script type="module">
         import { GoogleGenAI } from "@google/genai";
 
-        // CONFIGS DRIVE - NOME FIXO OBRIGATÓRIO
+        // CONFIGS DRIVE MASTER - RESOURCE ID FIXO
         const CLIENT_ID = '648353734848-s9fnmd9tt0i5577grbt3q9oju6h71mpi.apps.googleusercontent.com';
         const SCOPES = 'https://www.googleapis.com/auth/drive.file';
-        const STORAGE_KEY = 'medrep_data_v13_1';
+        const STORAGE_KEY = 'medrep_data_v13_2';
         const KEY_STORAGE = 'medrep_gemini_key_v11';
         const TOKEN_STORAGE = 'medrep_google_token_persist';
         const FILENAME = 'medrep_data.json';
+        const RESOURCE_ID = '13JbItqA5lE2UpEC7IE5miBX9uvRwXf14';
 
-        // ESTADO CENTRAL
         let state = {
             questions: [],
             srs: {},
@@ -258,7 +251,7 @@
         let chartInstance = null;
         let extractedFileText = "";
         let googleRetries = 0;
-        let driveFileId = null;
+        let driveFileId = RESOURCE_ID; // Inicia com o ID fixo
 
         const getAIClient = () => {
             const key = localStorage.getItem(KEY_STORAGE) || process.env.API_KEY;
@@ -278,7 +271,7 @@
             if (tokenClient) {
                 tokenClient.requestAccessToken();
             } else {
-                alert("Serviços Google em inicialização. Aguarde 2 segundos.");
+                alert("Serviços Google ainda em carga. Tente novamente em instantes.");
                 document.getElementById('login-loader').classList.add('hidden');
             }
         };
@@ -311,7 +304,7 @@
         };
 
         window.createNewFolder = () => {
-            const name = prompt("Nome da matéria (ex: Ginecologia):");
+            const name = prompt("Matéria:");
             if (name && name.trim()) {
                 const folder = { id: 'f_' + Date.now(), name: name.trim() };
                 state.folders.push(folder);
@@ -326,17 +319,17 @@
             const display = document.getElementById('active-folder-display');
             if (state.currentFolderId === 'f_all') {
                 warning.classList.remove('hidden');
-                display.innerText = "SELECIONE UMA PASTA NA HOME";
+                display.innerText = "SELECIONE NA HOME";
                 display.className = "w-full bg-slate-50 p-4 rounded-2xl text-xs font-black text-rose-500 uppercase border border-slate-100";
             } else {
                 warning.classList.add('hidden');
                 const folder = state.folders.find(f => f.id === state.currentFolderId);
-                display.innerText = "GRAVANDO EM: " + folder.name.toUpperCase();
+                display.innerText = "ATIVO: " + folder.name.toUpperCase();
                 display.className = "w-full bg-slate-50 p-4 rounded-2xl text-xs font-black text-indigo-600 uppercase border border-slate-100";
             }
         }
 
-        // GOOGLE DRIVE SYNC - PREVENÇÃO DE DUPLICATAS
+        // CARREGAMENTO DRIVE MASTER
         function initGoogleWithRetry() {
             if (window.google && window.google.accounts && window.gapi) {
                 setupGoogle();
@@ -345,7 +338,7 @@
                 document.getElementById('login-status-msg').innerText = `Sincronizando APIs (${googleRetries}/5)...`;
                 setTimeout(initGoogleWithRetry, 1000);
             } else {
-                document.getElementById('login-status-msg').innerText = "Erro ao carregar Google APIs. Recarregue.";
+                document.getElementById('login-status-msg').innerText = "Erro ao carregar serviços Google.";
             }
         }
 
@@ -383,61 +376,56 @@
         async function manualSync() {
             if (!accessToken) return;
             try {
-                // Busca arquivo único pelo nome fixo, ignorando a lixeira
-                const list = await gapi.client.drive.files.list({ 
-                    q: `name = '${FILENAME}' and trashed = false`,
-                    fields: 'files(id, name)'
-                });
+                // Tenta carregar diretamente pelo ID de recurso fornecido para fidelidade total
+                const resp = await gapi.client.drive.files.get({ fileId: driveFileId, alt: 'media' });
+                if (resp.result && resp.result.questions) {
+                    state = resp.result;
+                    saveLocal(false);
+                }
+            } catch (e) { 
+                console.warn("Recurso master não encontrado ou inacessível. Tentando busca por nome...", e);
+                // Fallback: Busca por nome para reassociar o ID
+                const list = await gapi.client.drive.files.list({ q: `name = '${FILENAME}' and trashed = false` });
                 const file = list.result.files[0];
                 if (file) {
                     driveFileId = file.id;
-                    const resp = await gapi.client.drive.files.get({ fileId: file.id, alt: 'media' });
+                    const resp = await gapi.client.drive.files.get({ fileId: driveFileId, alt: 'media' });
                     if (resp.result && resp.result.questions) {
                         state = resp.result;
                         saveLocal(false);
                     }
                 }
-            } catch (e) { console.warn("Sync Drive falhou", e); }
+            }
             updateStats();
         }
 
         async function autoBackup() {
             if (!accessToken) return;
             try {
-                // Se não temos o ID do arquivo ainda, tentamos buscar uma última vez para evitar duplicatas
-                if (!driveFileId) {
-                    const list = await gapi.client.drive.files.list({ q: `name = '${FILENAME}' and trashed = false` });
-                    if (list.result.files[0]) driveFileId = list.result.files[0].id;
-                }
-
                 const metadata = { name: FILENAME, mimeType: 'application/json' };
                 const blob = new Blob([JSON.stringify(state)], { type: 'application/json' });
                 const form = new FormData();
                 form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
                 form.append('file', blob);
 
+                // Força o uso do ID fixo para evitar duplicatas (método PATCH)
                 const url = driveFileId 
                     ? `https://www.googleapis.com/upload/drive/v3/files/${driveFileId}?uploadType=multipart`
                     : 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
 
-                const response = await fetch(url, {
+                await fetch(url, {
                     method: driveFileId ? 'PATCH' : 'POST',
                     headers: { 'Authorization': 'Bearer ' + accessToken },
                     body: form
                 });
-                
-                if (response.ok && !driveFileId) {
-                    const result = await response.json();
-                    driveFileId = result.id;
-                }
-            } catch (e) { console.warn("Backup falhou", e); }
+            } catch (e) { console.warn("Sync falhou", e); }
         }
 
-        // REFORMATADOR FIEL v13.1
+        // REFORMATADOR FIEL v13.2 COM NUMERAÇÃO SEQUENCIAL
         window.processIA = async () => {
-            if (state.currentFolderId === 'f_all') return alert("Selecione uma pasta ativa primeiro!");
+            if (state.currentFolderId === 'f_all') return alert("Selecione uma pasta ativa!");
             const userInput = document.getElementById('ia-prompt').value.trim();
-            if (!userInput && !extractedFileText) return alert("Nada para processar.");
+            if (!userInput && !extractedFileText) return alert("Nada para converter.");
             
             const loader = document.getElementById('ia-loader');
             const btn = document.getElementById('btn-ia');
@@ -446,27 +434,28 @@
 
             try {
                 const ai = getAIClient();
-                const sourceData = extractedFileText ? `DOCUMENTO:\n${extractedFileText}\n\nTEXTO:\n${userInput}` : userInput;
-                
+                const sourceData = extractedFileText ? `DOC:\n${extractedFileText}\n\nTEXT:\n${userInput}` : userInput;
+                const nextNumber = state.questions.length + 1;
+
                 const response = await ai.models.generateContent({
                     model: 'gemini-3-flash-preview',
                     contents: [{ parts: [{ text: sourceData }] }],
                     config: { 
                         maxOutputTokens: 8192,
-                        systemInstruction: `Você é estritamente um REFORMATADOR DE DADOS fiel. Sua função é organizar o input do usuário em flashcards médicos sem criar nada novo.
+                        systemInstruction: `Você é um REFORMATADOR DE DADOS estrito. Sua função é organizar o input do usuário em flashcards médicos JSON.
 
-REGRAS ABSOLUTAS:
-1. NÃO RESUMA: Casos clínicos longos devem ser mantidos na íntegra.
-2. FIDELIDADE TOTAL: Copie palavra por palavra. Não altere termos médicos ou gramática.
-3. NUMERAÇÃO AUTOMÁTICA: Adicione no início de cada campo "statement" o texto "Questão X:" (ex: "Questão 1: [texto original...]", "Questão 2: [texto original...]") de forma sequencial para o lote enviado.
+REGRAS:
+1. SEM RESUMOS: Casos clínicos longos devem ser copiados INTEGRALMENTE.
+2. FIDELIDADE: Copie palavra por palavra. Não altere terminologia médica.
+3. NUMERAÇÃO SEQUENCIAL: Comece a numerar as questões a partir de "Questão ${nextNumber}:". Adicione isso no início do campo "statement".
 4. MAPEAMENTO:
-   - Enunciado/Contexto -> "statement"
-   - Alternativas -> "options" (array de strings)
-   - Resposta -> "correctIndex" (número 0 a 4)
-   - Comentários do Usuário -> "explanation"
-5. PROIBIÇÃO: Se faltar informação, deixe o campo vazio no JSON, mas não invente explicações.
+   - Texto principal -> "statement"
+   - Alternativas -> "options" (array)
+   - Resposta -> "correctIndex" (número 0-4)
+   - Comentários -> "explanation"
+5. NADA DE CONTEÚDO NOVO: Se o usuário não enviou a resposta, deixe correctIndex null ou 0, mas não invente.
 
-Retorne APENAS o JSON: [{"statement":"","options":[],"correctIndex":0,"explanation":"","specialty":""}]`
+Retorne APENAS o JSON puro: [{"statement":"","options":[],"correctIndex":0,"explanation":"","specialty":""}]`
                     }
                 });
 
@@ -475,7 +464,7 @@ Retorne APENAS o JSON: [{"statement":"","options":[],"correctIndex":0,"explanati
                     tempExtracted = JSON.parse(match[0]);
                     renderReviewList();
                 } else {
-                    alert("Não foi possível detectar o formato. Tente colar novamente.");
+                    alert("Não foi possível processar o texto.");
                 }
             } catch (e) { alert("IA Falhou: " + e.message); }
             finally { loader.classList.add('hidden'); btn.disabled = false; }
@@ -485,8 +474,8 @@ Retorne APENAS o JSON: [{"statement":"","options":[],"correctIndex":0,"explanati
             document.getElementById('ia-review-area').classList.remove('hidden');
             document.getElementById('review-list').innerHTML = tempExtracted.map(q => `
                 <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
-                    <p class="text-[10px] font-black text-indigo-500 mb-2">MAPEADO FIELMENTE:</p>
-                    <p class="text-xs font-bold text-slate-700 leading-relaxed max-h-32 overflow-hidden italic">"${q.statement}"</p>
+                    <p class="text-[10px] font-black text-indigo-500 mb-2">PRÉVIA:</p>
+                    <p class="text-xs font-bold text-slate-700 leading-relaxed italic truncate">"${q.statement}"</p>
                 </div>
             `).join('');
             window.scrollTo(0, 0);
@@ -508,7 +497,7 @@ Retorne APENAS o JSON: [{"statement":"","options":[],"correctIndex":0,"explanati
             document.getElementById('ia-prompt').value = "";
             extractedFileText = "";
             document.getElementById('file-status').classList.add('hidden');
-            alert("✅ Lote de questões sincronizado com sucesso.");
+            alert("✅ Sincronizado com o Drive Master.");
         };
 
         // ANALYTICS & STATS
@@ -552,7 +541,7 @@ Retorne APENAS o JSON: [{"statement":"","options":[],"correctIndex":0,"explanati
             document.getElementById('stat-total').innerText = questions.length;
             const hits = history.filter(h => h.success).length;
             document.getElementById('stat-accuracy').innerText = history.length ? Math.round((hits / history.length) * 100) + "%" : "0%";
-            document.getElementById('home-due-text').innerText = due > 0 ? `${due} cards esperando.` : "Revisões em dia.";
+            document.getElementById('home-due-text').innerText = due > 0 ? `${due} pendentes.` : "Revisões em dia.";
             
             const badge = document.getElementById('due-badge');
             badge.innerText = due;
@@ -578,7 +567,6 @@ Retorne APENAS o JSON: [{"statement":"","options":[],"correctIndex":0,"explanati
             }).join('');
         }
 
-        // BUSCA POR TEMA
         window.renderBank = () => {
             const searchTerm = document.getElementById('bank-search').value.toLowerCase();
             const list = document.getElementById('bank-list');
@@ -608,7 +596,6 @@ Retorne APENAS o JSON: [{"statement":"","options":[],"correctIndex":0,"explanati
             `).join('');
         };
 
-        // ESTUDO SRS
         function startStudy() {
             const now = Date.now();
             const questions = state.currentFolderId === 'f_all' ? state.questions : state.questions.filter(q => q.folderId === state.currentFolderId);
@@ -621,11 +608,11 @@ Retorne APENAS o JSON: [{"statement":"","options":[],"correctIndex":0,"explanati
         function renderStudyCard() {
             const container = document.getElementById('study-container');
             if (studyQueue.length === 0) {
-                container.innerHTML = `<div class="py-24 text-center"><div class="text-6xl mb-6">✅</div><h2 class="text-xl font-black">Revisão Concluída!</h2><button onclick="window.switchTab('home')" class="mt-8 bg-indigo-600 text-white font-black px-10 py-4 rounded-2xl">Finalizar</button></div>`;
+                container.innerHTML = `<div class="py-24 text-center"><div class="text-6xl mb-6">✅</div><h2 class="text-xl font-black">Revisão Concluída!</h2><button onclick="window.switchTab('home')" class="mt-8 bg-indigo-600 text-white font-black px-10 py-4 rounded-2xl">Voltar Home</button></div>`;
                 return;
             }
             if (studyPointer >= studyQueue.length) {
-                container.innerHTML = `<div class="py-24 text-center"><div class="text-6xl mb-6">🎯</div><h2 class="text-xl font-black">Lote Finalizado</h2><button onclick="window.switchTab('home')" class="mt-8 bg-indigo-600 text-white font-black px-10 py-4 rounded-2xl">Finalizar</button></div>`;
+                container.innerHTML = `<div class="py-24 text-center"><div class="text-6xl mb-6">🎯</div><h2 class="text-xl font-black">Lote Finalizado</h2><button onclick="window.switchTab('home')" class="mt-8 bg-indigo-600 text-white font-black px-10 py-4 rounded-2xl">Voltar Home</button></div>`;
                 return;
             }
             const q = studyQueue[studyPointer];
@@ -683,7 +670,6 @@ Retorne APENAS o JSON: [{"statement":"","options":[],"correctIndex":0,"explanati
             renderStudyCard();
         };
 
-        // HELPERS
         function saveLocal(cloud = true) {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
             updateStats();
@@ -698,10 +684,9 @@ Retorne APENAS o JSON: [{"statement":"","options":[],"correctIndex":0,"explanati
             updateStats();
         }
 
-        window.deleteQ = (id) => { if (confirm("Excluir card permanentemente?")) { state.questions = state.questions.filter(q => q.id !== id); delete state.srs[id]; saveLocal(); renderBank(); } };
-        window.clearAll = () => { if (confirm("Apagar banco local? Requer sincronização manual após.")) { localStorage.removeItem(STORAGE_KEY); location.reload(); } };
+        window.deleteQ = (id) => { if (confirm("Excluir card?")) { state.questions = state.questions.filter(q => q.id !== id); delete state.srs[id]; saveLocal(); renderBank(); } };
+        window.clearAll = () => { if (confirm("Isso apagará seu banco local.")) { localStorage.removeItem(STORAGE_KEY); location.reload(); } };
 
-        // FILE
         document.getElementById('file-reader').addEventListener('change', async (e) => {
             const file = e.target.files[0];
             if (!file) return;
@@ -728,12 +713,12 @@ Retorne APENAS o JSON: [{"statement":"","options":[],"correctIndex":0,"explanati
             } catch (err) { alert(err.message); status.innerText = ""; }
         });
 
-        // INIT
         loadLocal();
         initChart();
         initGoogleWithRetry();
     </script>
 </body>
+</html>
 
 
 
