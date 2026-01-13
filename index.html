@@ -15,8 +15,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
     
-    <!-- Google Identity Services -->
-    <script src="https://accounts.google.com/js/api.js" async defer></script>
+    <!-- Google Identity Services - Scripts com Async/Defer obrigatórios -->
+    <script src="https://apis.google.com/js/api.js" async defer></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 
     <script type="importmap">
@@ -273,8 +273,8 @@
             if (tokenClient) {
                 tokenClient.requestAccessToken();
             } else {
-                alert("Serviços Google carregando...");
-                document.getElementById('login-loader').classList.add('hidden');
+                console.log("Reiniciando inicialização Google...");
+                setupGoogle(); // Tenta inicializar novamente se falhou antes
             }
         };
 
@@ -283,7 +283,6 @@
         async function manualSync() {
             if (!accessToken) return;
             try {
-                // Busca arquivo pelo nome em todo o Drive para garantir paridade
                 const list = await gapi.client.drive.files.list({ 
                     q: `name = '${FILENAME}' and trashed = false`,
                     spaces: 'drive',
@@ -313,7 +312,6 @@
         async function autoBackup() {
             if (!accessToken) return;
             try {
-                // Busca ID se não tiver para evitar duplicatas
                 if (!driveFileId) {
                     const list = await gapi.client.drive.files.list({ 
                         q: `name = '${FILENAME}' and trashed = false`,
@@ -323,7 +321,7 @@
                 }
 
                 const metadata = { name: FILENAME, mimeType: 'application/json' };
-                const boundary = 'medrep_sync_v13_3_master';
+                const boundary = 'medrep_sync_v13_3_master_final';
                 const delimiter = "\r\n--" + boundary + "\r\n";
                 const close_delim = "\r\n--" + boundary + "--";
 
@@ -672,42 +670,55 @@
         // --- INICIALIZAÇÃO E STORAGE ---
 
         function initGoogleWithRetry() {
-            if (window.google && window.google.accounts && window.gapi) {
+            console.log("Tentando inicializar APIs Google...");
+            // Verifica se as bibliotecas base já foram carregadas pelo navegador
+            if (window.gapi && window.google && window.google.accounts) {
                 setupGoogle();
-            } else if (googleRetries < 5) {
+            } else if (googleRetries < 15) {
                 googleRetries++;
-                document.getElementById('login-status-msg').innerText = `Sync... (${googleRetries}/5)`;
+                document.getElementById('login-status-msg').innerText = `Serviços Google carregando... (${googleRetries}/15)`;
                 setTimeout(initGoogleWithRetry, 1000);
+            } else {
+                document.getElementById('login-status-msg').innerText = "Erro ao carregar APIs. Recarregue a página.";
             }
         }
 
         function setupGoogle() {
-            gapi.load('client', async () => {
-                await gapi.client.init({ discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'] });
-                
-                tokenClient = google.accounts.oauth2.initTokenClient({
-                    client_id: CLIENT_ID,
-                    scope: SCOPES,
-                    prompt: 'consent', // Força o prompt de consentimento para garantir permissões de escrita
-                    callback: (resp) => {
-                        if (resp.error) {
-                            console.error("Erro no TokenClient Callback:", resp.error);
-                            return;
+            try {
+                gapi.load('client', async () => {
+                    await gapi.client.init({ discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'] });
+                    console.log("GAPI inicializado.");
+                    
+                    tokenClient = google.accounts.oauth2.initTokenClient({
+                        client_id: CLIENT_ID,
+                        scope: SCOPES,
+                        prompt: 'consent', // Força o prompt de consentimento para garantir permissões de escrita
+                        callback: (resp) => {
+                            if (resp.error) {
+                                console.error("Erro no TokenClient Callback:", resp.error);
+                                return;
+                            }
+                            accessToken = resp.access_token;
+                            localStorage.setItem(TOKEN_STORAGE, JSON.stringify({ token: accessToken, expiry: Date.now() + 3500 * 1000 }));
+                            onLoginSuccess();
                         }
-                        accessToken = resp.access_token;
-                        localStorage.setItem(TOKEN_STORAGE, JSON.stringify({ token: accessToken, expiry: Date.now() + 3500 * 1000 }));
+                    });
+                    console.log("GIS TokenClient configurado.");
+
+                    // Verifica se já temos um token válido salvo
+                    const saved = JSON.parse(localStorage.getItem(TOKEN_STORAGE));
+                    if (saved && saved.expiry > Date.now()) {
+                        accessToken = saved.token;
                         onLoginSuccess();
+                    } else {
+                        document.getElementById('login-status-msg').innerText = "Pronto para Sincronização Master.";
+                        document.getElementById('login-loader').classList.add('hidden');
                     }
                 });
-
-                const saved = JSON.parse(localStorage.getItem(TOKEN_STORAGE));
-                if (saved && saved.expiry > Date.now()) {
-                    accessToken = saved.token;
-                    onLoginSuccess();
-                } else {
-                    document.getElementById('login-status-msg').innerText = "Pronto para Login.";
-                }
-            });
+            } catch (err) {
+                console.error("Falha no setupGoogle:", err);
+                document.getElementById('login-status-msg').innerText = "Falha crítica no login.";
+            }
         }
 
         function onLoginSuccess() {
@@ -730,8 +741,8 @@
             updateStats();
         }
 
-        window.deleteQ = (id) => { if (confirm("Excluir card?")) { state.questions = state.questions.filter(q => q.id !== id); delete state.srs[id]; saveLocal(); renderBank(); } };
-        window.clearAll = () => { if (confirm("Apagar cache local?")) { localStorage.removeItem(STORAGE_KEY); location.reload(); } };
+        window.deleteQ = (id) => { if (confirm("Excluir card permanentemente?")) { state.questions = state.questions.filter(q => q.id !== id); delete state.srs[id]; saveLocal(); renderBank(); } };
+        window.clearAll = () => { if (confirm("Apagar cache local? Isso exigirá novo login para baixar dados do Drive.")) { localStorage.removeItem(STORAGE_KEY); location.reload(); } };
 
         document.getElementById('file-reader').addEventListener('change', async (e) => {
             const file = e.target.files[0];
@@ -759,10 +770,13 @@
             } catch (err) { alert(err.message); status.innerText = ""; }
         });
 
+        // Chamadas iniciais
         loadLocal();
         initChart();
         initGoogleWithRetry();
     </script>
 </body>
+</html>
+
 
 
