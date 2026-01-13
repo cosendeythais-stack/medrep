@@ -3,17 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>MedRep - Sincronização Master v13.5</title>
+    <title>MedRep - Sincronização Master v13.7</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     
+    <!-- Bibliotecas de Suporte -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
     
+    <!-- Google Identity Services -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script src="https://apis.google.com/js/api.js" async defer></script>
 
@@ -62,7 +64,7 @@
 </head>
 <body class="antialiased overflow-x-hidden">
 
-    <!-- CONFIG KEY BAR -->
+    <!-- BARRA DE CONFIGURAÇÃO DE CHAVE -->
     <div id="api-key-bar" class="fixed top-0 left-0 right-0 bg-slate-900 text-white p-3 shadow-2xl flex flex-col md:flex-row items-center justify-center gap-3 border-b border-white/10">
         <div class="flex items-center gap-2">
             <span class="text-[10px] font-black uppercase tracking-widest text-indigo-400">Gemini Key:</span>
@@ -71,44 +73,46 @@
         <button onclick="window.saveGeminiKey()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-black uppercase px-4 py-1.5 rounded-lg transition-colors">Salvar Chave</button>
     </div>
 
-    <!-- LOGIN SCREEN -->
+    <!-- TELA DE LOGIN -->
     <div id="login-screen" class="fixed inset-0 z-[200] bg-white flex flex-col items-center justify-center p-8 text-center pt-24">
         <div class="mb-12">
             <h1 class="text-6xl font-black text-indigo-600 tracking-tighter italic leading-none">MedRep</h1>
-            <p class="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-4">Sincronização Master v13.5</p>
+            <p class="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-4">Sincronização Master v13.7</p>
         </div>
         <div class="bg-slate-50 p-10 rounded-[40px] w-full max-w-sm border border-slate-100 mb-8 shadow-sm">
-            <p id="login-status-msg" class="text-xs font-semibold text-slate-500 mb-6">Iniciando Sincronização Drive Master...</p>
+            <p id="login-status-msg" class="text-xs font-semibold text-slate-500 mb-6">Aguardando Conexão Google Drive...</p>
             <button onclick="window.fazerLogin()" class="w-full bg-slate-900 text-white font-black py-5 rounded-[22px] shadow-xl flex items-center justify-center gap-4 active:scale-95 transition-transform">
                 <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" class="w-6" alt="Google">
-                <span class="text-xs uppercase tracking-widest">Login via Google Drive</span>
+                <span class="text-xs uppercase tracking-widest">Login via Drive Master</span>
             </button>
             <div id="login-loader" class="hidden mt-6 flex justify-center"><div class="loading-spinner"></div></div>
         </div>
-        <p class="text-[9px] font-black text-slate-300 uppercase tracking-[0.4em]">v13.5 MASTER SYNC</p>
+        <p class="text-[9px] font-black text-slate-300 uppercase tracking-[0.4em]">RESTURAÇÃO COMPLETA v13.7</p>
     </div>
 
-    <!-- MAIN APP -->
+    <!-- APLICATIVO PRINCIPAL -->
     <div id="main-app" class="pt-24">
         <header class="glass border-b border-slate-100 px-6 py-4 sticky top-[60px] md:top-[50px] z-50 flex justify-between items-center max-w-xl mx-auto w-full rounded-b-3xl">
             <div class="flex flex-col">
                 <h1 class="text-xl font-black text-indigo-600 tracking-tighter italic leading-none">MedRep</h1>
-                <span id="header-subtitle" class="text-[8px] font-bold text-slate-400 uppercase mt-1 tracking-widest">Sincronizado</span>
+                <span id="header-subtitle" class="text-[8px] font-bold text-slate-400 uppercase mt-1 tracking-widest">Global</span>
             </div>
             <div id="due-badge" class="hidden bg-rose-500 text-white text-[10px] font-black px-2 py-1 rounded-full">0</div>
         </header>
 
         <main class="max-w-xl mx-auto p-4 space-y-6 pb-32">
+            
+            <!-- HOME TAB -->
             <section id="tab-home" class="tab-content active space-y-6">
                 <div class="bg-indigo-600 p-8 rounded-[40px] text-white shadow-xl relative overflow-hidden">
-                    <p class="text-[9px] font-black uppercase tracking-widest opacity-60 mb-2">Resumo Global</p>
+                    <p class="text-[9px] font-black uppercase tracking-widest opacity-60 mb-2">Resumo de Desempenho</p>
                     <div class="grid grid-cols-2 gap-4 mb-4">
                         <div class="bg-white/10 p-4 rounded-2xl">
-                            <p class="text-[9px] font-bold uppercase opacity-50">Cards</p>
+                            <p class="text-[9px] font-bold uppercase opacity-50">Cards Totais</p>
                             <p id="stat-total" class="text-2xl font-black">0</p>
                         </div>
                         <div class="bg-white/10 p-4 rounded-2xl">
-                            <p class="text-[9px] font-bold uppercase opacity-50">Acertos</p>
+                            <p class="text-[9px] font-bold uppercase opacity-50">Precisão</p>
                             <p id="stat-accuracy" class="text-2xl font-black">0%</p>
                         </div>
                     </div>
@@ -119,8 +123,8 @@
 
                 <div class="space-y-4">
                     <div class="flex justify-between items-center px-4">
-                        <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Matérias</h2>
-                        <button onclick="window.createNewFolder()" class="text-[10px] font-black text-indigo-600 uppercase">Criar +</button>
+                        <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Suas Pastas</h2>
+                        <button onclick="window.createNewFolder()" class="text-[10px] font-black text-indigo-600 uppercase">Criar Pasta +</button>
                     </div>
                     <div id="folders-scroll" class="flex gap-2 overflow-x-auto pb-2 px-2 no-scrollbar"></div>
                 </div>
@@ -129,61 +133,74 @@
                     <div class="flex items-center gap-4">
                         <div class="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center text-xl">⚡</div>
                         <div>
-                            <h3 class="font-black text-slate-800">Sessão SRS</h3>
-                            <p id="home-due-text" class="text-xs text-slate-400">Cards para hoje.</p>
+                            <h3 class="font-black text-slate-800">Sessão de Revisão</h3>
+                            <p id="home-due-text" class="text-xs text-slate-400">Verifique seus cards pendentes.</p>
                         </div>
                     </div>
                 </div>
             </section>
 
+            <!-- STUDY TAB -->
             <section id="tab-study" class="tab-content">
                 <div id="study-container" class="space-y-6 min-h-[400px]"></div>
             </section>
 
+            <!-- ADD TAB -->
             <section id="tab-add" class="tab-content space-y-6">
                 <div class="bg-white p-8 rounded-[40px] border border-slate-100 shadow-sm space-y-6">
                     <div class="flex items-center gap-4">
                         <div class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-lg">🪄</div>
-                        <h2 class="text-lg font-black text-slate-800">Importador Fiel</h2>
+                        <h2 class="text-lg font-black text-slate-800">Importador IA Fiel</h2>
                     </div>
+
                     <div id="ia-folder-warning" class="bg-amber-50 border border-amber-100 p-4 rounded-2xl hidden">
-                        <p class="text-[10px] text-amber-700 font-bold uppercase leading-tight">⚠️ Atenção: Defina a matéria alvo na Home antes de converter.</p>
+                        <p class="text-[10px] text-amber-700 font-bold uppercase leading-tight">⚠️ Defina a matéria alvo na Home antes de importar.</p>
                     </div>
+
                     <div class="space-y-2">
-                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Gravando em:</label>
-                        <div id="active-folder-display" class="w-full bg-slate-50 p-4 rounded-2xl text-xs font-black text-indigo-600 uppercase border border-slate-100">-</div>
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Pasta Atual:</label>
+                        <div id="active-folder-display" class="w-full bg-slate-50 p-4 rounded-2xl text-xs font-black text-indigo-600 uppercase border border-slate-100">
+                            -
+                        </div>
                     </div>
+
                     <div class="bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl p-6 text-center">
                         <label class="cursor-pointer flex flex-col items-center gap-2">
                             <span class="text-2xl">📄</span>
-                            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Anexar Documento</span>
+                            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Anexar Documento (PDF/Docx)</span>
                             <input type="file" id="file-reader" class="hidden" accept=".pdf,.docx">
                             <span id="file-status" class="text-[9px] text-indigo-500 font-bold hidden"></span>
                         </label>
                     </div>
-                    <textarea id="ia-prompt" placeholder="Cole enunciados aqui..." class="w-full h-40 bg-slate-50 rounded-[24px] p-6 text-sm border border-slate-100 outline-none resize-none"></textarea>
+
+                    <textarea id="ia-prompt" placeholder="Cole enunciados ou texto livre..." class="w-full h-40 bg-slate-50 rounded-[24px] p-6 text-sm border border-slate-100 focus:ring-2 ring-indigo-500 outline-none resize-none"></textarea>
+                    
                     <button onclick="window.processIA()" id="btn-ia" class="w-full bg-slate-900 text-white font-black py-5 rounded-[20px] uppercase text-xs flex items-center justify-center gap-4 shadow-xl active:scale-95 transition-transform">
-                        <span>Reformatar Lote</span>
+                        <span>Reformatar Lote com IA</span>
                         <div id="ia-loader" class="loading-spinner hidden" style="border-top-color: white;"></div>
                     </button>
                 </div>
+
                 <div id="ia-review-area" class="hidden space-y-4">
                     <div class="flex justify-between items-center bg-white p-6 rounded-[24px] border border-slate-100 shadow-xl sticky top-[130px] z-10">
-                        <span id="review-count" class="text-xs font-black text-slate-800">Cards Identificados</span>
-                        <button onclick="window.confirmBatch()" class="bg-emerald-600 text-white text-[10px] font-black uppercase px-6 py-3 rounded-xl">Sincronizar no Drive</button>
+                        <span id="review-count" class="text-xs font-black text-slate-800">Mapeamento Concluído</span>
+                        <button onclick="window.confirmBatch()" class="bg-emerald-600 text-white text-[10px] font-black uppercase px-6 py-3 rounded-xl">Salvar Lote</button>
                     </div>
                     <div id="review-list" class="space-y-4 pb-20"></div>
                 </div>
             </section>
 
+            <!-- BANK TAB -->
             <section id="tab-bank" class="tab-content space-y-4">
                 <div class="flex justify-between items-center px-4">
-                    <h2 class="text-lg font-black text-slate-800">Banco de Dados</h2>
+                    <h2 class="text-lg font-black text-slate-800">Acervo</h2>
                     <button onclick="window.clearAll()" class="text-[8px] font-black text-rose-500 uppercase tracking-widest bg-rose-50 px-3 py-1.5 rounded-lg">Reset Local</button>
                 </div>
+                
                 <div class="px-2">
-                    <input type="text" id="bank-search" oninput="window.renderBank()" placeholder="🔎 Filtrar (ex: Pediatria)..." class="search-bar">
+                    <input type="text" id="bank-search" oninput="window.renderBank()" placeholder="🔎 Filtrar banco..." class="search-bar">
                 </div>
+
                 <div id="bank-list" class="space-y-2 pb-24 px-2"></div>
             </section>
         </main>
@@ -199,7 +216,7 @@
             </button>
             <button onclick="window.switchTab('add')" class="nav-btn flex flex-col items-center gap-1 text-slate-400" id="nav-add">
                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L14.5 8.5L21 11L14.5 13.5L12 20L9.5 13.5L3 11L9.5 8.5L12 2Z"/></svg>
-                <span class="text-[8px] font-black uppercase">Add Fiel</span>
+                <span class="text-[8px] font-black uppercase">Fiel</span>
             </button>
             <button onclick="window.switchTab('bank')" class="nav-btn flex flex-col items-center gap-1 text-slate-400" id="nav-bank">
                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M4 4H20V20H4V4ZM6 6V18H18V6H6ZM8 8H16V10H8V8ZM8 12H16V14H8V12ZM8 16H13V18H8V16Z"/></svg>
@@ -211,17 +228,32 @@
     <script type="module">
         import { GoogleGenAI } from "@google/genai";
 
+        // CONFIGURAÇÕES GLOBAIS
         const CLIENT_ID = '648353734848-s9fnmd9tt0i5577grbt3q9oju6h71mpi.apps.googleusercontent.com';
         const SCOPES = 'https://www.googleapis.com/auth/drive.file';
-        const STORAGE_KEY = 'medrep_data_v13_5';
+        const STORAGE_KEY = 'medrep_data_v13_7_master';
         const KEY_STORAGE = 'medrep_gemini_key_v11';
         const TOKEN_STORAGE = 'medrep_google_token_persist';
         const FILENAME = 'medrep_data.json';
-        const TARGET_FOLDER_ID = '1Dr5nLNJQ3mwXmhQglbqmYnyRw0Curv_i';
 
-        let state = { questions: [], srs: {}, history: [], folders: [{id: 'f_all', name: 'Global'}, {id: 'f_default', name: 'Geral'}], currentFolderId: 'f_all' };
-        let accessToken = null, tokenClient = null, chartInstance = null, driveFileId = null;
-        let tempExtracted = [], studyQueue = [], studyPointer = 0, isRevealed = false, extractedFileText = "", googleRetries = 0;
+        let state = {
+            questions: [],
+            srs: {},
+            history: [],
+            folders: [{id: 'f_all', name: 'Global'}, {id: 'f_default', name: 'Geral'}],
+            currentFolderId: 'f_all'
+        };
+
+        let tempExtracted = [];
+        let studyQueue = [];
+        let studyPointer = 0;
+        let isRevealed = false;
+        let accessToken = null;
+        let tokenClient = null;
+        let chartInstance = null;
+        let extractedFileText = "";
+        let googleRetries = 0;
+        let driveFileId = null;
 
         const getAIClient = () => {
             const key = localStorage.getItem(KEY_STORAGE) || process.env.API_KEY;
@@ -238,58 +270,57 @@
 
         window.fazerLogin = () => {
             document.getElementById('login-loader').classList.remove('hidden');
-            if (tokenClient) tokenClient.requestAccessToken();
-            else { alert("Iniciando APIs..."); document.getElementById('login-loader').classList.add('hidden'); }
+            if (tokenClient) {
+                tokenClient.requestAccessToken();
+            } else {
+                alert("Serviços Google carregando...");
+                document.getElementById('login-loader').classList.add('hidden');
+            }
         };
 
-        // --- FUNÇÕES DE SINCRONIZAÇÃO MASTER v13.5 ---
+        // --- LÓGICA DE SINCRONIZAÇÃO MASTER v13.7 ---
 
         async function manualSync() {
             if (!accessToken) return;
             try {
-                // Varredura total usando spaces: drive e vinculando à pasta alvo
-                const response = await gapi.client.drive.files.list({
-                    q: `'${TARGET_FOLDER_ID}' in parents and name = '${FILENAME}' and trashed = false`,
+                // Busca global por nome
+                const list = await gapi.client.drive.files.list({ 
+                    q: `name = '${FILENAME}' and trashed = false`,
                     spaces: 'drive',
                     fields: 'files(id, name)'
                 });
-                const file = response.result.files[0];
+                const file = list.result.files[0];
                 if (file) {
                     driveFileId = file.id;
                     const timestamp = Date.now();
-                    // Busca versão master com bypass de cache
-                    const fileData = await gapi.client.drive.files.get({
-                        fileId: driveFileId,
-                        alt: 'media',
-                        _t: timestamp
+                    const resp = await gapi.client.drive.files.get({ 
+                        fileId: driveFileId, 
+                        alt: 'media', 
+                        _t: timestamp 
                     });
-                    if (fileData.result && fileData.result.questions) {
-                        state = fileData.result;
+                    if (resp.result && resp.result.questions) {
+                        state = resp.result;
                         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-                        updateStats();
-                        console.log("Sincronização Master concluída.");
+                        console.log("Sincronização: Dados carregados com sucesso.");
                     }
                 }
-            } catch (e) { console.error("Falha no ManualSync:", e); }
+            } catch (e) { console.error("ManualSync falhou", e); }
             updateStats();
         }
 
         async function autoBackup() {
             if (!accessToken) return;
             try {
-                // Re-localiza ID se necessário para evitar duplicatas
                 if (!driveFileId) {
                     const list = await gapi.client.drive.files.list({ 
-                        q: `'${TARGET_FOLDER_ID}' in parents and name = '${FILENAME}' and trashed = false`,
+                        q: `name = '${FILENAME}' and trashed = false`,
                         spaces: 'drive'
                     });
                     if (list.result.files && list.result.files[0]) driveFileId = list.result.files[0].id;
                 }
 
                 const metadata = { name: FILENAME, mimeType: 'application/json' };
-                if (!driveFileId) metadata.parents = [TARGET_FOLDER_ID];
-
-                const boundary = 'medrep_master_sync_boundary';
+                const boundary = 'medrep_master_boundary';
                 const delimiter = "\r\n--" + boundary + "\r\n";
                 const close_delim = "\r\n--" + boundary + "--";
 
@@ -302,12 +333,11 @@
                     ? `https://www.googleapis.com/upload/drive/v3/files/${driveFileId}?uploadType=multipart`
                     : 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
 
-                // Garantia de Token em cada envio
                 const response = await fetch(url, {
                     method: driveFileId ? 'PATCH' : 'POST',
                     headers: { 
-                        'Authorization': `Bearer ${accessToken}`,
-                        'Content-Type': `multipart/related; boundary=${boundary}`
+                        'Authorization': 'Bearer ' + accessToken,
+                        'Content-Type': 'multipart/related; boundary=' + boundary
                     },
                     body: body
                 });
@@ -316,21 +346,337 @@
                     const result = await response.json();
                     driveFileId = result.id;
                 }
-            } catch (e) { console.error("Falha no AutoBackup:", e); }
+            } catch (e) { console.error("AutoBackup falhou", e); }
         }
 
-        // --- INICIALIZAÇÃO E CONTROLE ---
+        // --- LÓGICA SRS (SM-2) ---
+
+        window.submitSRS = (grade) => {
+            const q = studyQueue[studyPointer];
+            const srs = state.srs[q.id] || { interval: 0, repetitions: 0, easeFactor: 2.5 };
+            let { interval, repetitions, easeFactor } = srs;
+            const score = grade === 1 ? 0 : grade === 2 ? 2 : grade === 3 ? 4 : 5;
+            
+            if (score >= 3) {
+                if (repetitions === 0) interval = 1;
+                else if (repetitions === 1) interval = 6;
+                else interval = Math.round(interval * easeFactor);
+                repetitions++;
+            } else { 
+                repetitions = 0; 
+                interval = 1; 
+            }
+            
+            easeFactor = easeFactor + (0.1 - (5 - score) * (0.08 + (5 - score) * 0.02));
+            if (easeFactor < 1.3) easeFactor = 1.3;
+            
+            state.srs[q.id] = { 
+                interval, 
+                repetitions, 
+                easeFactor, 
+                nextReview: Date.now() + (interval * 24 * 60 * 60 * 1000) 
+            };
+            
+            state.history.push({ cardId: q.id, success: score >= 3, date: Date.now() });
+            saveLocal();
+            studyPointer++;
+            renderStudyCard();
+        };
+
+        // --- IA E PROCESSAMENTO ---
+
+        window.processIA = async () => {
+            if (state.currentFolderId === 'f_all') return alert("Escolha uma pasta específica.");
+            const userInput = document.getElementById('ia-prompt').value.trim();
+            if (!userInput && !extractedFileText) return alert("Nada para processar.");
+            
+            const loader = document.getElementById('ia-loader');
+            const btn = document.getElementById('btn-ia');
+            loader.classList.remove('hidden');
+            btn.disabled = true;
+
+            try {
+                const ai = getAIClient();
+                const sourceData = extractedFileText ? `DOC:\n${extractedFileText}\n\nUSER:\n${userInput}` : userInput;
+                const nextNum = state.questions.length + 1;
+
+                const response = await ai.models.generateContent({
+                    model: 'gemini-3-flash-preview',
+                    contents: [{ parts: [{ text: sourceData }] }],
+                    config: { 
+                        maxOutputTokens: 8192,
+                        systemInstruction: `Você é um REFORMATADOR MÉDICO FIEL. Organize o input em JSON.
+                        Regras: 1. COPIE INTEGRALMENTE (Sem resumos). 2. FIDELIDADE TOTAL PALAVRA POR PALAVRA. 
+                        3. NUMERAÇÃO: O banco tem ${state.questions.length} questões. Comece da "Questão ${nextNum}:" sequencialmente. 
+                        Retorne JSON: [{"statement":"","options":[],"correctIndex":0,"explanation":"","specialty":""}]`
+                    }
+                });
+
+                const match = response.text.match(/\[[\s\S]*\]/);
+                if (match) {
+                    tempExtracted = JSON.parse(match[0]);
+                    renderReviewList();
+                } else {
+                    alert("A IA não retornou um formato válido.");
+                }
+            } catch (e) { alert("IA Falhou: " + e.message); }
+            finally { loader.classList.add('hidden'); btn.disabled = false; }
+        };
+
+        function renderReviewList() {
+            document.getElementById('ia-review-area').classList.remove('hidden');
+            document.getElementById('review-list').innerHTML = tempExtracted.map(q => `
+                <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-2">
+                    <p class="text-[10px] font-black text-indigo-500">IDENTIFICADO:</p>
+                    <p class="text-xs font-bold text-slate-700 italic truncate leading-relaxed">"${q.statement}"</p>
+                </div>
+            `).join('');
+            window.scrollTo(0, 0);
+        }
+
+        window.confirmBatch = () => {
+            const folderId = state.currentFolderId;
+            const folderName = state.folders.find(f => f.id === folderId).name;
+            const news = tempExtracted.map(q => ({ 
+                ...q, 
+                id: 'q_' + Math.random().toString(36).substr(2, 9),
+                folderId: folderId,
+                specialty: folderName,
+                date: Date.now()
+            }));
+            state.questions = [...state.questions, ...news];
+            saveLocal();
+            document.getElementById('ia-review-area').classList.add('hidden');
+            document.getElementById('ia-prompt').value = "";
+            extractedFileText = "";
+            document.getElementById('file-status').classList.add('hidden');
+            alert("✅ Lote salvo e sincronizado.");
+        };
+
+        // --- ANALYTICS (CHART.JS) ---
+
+        function initChart() {
+            const ctx = document.getElementById('performanceChart').getContext('2d');
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'],
+                    datasets: [{
+                        label: 'Hits',
+                        data: [0,0,0,0,0,0,0],
+                        borderColor: '#fff',
+                        backgroundColor: 'rgba(255,255,255,0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 2,
+                        pointRadius: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { display: true, ticks: { color: 'rgba(255,255,255,0.6)', font: { size: 9 } }, grid: { display: false } },
+                        y: { display: false }
+                    }
+                }
+            });
+        }
+
+        function updateStats() {
+            const folderId = state.currentFolderId;
+            const now = Date.now();
+            const questions = folderId === 'f_all' ? state.questions : state.questions.filter(q => q.folderId === folderId);
+            const questionIds = new Set(questions.map(q => q.id));
+            const history = state.history.filter(h => folderId === 'f_all' || questionIds.has(h.cardId));
+            const due = questions.filter(q => !state.srs[q.id] || state.srs[q.id].nextReview <= now).length;
+            
+            document.getElementById('stat-total').innerText = questions.length;
+            const hits = history.filter(h => h.success).length;
+            document.getElementById('stat-accuracy').innerText = history.length ? Math.round((hits / history.length) * 100) + "%" : "0%";
+            document.getElementById('home-due-text').innerText = due > 0 ? `${due} cards para hoje.` : "Tudo revisado!";
+            
+            const badge = document.getElementById('due-badge');
+            badge.innerText = due;
+            badge.classList.toggle('hidden', due === 0);
+
+            if (chartInstance) {
+                const weeklyData = [0,0,0,0,0,0,0];
+                history.slice(-100).forEach(h => {
+                    const day = new Date(h.date).getDay();
+                    if (h.success) weeklyData[day]++;
+                });
+                chartInstance.data.datasets[0].data = weeklyData;
+                chartInstance.update();
+            }
+            renderFoldersUI();
+        }
+
+        function renderFoldersUI() {
+            const scroll = document.getElementById('folders-scroll');
+            scroll.innerHTML = state.folders.map(f => {
+                const isActive = state.currentFolderId === f.id;
+                return `<div onclick="window.onFolderChange('${f.id}')" class="folder-chip px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest border border-slate-200 bg-white ${isActive ? 'active shadow-lg' : 'text-slate-500'}">${f.name}</div>`;
+            }).join('');
+        }
+
+        // --- NAVEGAÇÃO E UI ---
+
+        window.switchTab = (tabId) => {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(el => {
+                el.classList.remove('active', 'text-indigo-600');
+                el.classList.add('text-slate-400');
+            });
+            document.getElementById('tab-' + tabId).classList.add('active');
+            const btn = document.getElementById('nav-' + tabId);
+            btn.classList.add('active', 'text-indigo-600');
+            btn.classList.remove('text-slate-400');
+            
+            if (tabId === 'home') updateStats();
+            if (tabId === 'study') startStudy();
+            if (tabId === 'bank') renderBank();
+            if (tabId === 'add') validateIAFolder();
+
+            window.scrollTo(0, 0);
+        };
+
+        window.onFolderChange = (id) => {
+            state.currentFolderId = id;
+            const folder = state.folders.find(f => f.id === id);
+            document.getElementById('header-subtitle').innerText = folder.name;
+            updateStats();
+            if (document.getElementById('tab-bank').classList.contains('active')) renderBank();
+        };
+
+        window.createNewFolder = () => {
+            const name = prompt("Nome da Matéria:");
+            if (name && name.trim()) {
+                const folder = { id: 'f_' + Date.now(), name: name.trim() };
+                state.folders.push(folder);
+                state.currentFolderId = folder.id;
+                saveLocal();
+                updateStats();
+            }
+        };
+
+        function validateIAFolder() {
+            const warning = document.getElementById('ia-folder-warning');
+            const display = document.getElementById('active-folder-display');
+            if (state.currentFolderId === 'f_all') {
+                warning.classList.remove('hidden');
+                display.innerText = "ESCOLHA UMA PASTA";
+                display.className = "w-full bg-slate-50 p-4 rounded-2xl text-xs font-black text-rose-500 border border-slate-100";
+            } else {
+                warning.classList.add('hidden');
+                const folder = state.folders.find(f => f.id === state.currentFolderId);
+                display.innerText = folder.name.toUpperCase();
+                display.className = "w-full bg-slate-50 p-4 rounded-2xl text-xs font-black text-indigo-600 border border-slate-100";
+            }
+        }
+
+        window.renderBank = () => {
+            const searchTerm = document.getElementById('bank-search').value.toLowerCase();
+            const list = document.getElementById('bank-list');
+            const folderFilter = state.currentFolderId;
+            let filtered = folderFilter === 'f_all' ? state.questions : state.questions.filter(q => q.folderId === folderFilter);
+            
+            if (searchTerm) {
+                filtered = filtered.filter(q => 
+                    q.statement.toLowerCase().includes(searchTerm) || 
+                    (q.explanation && q.explanation.toLowerCase().includes(searchTerm))
+                );
+            }
+
+            if (filtered.length === 0) {
+                list.innerHTML = `<div class="py-24 text-center text-slate-300 italic text-xs">Banco vazio ou sem resultados.</div>`;
+                return;
+            }
+            list.innerHTML = filtered.slice().reverse().map(q => `
+                <div class="bg-white p-5 rounded-3xl border border-slate-100 flex justify-between items-center shadow-sm">
+                    <div class="truncate mr-4">
+                        <p class="text-[11px] text-slate-700 font-bold truncate">${q.statement}</p>
+                        <p class="text-[8px] text-slate-400 font-black uppercase mt-1 tracking-tighter">${q.specialty || 'Global'}</p>
+                    </div>
+                    <button onclick="window.deleteQ('${q.id}')" class="text-rose-400 p-2 active:scale-90 transition-transform">✕</button>
+                </div>
+            `).join('');
+        };
+
+        function startStudy() {
+            const now = Date.now();
+            const questions = state.currentFolderId === 'f_all' ? state.questions : state.questions.filter(q => q.folderId === state.currentFolderId);
+            studyQueue = questions.filter(q => !state.srs[q.id] || state.srs[q.id].nextReview <= now);
+            studyQueue.sort(() => Math.random() - 0.5);
+            studyPointer = 0;
+            renderStudyCard();
+        }
+
+        function renderStudyCard() {
+            const container = document.getElementById('study-container');
+            if (studyQueue.length === 0) {
+                container.innerHTML = `<div class="py-24 text-center"><div class="text-6xl mb-6">✅</div><h2 class="text-xl font-black">Meta Batida!</h2><button onclick="window.switchTab('home')" class="mt-8 bg-indigo-600 text-white font-black px-10 py-4 rounded-2xl">Finalizar</button></div>`;
+                return;
+            }
+            if (studyPointer >= studyQueue.length) {
+                container.innerHTML = `<div class="py-24 text-center"><div class="text-6xl mb-6">🎯</div><h2 class="text-xl font-black">Fim do Lote</h2><button onclick="window.switchTab('home')" class="mt-8 bg-indigo-600 text-white font-black px-10 py-4 rounded-2xl">Finalizar</button></div>`;
+                return;
+            }
+            const q = studyQueue[studyPointer];
+            isRevealed = false;
+            container.innerHTML = `
+                <div class="bg-white p-8 rounded-[40px] border border-slate-100 shadow-xl space-y-6">
+                    <div class="flex justify-between items-center"><span class="text-[10px] font-black text-indigo-500 uppercase tracking-widest">${q.specialty || 'Global'}</span><span class="text-[10px] font-bold text-slate-400">${studyPointer+1}/${studyQueue.length}</span></div>
+                    <h3 class="text-lg font-bold text-slate-800 leading-relaxed case-text">${q.statement.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')}</h3>
+                    <div class="space-y-3">
+                        ${q.options.map((opt, i) => `<button onclick="window.reveal(${i})" class="opt-btn w-full text-left p-5 rounded-3xl border-2 border-slate-50 bg-slate-50 text-slate-600 text-sm font-semibold active:scale-95 transition-all">${opt}</button>`).join('')}
+                    </div>
+                    <div id="study-feedback" class="hidden pt-6 border-t border-slate-50 space-y-6">
+                        <div class="bg-slate-900 text-slate-300 p-6 rounded-[28px] text-[11px] leading-relaxed italic">
+                            ${q.explanation || 'Sem anotações extras.'}
+                        </div>
+                        <div class="grid grid-cols-4 gap-2">
+                            <button onclick="window.submitSRS(1)" class="bg-rose-500 py-5 rounded-2xl text-white font-black text-[9px] uppercase">Errei</button>
+                            <button onclick="window.submitSRS(2)" class="bg-orange-400 py-5 rounded-2xl text-white font-black text-[9px] uppercase">Difícil</button>
+                            <button onclick="window.submitSRS(3)" class="bg-indigo-500 py-5 rounded-2xl text-white font-black text-[9px] uppercase">Bom</button>
+                            <button onclick="window.submitSRS(4)" class="bg-emerald-500 py-5 rounded-2xl text-white font-black text-[9px] uppercase">Fácil</button>
+                        </div>
+                    </div>
+                </div>`;
+        }
+
+        window.reveal = (idx) => {
+            if (isRevealed) return;
+            isRevealed = true;
+            const q = studyQueue[studyPointer];
+            document.querySelectorAll('.opt-btn').forEach((btn, i) => { 
+                if (i === q.correctIndex) btn.classList.add('option-btn-correct');
+                else if (i === idx) btn.classList.add('option-btn-wrong');
+                btn.disabled = true;
+            });
+            document.getElementById('study-feedback').classList.remove('hidden');
+        };
+
+        // --- INICIALIZAÇÃO E STORAGE ---
 
         function initGoogleWithRetry() {
-            if (window.google && window.google.accounts && window.gapi) setupGoogle();
-            else if (googleRetries < 5) { googleRetries++; setTimeout(initGoogleWithRetry, 1000); }
+            if (window.google && window.google.accounts && window.gapi) {
+                setupGoogle();
+            } else if (googleRetries < 5) {
+                googleRetries++;
+                document.getElementById('login-status-msg').innerText = `Sincronizando... (${googleRetries}/5)`;
+                setTimeout(initGoogleWithRetry, 1000);
+            }
         }
 
         function setupGoogle() {
             gapi.load('client', async () => {
                 await gapi.client.init({ discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'] });
+                
                 tokenClient = google.accounts.oauth2.initTokenClient({
-                    client_id: CLIENT_ID, scope: SCOPES,
+                    client_id: CLIENT_ID,
+                    scope: SCOPES,
                     callback: (resp) => {
                         if (resp.error) return;
                         accessToken = resp.access_token;
@@ -338,9 +684,14 @@
                         onLoginSuccess();
                     }
                 });
+
                 const saved = JSON.parse(localStorage.getItem(TOKEN_STORAGE));
-                if (saved && saved.expiry > Date.now()) { accessToken = saved.token; onLoginSuccess(); }
-                else { document.getElementById('login-status-msg').innerText = "Pronto para Conectar."; }
+                if (saved && saved.expiry > Date.now()) {
+                    accessToken = saved.token;
+                    onLoginSuccess();
+                } else {
+                    document.getElementById('login-status-msg').innerText = "Pronto para Login.";
+                }
             });
         }
 
@@ -350,167 +701,56 @@
             manualSync();
         }
 
-        window.processIA = async () => {
-            if (state.currentFolderId === 'f_all') return alert("Selecione uma matéria na Home!");
-            const userInput = document.getElementById('ia-prompt').value.trim();
-            if (!userInput && !extractedFileText) return alert("Nada para processar.");
-            const loader = document.getElementById('ia-loader'), btn = document.getElementById('btn-ia');
-            loader.classList.remove('hidden'); btn.disabled = true;
-            try {
-                const ai = getAIClient();
-                const nextNum = state.questions.length + 1;
-                const response = await ai.models.generateContent({
-                    model: 'gemini-3-flash-preview',
-                    contents: [{ parts: [{ text: (extractedFileText ? `DOC:\n${extractedFileText}\n\nTEXT:\n${userInput}` : userInput) }] }],
-                    config: { 
-                        maxOutputTokens: 8192,
-                        systemInstruction: `Você é um REFORMATADOR MÉDICO FIEL. Organize o lote em JSON. 
-                        REGRAS: 1. COPIE INTEGRALMENTE (Sem resumos). 2. FIDELIDADE PALAVRA POR PALAVRA. 
-                        3. NUMERAÇÃO: Comece de "Questão ${nextNum}:" sequencialmente. 
-                        4. MAPA: statement, options[], correctIndex, explanation.
-                        Retorne APENAS o JSON puro.`
-                    }
-                });
-                const match = response.text.match(/\[[\s\S]*\]/);
-                if (match) { tempExtracted = JSON.parse(match[0]); renderReviewList(); }
-                else alert("Formato não identificado.");
-            } catch (e) { alert("IA Falhou: " + e.message); }
-            finally { loader.classList.add('hidden'); btn.disabled = false; }
-        };
-
-        function renderReviewList() {
-            document.getElementById('ia-review-area').classList.remove('hidden');
-            document.getElementById('review-list').innerHTML = tempExtracted.map(q => `
-                <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm"><p class="text-[10px] font-black text-indigo-500 mb-1">PRÉVIA FIEL:</p><p class="text-xs font-bold text-slate-700 italic truncate">"${q.statement}"</p></div>
-            `).join('');
-            window.scrollTo(0, 0);
+        function saveLocal(cloud = true) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            updateStats();
+            if (cloud) autoBackup();
         }
 
-        window.confirmBatch = () => {
-            const folderId = state.currentFolderId, folderName = state.folders.find(f => f.id === folderId).name;
-            const news = tempExtracted.map(q => ({ ...q, id: 'q_' + Math.random().toString(36).substr(2, 9), folderId, specialty: folderName, date: Date.now() }));
-            state.questions = [...state.questions, ...news];
-            saveLocal();
-            document.getElementById('ia-review-area').classList.add('hidden');
-            document.getElementById('ia-prompt').value = ""; extractedFileText = "";
-            alert("✅ Cards Sincronizados.");
-        };
-
-        // UI HELPERS
-        window.switchTab = (id) => {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active', 'text-indigo-600'));
-            document.getElementById('tab-' + id).classList.add('active');
-            document.getElementById('nav-' + id).classList.add('active', 'text-indigo-600');
-            if (id === 'home') updateStats(); if (id === 'study') startStudy(); if (id === 'bank') renderBank(); if (id === 'add') validateIAFolder();
-            window.scrollTo(0, 0);
-        };
-
-        function updateStats() {
-            const folderId = state.currentFolderId, now = Date.now();
-            const questions = folderId === 'f_all' ? state.questions : state.questions.filter(q => q.folderId === folderId);
-            const hits = state.history.filter(h => h.success).length;
-            document.getElementById('stat-total').innerText = questions.length;
-            document.getElementById('stat-accuracy').innerText = state.history.length ? Math.round((hits / state.history.length) * 100) + "%" : "0%";
-            const due = questions.filter(q => !state.srs[q.id] || state.srs[q.id].nextReview <= now).length;
-            document.getElementById('home-due-text').innerText = due > 0 ? `${due} pendentes.` : "Revisão em dia.";
-            document.getElementById('due-badge').innerText = due;
-            document.getElementById('due-badge').classList.toggle('hidden', due === 0);
-            renderFoldersUI();
+        function loadLocal() {
+            const data = localStorage.getItem(STORAGE_KEY);
+            if (data) state = JSON.parse(data);
+            const savedKey = localStorage.getItem(KEY_STORAGE);
+            if (savedKey) document.getElementById('gemini-key-input').value = savedKey;
+            updateStats();
         }
 
-        function renderFoldersUI() {
-            document.getElementById('folders-scroll').innerHTML = state.folders.map(f => {
-                const act = state.currentFolderId === f.id;
-                return `<div onclick="window.onFolderChange('${f.id}')" class="folder-chip px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest border border-slate-200 bg-white ${act ? 'active shadow-lg' : 'text-slate-500'}">${f.name}</div>`;
-            }).join('');
-        }
-
-        window.onFolderChange = (id) => { state.currentFolderId = id; updateStats(); if (document.getElementById('tab-bank').classList.contains('active')) renderBank(); };
-        window.createNewFolder = () => { const name = prompt("Matéria:"); if (name) { state.folders.push({ id: 'f_'+Date.now(), name }); saveLocal(); updateStats(); } };
-        function validateIAFolder() {
-            const warn = document.getElementById('ia-folder-warning'), disp = document.getElementById('active-folder-display');
-            if (state.currentFolderId === 'f_all') { warn.classList.remove('hidden'); disp.innerText = "SELECIONE NA HOME"; disp.className = "w-full bg-slate-50 p-4 rounded-2xl text-xs font-black text-rose-500 border border-slate-100"; }
-            else { warn.classList.add('hidden'); const folder = state.folders.find(f => f.id === state.currentFolderId); disp.innerText = folder.name.toUpperCase(); disp.className = "w-full bg-slate-50 p-4 rounded-2xl text-xs font-black text-indigo-600 border border-slate-100"; }
-        }
-
-        window.renderBank = () => {
-            const term = document.getElementById('bank-search').value.toLowerCase();
-            const filtered = state.questions.filter(q => (state.currentFolderId === 'f_all' || q.folderId === state.currentFolderId) && (q.statement.toLowerCase().includes(term) || (q.explanation && q.explanation.toLowerCase().includes(term))));
-            document.getElementById('bank-list').innerHTML = filtered.slice().reverse().map(q => `
-                <div class="bg-white p-5 rounded-3xl border border-slate-100 flex justify-between items-center shadow-sm"><div class="truncate mr-4"><p class="text-[11px] text-slate-700 font-bold truncate">${q.statement}</p><p class="text-[8px] text-slate-400 font-black uppercase mt-1 tracking-tighter">${q.specialty || 'Global'}</p></div><button onclick="window.deleteQ('${q.id}')" class="text-rose-400 p-2 active:scale-90 transition-transform">✕</button></div>
-            `).join('') || `<div class="py-24 text-center text-slate-300 italic text-xs">Vazio.</div>`;
-        };
-
-        function startStudy() {
-            const now = Date.now(), q = state.currentFolderId === 'f_all' ? state.questions : state.questions.filter(q => q.folderId === state.currentFolderId);
-            studyQueue = q.filter(q => !state.srs[q.id] || state.srs[q.id].nextReview <= now).sort(() => Math.random() - 0.5);
-            studyPointer = 0; renderStudyCard();
-        }
-
-        function renderStudyCard() {
-            const container = document.getElementById('study-container');
-            if (!studyQueue.length || studyPointer >= studyQueue.length) { container.innerHTML = `<div class="py-24 text-center"><h2 class="text-xl font-black">Meta Batida!</h2><button onclick="window.switchTab('home')" class="mt-8 bg-indigo-600 text-white font-black px-10 py-4 rounded-2xl">Finalizar</button></div>`; return; }
-            const q = studyQueue[studyPointer]; isRevealed = false;
-            container.innerHTML = `
-                <div class="bg-white p-8 rounded-[40px] border border-slate-100 shadow-xl space-y-6">
-                    <div class="flex justify-between items-center"><span class="text-[10px] font-black text-indigo-500 uppercase">${q.specialty || 'Global'}</span><span class="text-[10px] font-bold text-slate-400">${studyPointer+1}/${studyQueue.length}</span></div>
-                    <h3 class="text-lg font-bold text-slate-800 leading-relaxed case-text">${q.statement.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')}</h3>
-                    <div class="space-y-3">${q.options.map((opt, i) => `<button onclick="window.reveal(${i})" class="opt-btn w-full text-left p-5 rounded-3xl border-2 border-slate-50 bg-slate-50 text-slate-600 text-sm font-semibold active:scale-95 transition-all">${opt}</button>`).join('')}</div>
-                    <div id="study-feedback" class="hidden pt-6 border-t border-slate-50 space-y-6"><div class="bg-slate-900 text-slate-300 p-6 rounded-[28px] text-[11px] leading-relaxed italic">${q.explanation || 'Sem notas.'}</div><div class="grid grid-cols-4 gap-2">
-                        <button onclick="window.submitSRS(1)" class="bg-rose-500 py-5 rounded-2xl text-white font-black text-[9px]">Errei</button><button onclick="window.submitSRS(2)" class="bg-orange-400 py-5 rounded-2xl text-white font-black text-[9px]">Difícil</button><button onclick="window.submitSRS(3)" class="bg-indigo-500 py-5 rounded-2xl text-white font-black text-[9px]">Bom</button><button onclick="window.submitSRS(4)" class="bg-emerald-500 py-5 rounded-2xl text-white font-black text-[9px]">Fácil</button>
-                    </div></div>
-                </div>`;
-        }
-
-        window.reveal = (idx) => {
-            if (isRevealed) return; isRevealed = true; const q = studyQueue[studyPointer];
-            document.querySelectorAll('.opt-btn').forEach((btn, i) => { if (i === q.correctIndex) btn.classList.add('option-btn-correct'); else if (i === idx) btn.classList.add('option-btn-wrong'); btn.disabled = true; });
-            document.getElementById('study-feedback').classList.remove('hidden');
-        };
-
-        window.submitSRS = (grade) => {
-            const q = studyQueue[studyPointer], srs = state.srs[q.id] || { interval: 0, repetitions: 0, easeFactor: 2.5 };
-            let { interval, repetitions, easeFactor } = srs; const score = grade === 1 ? 0 : grade === 2 ? 2 : grade === 3 ? 4 : 5;
-            if (score >= 3) { if (!repetitions) interval = 1; else if (repetitions === 1) interval = 6; else interval = Math.round(interval * easeFactor); repetitions++; }
-            else { repetitions = 0; interval = 1; }
-            easeFactor = Math.max(1.3, easeFactor + (0.1 - (5 - score) * (0.08 + (5 - score) * 0.02)));
-            state.srs[q.id] = { interval, repetitions, easeFactor, nextReview: Date.now() + (interval * 86400000) };
-            state.history.push({ cardId: q.id, success: score >= 3, date: Date.now() });
-            saveLocal(); studyPointer++; renderStudyCard();
-        };
-
-        function saveLocal(cloud = true) { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); updateStats(); if (cloud) autoBackup(); }
-        window.deleteQ = (id) => { if (confirm("Excluir?")) { state.questions = state.questions.filter(q => q.id !== id); delete state.srs[id]; saveLocal(); renderBank(); } };
-        window.clearAll = () => { if (confirm("Limpar cache local?")) { localStorage.removeItem(STORAGE_KEY); location.reload(); } };
+        window.deleteQ = (id) => { if (confirm("Excluir card permanentemente?")) { state.questions = state.questions.filter(q => q.id !== id); delete state.srs[id]; saveLocal(); renderBank(); } };
+        window.clearAll = () => { if (confirm("Apagar cache local? Requer login para sincronizar novamente.")) { localStorage.removeItem(STORAGE_KEY); location.reload(); } };
 
         document.getElementById('file-reader').addEventListener('change', async (e) => {
-            const file = e.target.files[0]; if (!file) return; const status = document.getElementById('file-status');
-            status.innerText = "⏳ Lendo..."; status.classList.remove('hidden');
+            const file = e.target.files[0];
+            if (!file) return;
+            const status = document.getElementById('file-status');
+            status.innerText = "⏳ Lendo...";
+            status.classList.remove('hidden');
             try {
                 if (file.name.endsWith('.pdf')) {
-                    const arrayBuffer = await file.arrayBuffer(), pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-                    let full = ""; for (let i = 1; i <= pdf.numPages; i++) { const page = await pdf.getPage(i), cont = await page.getTextContent(); full += cont.items.map(it => it.str).join(" ") + " "; }
-                    extractedFileText = full;
+                    const arrayBuffer = await file.arrayBuffer();
+                    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                    let fullText = "";
+                    for (let i = 1; i <= pdf.numPages; i++) {
+                        const page = await pdf.getPage(i);
+                        const content = await page.getTextContent();
+                        fullText += content.items.map(item => item.str).join(" ") + " ";
+                    }
+                    extractedFileText = fullText;
                 } else if (file.name.endsWith('.docx')) {
-                    const arrayBuffer = await file.arrayBuffer(), res = await mammoth.extractRawText({ arrayBuffer });
-                    extractedFileText = res.value;
+                    const arrayBuffer = await file.arrayBuffer();
+                    const result = await mammoth.extractRawText({ arrayBuffer });
+                    extractedFileText = result.value;
                 }
                 status.innerText = "✅ " + file.name;
             } catch (err) { alert(err.message); status.innerText = ""; }
         });
 
-        // INIT
-        (function loadLocal() {
-            const data = localStorage.getItem(STORAGE_KEY); if (data) state = JSON.parse(data);
-            const key = localStorage.getItem(KEY_STORAGE); if (key) document.getElementById('gemini-key-input').value = key;
-        })();
-        const ctx = document.getElementById('performanceChart').getContext('2d');
-        chartInstance = new Chart(ctx, { type: 'line', data: { labels: ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'], datasets: [{ data:[0,0,0,0,0,0,0], borderColor: '#fff', tension: 0.4 }] }, options: { plugins:{legend:{display:false}}, scales:{x:{ticks:{color:'#fff'}},y:{display:false}} } });
+        loadLocal();
+        initChart();
         initGoogleWithRetry();
     </script>
 </body>
 </html>
+
 
 
 
