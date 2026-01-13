@@ -3,20 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>MedRep - Sincronização em Pasta</title>
+    <title>MedRep - Sincronização Global</title>
     
-    <!-- PWA & Mobile Optimization -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     
-    <!-- Bibliotecas Externas -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
     
-    <!-- Google Identity Services -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script src="https://apis.google.com/js/api.js" async defer></script>
 
@@ -60,7 +57,7 @@
         .safe-bottom { padding-bottom: calc(1.5rem + env(safe-area-inset-bottom)); }
         
         .case-text { line-height: 1.6; word-break: break-word; }
-        .case-text b { color: #4338ca; }
+        .case-text b { color: #4338ca; font-weight: 800; }
     </style>
 </head>
 <body class="antialiased overflow-x-hidden">
@@ -78,17 +75,17 @@
     <div id="login-screen" class="fixed inset-0 z-[200] bg-white flex flex-col items-center justify-center p-8 text-center pt-24">
         <div class="mb-12">
             <h1 class="text-6xl font-black text-indigo-600 tracking-tighter italic leading-none">MedRep</h1>
-            <p class="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-4">Sincronização em Pasta v13.3</p>
+            <p class="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-4">Sincronização Master v13.4</p>
         </div>
         <div class="bg-slate-50 p-10 rounded-[40px] w-full max-w-sm border border-slate-100 mb-8 shadow-sm">
-            <p id="login-status-msg" class="text-xs font-semibold text-slate-500 mb-6">Iniciando Sincronização Drive...</p>
+            <p id="login-status-msg" class="text-xs font-semibold text-slate-500 mb-6">Aguardando Conexão Google Drive...</p>
             <button onclick="window.fazerLogin()" class="w-full bg-slate-900 text-white font-black py-5 rounded-[22px] shadow-xl flex items-center justify-center gap-4 active:scale-95 transition-transform">
                 <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" class="w-6" alt="Google">
-                <span class="text-xs uppercase tracking-widest">Acessar Pasta no Drive</span>
+                <span class="text-xs uppercase tracking-widest">Login via Drive Master</span>
             </button>
             <div id="login-loader" class="hidden mt-6 flex justify-center"><div class="loading-spinner"></div></div>
         </div>
-        <p class="text-[9px] font-black text-slate-300 uppercase tracking-[0.4em]">v13.3 FOLDER SYNC</p>
+        <p class="text-[9px] font-black text-slate-300 uppercase tracking-[0.4em]">v13.4 GLOBAL SYNC</p>
     </div>
 
     <!-- MAIN APP -->
@@ -96,7 +93,7 @@
         <header class="glass border-b border-slate-100 px-6 py-4 sticky top-[60px] md:top-[50px] z-50 flex justify-between items-center max-w-xl mx-auto w-full rounded-b-3xl">
             <div class="flex flex-col">
                 <h1 class="text-xl font-black text-indigo-600 tracking-tighter italic leading-none">MedRep</h1>
-                <span id="header-subtitle" class="text-[8px] font-bold text-slate-400 uppercase mt-1 tracking-widest">Global</span>
+                <span id="header-subtitle" class="text-[8px] font-bold text-slate-400 uppercase mt-1 tracking-widest">Sincronizado</span>
             </div>
             <div id="due-badge" class="hidden bg-rose-500 text-white text-[10px] font-black px-2 py-1 rounded-full">0</div>
         </header>
@@ -105,14 +102,14 @@
             
             <section id="tab-home" class="tab-content active space-y-6">
                 <div class="bg-indigo-600 p-8 rounded-[40px] text-white shadow-xl relative overflow-hidden">
-                    <p class="text-[9px] font-black uppercase tracking-widest opacity-60 mb-2">Resumo do Banco</p>
+                    <p class="text-[9px] font-black uppercase tracking-widest opacity-60 mb-2">Desempenho Médico</p>
                     <div class="grid grid-cols-2 gap-4 mb-4">
                         <div class="bg-white/10 p-4 rounded-2xl">
-                            <p class="text-[9px] font-bold uppercase opacity-50">Cards</p>
+                            <p class="text-[9px] font-bold uppercase opacity-50">Cards Totais</p>
                             <p id="stat-total" class="text-2xl font-black">0</p>
                         </div>
                         <div class="bg-white/10 p-4 rounded-2xl">
-                            <p class="text-[9px] font-bold uppercase opacity-50">Acertos</p>
+                            <p class="text-[9px] font-bold uppercase opacity-50">Precisão</p>
                             <p id="stat-accuracy" class="text-2xl font-black">0%</p>
                         </div>
                     </div>
@@ -124,7 +121,7 @@
                 <div class="space-y-4">
                     <div class="flex justify-between items-center px-4">
                         <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Matérias</h2>
-                        <button onclick="window.createNewFolder()" class="text-[10px] font-black text-indigo-600 uppercase">Criar +</button>
+                        <button onclick="window.createNewFolder()" class="text-[10px] font-black text-indigo-600 uppercase">Nova Pasta +</button>
                     </div>
                     <div id="folders-scroll" class="flex gap-2 overflow-x-auto pb-2 px-2 no-scrollbar"></div>
                 </div>
@@ -133,8 +130,8 @@
                     <div class="flex items-center gap-4">
                         <div class="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center text-xl">⚡</div>
                         <div>
-                            <h3 class="font-black text-slate-800">Revisar Cards</h3>
-                            <p id="home-due-text" class="text-xs text-slate-400">Verifique suas metas diárias.</p>
+                            <h3 class="font-black text-slate-800">Sessão de Repetição</h3>
+                            <p id="home-due-text" class="text-xs text-slate-400">Cards esperando revisão.</p>
                         </div>
                     </div>
                 </div>
@@ -148,15 +145,15 @@
                 <div class="bg-white p-8 rounded-[40px] border border-slate-100 shadow-sm space-y-6">
                     <div class="flex items-center gap-4">
                         <div class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-lg">🪄</div>
-                        <h2 class="text-lg font-black text-slate-800">Importar Fielmente</h2>
+                        <h2 class="text-lg font-black text-slate-800">Conversor Fiel</h2>
                     </div>
 
                     <div id="ia-folder-warning" class="bg-amber-50 border border-amber-100 p-4 rounded-2xl hidden">
-                        <p class="text-[10px] text-amber-700 font-bold uppercase leading-tight">⚠️ Atenção: Defina uma matéria na Home para organizar o card.</p>
+                        <p class="text-[10px] text-amber-700 font-bold uppercase leading-tight">⚠️ Atenção: Defina a matéria alvo na Home antes de converter.</p>
                     </div>
 
                     <div class="space-y-2">
-                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Gravando em:</label>
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Pasta Selecionada:</label>
                         <div id="active-folder-display" class="w-full bg-slate-50 p-4 rounded-2xl text-xs font-black text-indigo-600 uppercase border border-slate-100">
                             -
                         </div>
@@ -165,24 +162,24 @@
                     <div class="bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl p-6 text-center">
                         <label class="cursor-pointer flex flex-col items-center gap-2">
                             <span class="text-2xl">📄</span>
-                            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Anexar Documento</span>
+                            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Anexar Questão (PDF/Docx)</span>
                             <input type="file" id="file-reader" class="hidden" accept=".pdf,.docx">
                             <span id="file-status" class="text-[9px] text-indigo-500 font-bold hidden"></span>
                         </label>
                     </div>
 
-                    <textarea id="ia-prompt" placeholder="Cole os enunciados aqui. O sistema continuará a numeração de onde parou..." class="w-full h-40 bg-slate-50 rounded-[24px] p-6 text-sm border border-slate-100 focus:ring-2 ring-indigo-500 outline-none resize-none"></textarea>
+                    <textarea id="ia-prompt" placeholder="Cole os enunciados aqui. A IA organizará fielmente e numerará sequencialmente a partir da última questão..." class="w-full h-40 bg-slate-50 rounded-[24px] p-6 text-sm border border-slate-100 focus:ring-2 ring-indigo-500 outline-none resize-none"></textarea>
                     
                     <button onclick="window.processIA()" id="btn-ia" class="w-full bg-slate-900 text-white font-black py-5 rounded-[20px] uppercase text-xs flex items-center justify-center gap-4 shadow-xl active:scale-95 transition-transform">
-                        <span>Reformatar Lote</span>
+                        <span>Reformatar Lote de Questões</span>
                         <div id="ia-loader" class="loading-spinner hidden" style="border-top-color: white;"></div>
                     </button>
                 </div>
 
                 <div id="ia-review-area" class="hidden space-y-4">
                     <div class="flex justify-between items-center bg-white p-6 rounded-[24px] border border-slate-100 shadow-xl sticky top-[130px] z-10">
-                        <span id="review-count" class="text-xs font-black text-slate-800">Organizado</span>
-                        <button onclick="window.confirmBatch()" class="bg-emerald-600 text-white text-[10px] font-black uppercase px-6 py-3 rounded-xl">Salvar na Pasta</button>
+                        <span id="review-count" class="text-xs font-black text-slate-800">Mapeamento Fiel</span>
+                        <button onclick="window.confirmBatch()" class="bg-emerald-600 text-white text-[10px] font-black uppercase px-6 py-3 rounded-xl">Salvar na Nuvem</button>
                     </div>
                     <div id="review-list" class="space-y-4 pb-20"></div>
                 </div>
@@ -190,12 +187,12 @@
 
             <section id="tab-bank" class="tab-content space-y-4">
                 <div class="flex justify-between items-center px-4">
-                    <h2 class="text-lg font-black text-slate-800">Acervo</h2>
-                    <button onclick="window.clearAll()" class="text-[8px] font-black text-rose-500 uppercase tracking-widest bg-rose-50 px-3 py-1.5 rounded-lg">Reset Local</button>
+                    <h2 class="text-lg font-black text-slate-800">Seu Banco</h2>
+                    <button onclick="window.clearAll()" class="text-[8px] font-black text-rose-500 uppercase tracking-widest bg-rose-50 px-3 py-1.5 rounded-lg">Limpar Cache Local</button>
                 </div>
                 
                 <div class="px-2">
-                    <input type="text" id="bank-search" oninput="window.renderBank()" placeholder="🔎 Filtrar (ex: Pediatria)..." class="search-bar">
+                    <input type="text" id="bank-search" oninput="window.renderBank()" placeholder="🔎 Filtrar (ex: Pediatria, DPOC)..." class="search-bar">
                 </div>
 
                 <div id="bank-list" class="space-y-2 pb-24 px-2"></div>
@@ -209,15 +206,15 @@
             </button>
             <button onclick="window.switchTab('study')" class="nav-btn flex flex-col items-center gap-1 text-slate-400" id="nav-study">
                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L4.5 20.29L5.21 21L12 18L18.79 21L19.5 20.29L12 2Z"/></svg>
-                <span class="text-[8px] font-black uppercase">Estudar</span>
+                <span class="text-[8px] font-black uppercase">Revisar</span>
             </button>
             <button onclick="window.switchTab('add')" class="nav-btn flex flex-col items-center gap-1 text-slate-400" id="nav-add">
                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L14.5 8.5L21 11L14.5 13.5L12 20L9.5 13.5L3 11L9.5 8.5L12 2Z"/></svg>
-                <span class="text-[8px] font-black uppercase">Fiel</span>
+                <span class="text-[8px] font-black uppercase">Importar</span>
             </button>
             <button onclick="window.switchTab('bank')" class="nav-btn flex flex-col items-center gap-1 text-slate-400" id="nav-bank">
                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M4 4H20V20H4V4ZM6 6V18H18V6H6ZM8 8H16V10H8V8ZM8 12H16V14H8V12ZM8 16H13V18H8V16Z"/></svg>
-                <span class="text-[8px] font-black uppercase">Banco</span>
+                <span class="text-[8px] font-black uppercase">Acervo</span>
             </button>
         </nav>
     </div>
@@ -225,10 +222,10 @@
     <script type="module">
         import { GoogleGenAI } from "@google/genai";
 
-        // CONFIGS DRIVE ESPECÍFICAS
+        // CONFIGS DRIVE MASTER - FIDELIDADE TOTAL
         const CLIENT_ID = '648353734848-s9fnmd9tt0i5577grbt3q9oju6h71mpi.apps.googleusercontent.com';
         const SCOPES = 'https://www.googleapis.com/auth/drive.file';
-        const STORAGE_KEY = 'medrep_data_v13_3';
+        const STORAGE_KEY = 'medrep_data_v13_4';
         const KEY_STORAGE = 'medrep_gemini_key_v11';
         const TOKEN_STORAGE = 'medrep_google_token_persist';
         const FILENAME = 'medrep_data.json';
@@ -238,7 +235,7 @@
             questions: [],
             srs: {},
             history: [],
-            folders: [{id: 'f_all', name: 'Todas as Pastas'}, {id: 'f_default', name: 'Geral'}],
+            folders: [{id: 'f_all', name: 'Global'}, {id: 'f_default', name: 'Geral'}],
             currentFolderId: 'f_all'
         };
 
@@ -262,7 +259,7 @@
             const key = document.getElementById('gemini-key-input').value.trim();
             if (!key.startsWith('AIza')) return alert("Chave Gemini inválida.");
             localStorage.setItem(KEY_STORAGE, key);
-            alert("✅ Chave Salva.");
+            alert("✅ Chave Configurada.");
             location.reload();
         };
 
@@ -271,7 +268,7 @@
             if (tokenClient) {
                 tokenClient.requestAccessToken();
             } else {
-                alert("Serviços Google carregando...");
+                alert("Serviços Google em carga...");
                 document.getElementById('login-loader').classList.add('hidden');
             }
         };
@@ -319,23 +316,24 @@
             const display = document.getElementById('active-folder-display');
             if (state.currentFolderId === 'f_all') {
                 warning.classList.remove('hidden');
-                display.innerText = "SELECIONE UMA PASTA";
+                display.innerText = "SELECIONE UMA PASTA NA HOME";
                 display.className = "w-full bg-slate-50 p-4 rounded-2xl text-xs font-black text-rose-500 uppercase border border-slate-100";
             } else {
                 warning.classList.add('hidden');
                 const folder = state.folders.find(f => f.id === state.currentFolderId);
-                display.innerText = "ATIVO: " + folder.name.toUpperCase();
+                display.innerText = "IMPORTANDO PARA: " + folder.name.toUpperCase();
                 display.className = "w-full bg-slate-50 p-4 rounded-2xl text-xs font-black text-indigo-600 uppercase border border-slate-100";
             }
         }
 
-        // GOOGLE DRIVE SYNC - FOLDER SPECIFIC
+        // --- LÓGICA DE SINCRONIZAÇÃO MASTER ---
+        
         function initGoogleWithRetry() {
             if (window.google && window.google.accounts && window.gapi) {
                 setupGoogle();
             } else if (googleRetries < 5) {
                 googleRetries++;
-                document.getElementById('login-status-msg').innerText = `Sincronizando Drive (${googleRetries}/5)...`;
+                document.getElementById('login-status-msg').innerText = `Conectando (${googleRetries}/5)...`;
                 setTimeout(initGoogleWithRetry, 1000);
             }
         }
@@ -360,7 +358,7 @@
                     accessToken = saved.token;
                     onLoginSuccess();
                 } else {
-                    document.getElementById('login-status-msg').innerText = "Pronto.";
+                    document.getElementById('login-status-msg').innerText = "Pronto para Sincronizar.";
                 }
             });
         }
@@ -371,50 +369,61 @@
             manualSync();
         }
 
+        // Busca o arquivo na pasta fixa e substitui o estado local
         async function manualSync() {
             if (!accessToken) return;
             try {
-                // Busca especificamente na pasta alvo
                 const list = await gapi.client.drive.files.list({ 
-                    q: `'${TARGET_FOLDER_ID}' in parents and name = '${FILENAME}' and trashed = false` 
+                    q: `'${TARGET_FOLDER_ID}' in parents and name = '${FILENAME}' and trashed = false`,
+                    fields: 'files(id, name)'
                 });
                 const file = list.result.files[0];
                 if (file) {
                     driveFileId = file.id;
-                    const resp = await gapi.client.drive.files.get({ fileId: driveFileId, alt: 'media' });
+                    // Timestamp para evitar cache do Drive
+                    const timestamp = Date.now();
+                    const resp = await gapi.client.drive.files.get({ fileId: driveFileId, alt: 'media', _t: timestamp });
                     if (resp.result && resp.result.questions) {
                         state = resp.result;
                         saveLocal(false);
                     }
                 } else {
-                    // Inicializa banco vazio se não houver arquivo
                     driveFileId = null;
                 }
-            } catch (e) { console.warn("Sync falhou", e); }
+            } catch (e) { console.error("ManualSync falhou", e); }
             updateStats();
         }
 
+        // Salvamento Multipart com Overwrite Fiel
         async function autoBackup() {
             if (!accessToken) return;
             try {
-                // Verifica novamente se o arquivo existe na pasta antes de salvar
+                // Re-verificar ID se nulo
                 if (!driveFileId) {
                     const list = await gapi.client.drive.files.list({ 
                         q: `'${TARGET_FOLDER_ID}' in parents and name = '${FILENAME}' and trashed = false` 
                     });
-                    if (list.result.files[0]) driveFileId = list.result.files[0].id;
+                    if (list.result.files && list.result.files[0]) driveFileId = list.result.files[0].id;
                 }
 
                 const metadata = { 
                     name: FILENAME, 
-                    mimeType: 'application/json',
-                    parents: driveFileId ? undefined : [TARGET_FOLDER_ID] 
+                    mimeType: 'application/json'
                 };
-                
-                const blob = new Blob([JSON.stringify(state)], { type: 'application/json' });
-                const form = new FormData();
-                form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-                form.append('file', blob);
+                if (!driveFileId) metadata.parents = [TARGET_FOLDER_ID];
+
+                const boundary = 'medrep_sync_boundary';
+                const delimiter = "\r\n--" + boundary + "\r\n";
+                const close_delim = "\r\n--" + boundary + "--";
+
+                const body = 
+                    delimiter + 
+                    'Content-Type: application/json; charset=UTF-8\r\n\r\n' +
+                    JSON.stringify(metadata) +
+                    delimiter + 
+                    'Content-Type: application/json\r\n\r\n' +
+                    JSON.stringify(state) +
+                    close_delim;
 
                 const url = driveFileId 
                     ? `https://www.googleapis.com/upload/drive/v3/files/${driveFileId}?uploadType=multipart`
@@ -422,20 +431,23 @@
 
                 const response = await fetch(url, {
                     method: driveFileId ? 'PATCH' : 'POST',
-                    headers: { 'Authorization': 'Bearer ' + accessToken },
-                    body: form
+                    headers: { 
+                        'Authorization': 'Bearer ' + accessToken,
+                        'Content-Type': 'multipart/related; boundary=' + boundary
+                    },
+                    body: body
                 });
 
                 if (response.ok && !driveFileId) {
                     const result = await response.json();
                     driveFileId = result.id;
                 }
-            } catch (e) { console.warn("AutoBackup falhou", e); }
+            } catch (e) { console.error("AutoBackup falhou", e); }
         }
 
-        // REFORMATADOR FIEL v13.3 COM NUMERAÇÃO CONTÍNUA
+        // REFORMATADOR MÉDICO v13.4 - NUMERAÇÃO SEQUENCIAL
         window.processIA = async () => {
-            if (state.currentFolderId === 'f_all') return alert("Escolha uma pasta específica.");
+            if (state.currentFolderId === 'f_all') return alert("Selecione uma matéria ativa na Home!");
             const userInput = document.getElementById('ia-prompt').value.trim();
             if (!userInput && !extractedFileText) return alert("Nada para processar.");
             
@@ -446,27 +458,26 @@
 
             try {
                 const ai = getAIClient();
-                const sourceData = extractedFileText ? `DOC:\n${extractedFileText}\n\nUSER:\n${userInput}` : userInput;
-                // Lê quantas questões já existem no total do banco
-                const startingNumber = state.questions.length + 1;
+                const sourceData = extractedFileText ? `DOCUMENTO:\n${extractedFileText}\n\nTEXTO:\n${userInput}` : userInput;
+                const nextNum = state.questions.length + 1;
 
                 const response = await ai.models.generateContent({
                     model: 'gemini-3-flash-preview',
                     contents: [{ parts: [{ text: sourceData }] }],
                     config: { 
                         maxOutputTokens: 8192,
-                        systemInstruction: `Você é um REFORMATADOR MÉDICO. Organize o input em flashcards JSON.
+                        systemInstruction: `Você é um REFORMATADOR MÉDICO FIEL. Organize o input em flashcards JSON.
 
 REGRAS RÍGIDAS:
-1. SEM RESUMOS: Casos clínicos longos devem ser copiados INTEGRALMENTE.
-2. FIDELIDADE: Copie palavra por palavra. Não altere terminologia.
-3. CONTINUIDADE DE NUMERAÇÃO: O banco atual possui questões até a de número ${startingNumber - 1}. Comece a numerar as novas questões como "Questão ${startingNumber}:", "Questão ${startingNumber + 1}:", etc., no início do campo "statement".
+1. SEM RESUMOS: Casos clínicos longos devem ser mantidos na íntegra. Não resuma.
+2. FIDELIDADE TOTAL: Copie palavra por palavra. Não altere termos médicos.
+3. NUMERAÇÃO AUTOMÁTICA SEQUENCIAL: O banco já possui ${nextNum - 1} questões. Comece numerando as novas a partir de "Questão ${nextNum}:", "Questão ${nextNum + 1}:", etc. no início do campo "statement".
 4. MAPEAMENTO:
-   - Texto/Enunciado -> "statement"
-   - Alternativas -> "options" (array)
-   - Resposta correta -> "correctIndex" (0-4)
-   - Comentários/Notas -> "explanation"
-5. NADA DE CONTEÚDO NOVO: Se o usuário não enviou a resposta, deixe correctIndex null ou 0.
+   - Texto principal -> "statement"
+   - Alternativas -> "options" (array de strings)
+   - Resposta correta -> "correctIndex" (número 0 a 4)
+   - Notas adicionais -> "explanation"
+5. NADA DE CONTEÚDO NOVO: Não crie explicações. Se não houver resposta no texto, deixe correctIndex null ou 0.
 
 Retorne APENAS o JSON puro: [{"statement":"","options":[],"correctIndex":0,"explanation":"","specialty":""}]`
                     }
@@ -477,18 +488,19 @@ Retorne APENAS o JSON puro: [{"statement":"","options":[],"correctIndex":0,"expl
                     tempExtracted = JSON.parse(match[0]);
                     renderReviewList();
                 } else {
-                    alert("A IA não retornou um formato válido.");
+                    alert("A IA não conseguiu formatar o lote. Tente colar o texto novamente.");
                 }
-            } catch (e) { alert("IA Falhou: " + e.message); }
+            } catch (e) { alert("Erro na IA: " + e.message); }
             finally { loader.classList.add('hidden'); btn.disabled = false; }
         };
 
         function renderReviewList() {
             document.getElementById('ia-review-area').classList.remove('hidden');
             document.getElementById('review-list').innerHTML = tempExtracted.map(q => `
-                <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
-                    <p class="text-[10px] font-black text-indigo-500 mb-2">MAPEADO:</p>
+                <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-2">
+                    <p class="text-[10px] font-black text-indigo-500 mb-1">MAPEADO:</p>
                     <p class="text-xs font-bold text-slate-700 leading-relaxed italic truncate">"${q.statement}"</p>
+                    <p class="text-[9px] text-slate-400">Opções detectadas: ${q.options.length}</p>
                 </div>
             `).join('');
             window.scrollTo(0, 0);
@@ -510,7 +522,7 @@ Retorne APENAS o JSON puro: [{"statement":"","options":[],"correctIndex":0,"expl
             document.getElementById('ia-prompt').value = "";
             extractedFileText = "";
             document.getElementById('file-status').classList.add('hidden');
-            alert("✅ Sincronizado com a pasta alvo.");
+            alert("✅ Sincronizado Globalmente na Pasta alvo.");
         };
 
         // ANALYTICS & STATS
@@ -521,7 +533,7 @@ Retorne APENAS o JSON puro: [{"statement":"","options":[],"correctIndex":0,"expl
                 data: {
                     labels: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'],
                     datasets: [{
-                        label: 'Acertos',
+                        label: 'Hits',
                         data: [0,0,0,0,0,0,0],
                         borderColor: '#fff',
                         backgroundColor: 'rgba(255,255,255,0.1)',
@@ -554,7 +566,7 @@ Retorne APENAS o JSON puro: [{"statement":"","options":[],"correctIndex":0,"expl
             document.getElementById('stat-total').innerText = questions.length;
             const hits = history.filter(h => h.success).length;
             document.getElementById('stat-accuracy').innerText = history.length ? Math.round((hits / history.length) * 100) + "%" : "0%";
-            document.getElementById('home-due-text').innerText = due > 0 ? `${due} pendentes.` : "Tudo em dia.";
+            document.getElementById('home-due-text').innerText = due > 0 ? `${due} cards para revisar hoje.` : "Tudo em dia!";
             
             const badge = document.getElementById('due-badge');
             badge.innerText = due;
@@ -595,7 +607,7 @@ Retorne APENAS o JSON puro: [{"statement":"","options":[],"correctIndex":0,"expl
             }
 
             if (filtered.length === 0) {
-                list.innerHTML = `<div class="py-24 text-center text-slate-300 italic text-xs">Sem cards correspondentes.</div>`;
+                list.innerHTML = `<div class="py-24 text-center text-slate-300 italic text-xs">Nenhum card disponível.</div>`;
                 return;
             }
             list.innerHTML = filtered.slice().reverse().map(q => `
@@ -625,7 +637,7 @@ Retorne APENAS o JSON puro: [{"statement":"","options":[],"correctIndex":0,"expl
                 return;
             }
             if (studyPointer >= studyQueue.length) {
-                container.innerHTML = `<div class="py-24 text-center"><div class="text-6xl mb-6">🎯</div><h2 class="text-xl font-black">Fim do Lote</h2><button onclick="window.switchTab('home')" class="mt-8 bg-indigo-600 text-white font-black px-10 py-4 rounded-2xl">Finalizar</button></div>`;
+                container.innerHTML = `<div class="py-24 text-center"><div class="text-6xl mb-6">🎯</div><h2 class="text-xl font-black">Cards Revisados</h2><button onclick="window.switchTab('home')" class="mt-8 bg-indigo-600 text-white font-black px-10 py-4 rounded-2xl">Finalizar</button></div>`;
                 return;
             }
             const q = studyQueue[studyPointer];
@@ -639,7 +651,7 @@ Retorne APENAS o JSON puro: [{"statement":"","options":[],"correctIndex":0,"expl
                     </div>
                     <div id="study-feedback" class="hidden pt-6 border-t border-slate-50 space-y-6">
                         <div class="bg-slate-900 text-slate-300 p-6 rounded-[28px] text-[11px] border-l-4 border-indigo-500 leading-relaxed italic">
-                            ${q.explanation || 'Sem anotações adicionais.'}
+                            ${q.explanation || 'Sem anotações registradas.'}
                         </div>
                         <div class="grid grid-cols-4 gap-2">
                             <button onclick="window.submitSRS(1)" class="bg-rose-500 py-5 rounded-2xl text-white font-black text-[9px] uppercase">Errei</button>
@@ -698,7 +710,7 @@ Retorne APENAS o JSON puro: [{"statement":"","options":[],"correctIndex":0,"expl
         }
 
         window.deleteQ = (id) => { if (confirm("Excluir card permanentemente?")) { state.questions = state.questions.filter(q => q.id !== id); delete state.srs[id]; saveLocal(); renderBank(); } };
-        window.clearAll = () => { if (confirm("Isso apagará seu banco local.")) { localStorage.removeItem(STORAGE_KEY); location.reload(); } };
+        window.clearAll = () => { if (confirm("Apagar cache local? Requer login para sincronizar.")) { localStorage.removeItem(STORAGE_KEY); location.reload(); } };
 
         document.getElementById('file-reader').addEventListener('change', async (e) => {
             const file = e.target.files[0];
