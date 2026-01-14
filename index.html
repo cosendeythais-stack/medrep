@@ -87,8 +87,8 @@
             <p class="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-4">Sincronização Master v13.4.4</p>
         </div>
         <div class="bg-slate-50 p-10 rounded-[40px] w-full max-w-sm border border-slate-100 mb-8 shadow-sm">
-            <p id="login-status-msg" class="text-xs font-semibold text-slate-500 mb-6">Iniciando Motores de Sincronia...</p>
-            <button id="login-btn-action" onclick="window.fazerLogin()" class="w-full bg-slate-900 text-white font-black py-5 rounded-[22px] shadow-xl flex items-center justify-center gap-4 active:scale-95 transition-transform">
+            <p id="login-status-msg" class="text-xs font-semibold text-slate-500 mb-6">Aguardando Conexão Google Drive...</p>
+            <button onclick="window.fazerLogin()" class="w-full bg-slate-900 text-white font-black py-5 rounded-[22px] shadow-xl flex items-center justify-center gap-4 active:scale-95 transition-transform">
                 <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" class="w-6" alt="Google">
                 <span class="text-xs uppercase tracking-widest">Login via Drive Master</span>
             </button>
@@ -239,13 +239,14 @@
     <script type="module">
         import { GoogleGenAI } from "@google/genai";
 
-        // CONFIGURAÇÕES GLOBAIS - ESCOPO DE ESCRITA MANDATÓRIO
+        // CREDENCIAIS E CONFIGURAÇÕES GLOBAIS
         const CLIENT_ID = '648353734848-s9fnmd9tt0i5577grbt3q9oju6h71mpi.apps.googleusercontent.com';
         const SCOPES = 'https://www.googleapis.com/auth/drive.file'; 
         const STORAGE_KEY = 'medrep_data_v13_3_global';
         const KEY_STORAGE = 'medrep_gemini_key_v11';
         const TOKEN_STORAGE = 'medrep_google_token_persist';
         const FILENAME = 'medrep_data.json';
+        const DEFAULT_AI_KEY = 'AIzaSyAIJFacEIsyKUY0LLwjsGxFSdniwKfXkIE';
 
         let state = {
             questions: [],
@@ -267,7 +268,7 @@
         let driveFileId = null;
 
         const getAIClient = () => {
-            const key = localStorage.getItem(KEY_STORAGE) || process.env.API_KEY;
+            const key = localStorage.getItem(KEY_STORAGE) || process.env.API_KEY || DEFAULT_AI_KEY;
             return new GoogleGenAI({ apiKey: key });
         };
 
@@ -301,29 +302,26 @@
         };
 
         window.fazerLogin = () => {
-            const statusMsg = document.getElementById('login-status-msg');
-            if (!tokenClient) {
-                statusMsg.innerText = "⚠️ Google Client não carregado. Aguarde...";
-                return alert("O motor Google ainda está aquecendo. Tente em 3 segundos.");
-            }
-            
             document.getElementById('login-loader').classList.remove('hidden');
-            tokenClient.requestAccessToken();
+            if (tokenClient) {
+                tokenClient.requestAccessToken();
+            } else {
+                setupGoogle();
+            }
         };
 
         // --- SINCRONIZAÇÃO MASTER v13.4.4 ---
 
         async function manualSync() {
             if (!accessToken) return;
-            showSyncStatus("☁️ Buscando Dados...");
+            showSyncStatus("☁️ Buscando no Drive...");
             try {
-                // Busca Global Unificada por Nome (medrep_data.json)
+                // Busca global por nome para paridade entre dispositivos
                 const list = await gapi.client.drive.files.list({ 
                     q: `name = '${FILENAME}' and trashed = false`,
                     spaces: 'drive',
                     fields: 'files(id, name)'
                 });
-                
                 const file = list.result.files[0];
                 if (file) {
                     driveFileId = file.id;
@@ -333,23 +331,19 @@
                     });
                     
                     let driveData = resp.result;
-                    // Força parsing se vier como string crua
-                    if (typeof driveData === 'string') {
-                        try { driveData = JSON.parse(driveData); } catch(e) { console.error("Parse Drive fail", e); }
-                    }
+                    if (typeof driveData === 'string') driveData = JSON.parse(driveData);
 
                     if (driveData && driveData.questions) {
                         state = driveData;
                         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-                        console.log("Sincronia Global: Carregado do Drive ID " + driveFileId);
+                        console.log("Drive: Dados carregados. ID: " + driveFileId);
                         showSyncStatus("✅ Sincronizado", 'success');
                     }
                 } else {
-                    showSyncStatus("✅ Novo Banco Pronto");
-                    console.log("Sincronia Global: Nenhum arquivo prévio. Iniciando novo.");
+                    showSyncStatus("☁️ Criando novo banco...");
                 }
             } catch (e) { 
-                console.error("Falha na Sincronia Manual:", e);
+                console.error("ManualSync falhou:", e);
                 showSyncStatus("❌ Falha na Sincronia", 'error');
             }
             updateStats();
@@ -359,7 +353,7 @@
             if (!accessToken) return;
             showSyncStatus("☁️ Sincronizando...");
             try {
-                // Recupera ID por nome se estiver nulo para evitar conflitos POST/PATCH
+                // Localiza ID se for a primeira vez na sessão
                 if (!driveFileId) {
                     const list = await gapi.client.drive.files.list({ 
                         q: `name = '${FILENAME}' and trashed = false`,
@@ -371,7 +365,7 @@
                 }
 
                 const metadata = { name: FILENAME, mimeType: 'application/json' };
-                const boundary = 'medrep_sync_v13_4_4_global';
+                const boundary = 'medrep_sync_v13_4_4_master';
                 const delimiter = "\r\n--" + boundary + "\r\n";
                 const close_delim = "\r\n--" + boundary + "--";
 
@@ -380,6 +374,7 @@
                     delimiter + 'Content-Type: application/json\r\n\r\n' + JSON.stringify(state) +
                     close_delim;
 
+                // MÉTODO PATCH PARA ATUALIZAÇÃO, POST PARA CRIAÇÃO
                 const url = driveFileId 
                     ? `https://www.googleapis.com/upload/drive/v3/files/${driveFileId}?uploadType=multipart`
                     : 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
@@ -395,12 +390,10 @@
 
                 if (!response.ok) {
                     const errorText = await response.text();
-                    console.error("ERRO CRÍTICO DRIVE - Status:", response.status, "Resposta:", errorText);
-                    showSyncStatus("❌ Falha no Backup", 'error');
+                    console.error("AutoBackup: Erro HTTP:", response.status, errorText);
+                    showSyncStatus("❌ Erro ao Salvar no Drive", 'error');
                     
-                    // Se o token morreu, pede re-autorização na próxima mutação
                     if (response.status === 401 || response.status === 403) {
-                        accessToken = null;
                         tokenClient.requestAccessToken();
                     }
                 } else {
@@ -411,8 +404,8 @@
                     showSyncStatus("✅ Sincronizado", 'success');
                 }
             } catch (e) { 
-                console.error("AutoBackup fail:", e);
-                showSyncStatus("❌ Erro de Conexão Drive", 'error');
+                console.error("AutoBackup falhou criticamente:", e);
+                showSyncStatus("❌ Erro de Rede", 'error');
             }
         }
 
@@ -475,7 +468,7 @@
                         maxOutputTokens: 8192,
                         systemInstruction: `Você é um REFORMATADOR MÉDICO FIEL. Organize o input em JSON.
                         Regras: 1. COPIE INTEGRALMENTE (Sem resumos). 2. FIDELIDADE TOTAL PALAVRA POR PALAVRA. 
-                        3. NUMERAÇÃO: O banco tem ${state.questions.length} questões. Comece da "Questão ${nextNum}:" sequencialmente. 
+                        3. NUMERAÇÃO: Comece da "Questão ${nextNum}:". 
                         Retorne JSON: [{"statement":"","options":[],"correctIndex":0,"explanation":"","specialty":""}]`
                     }
                 });
@@ -513,14 +506,11 @@
                 date: Date.now()
             }));
             state.questions = [...state.questions, ...news];
-            
             saveLocal(true);
-            
             document.getElementById('ia-review-area').classList.add('hidden');
             document.getElementById('ia-prompt').value = "";
             extractedFileText = "";
-            document.getElementById('file-status').classList.add('hidden');
-            alert("✅ Lote salvo e sincronizado.");
+            alert("✅ Lote salvo.");
         };
 
         // --- ANALYTICS ---
@@ -565,7 +555,7 @@
             document.getElementById('stat-total').innerText = questions.length;
             const hits = history.filter(h => h.success).length;
             document.getElementById('stat-accuracy').innerText = history.length ? Math.round((hits / history.length) * 100) + "%" : "0%";
-            document.getElementById('home-due-text').innerText = due > 0 ? `${due} cards pendentes.` : "Revisão OK!";
+            document.getElementById('home-due-text').innerText = due > 0 ? `${due} cards pendentes.` : "Tudo em dia!";
             
             const badge = document.getElementById('due-badge');
             badge.innerText = due;
@@ -637,39 +627,29 @@
             if (state.currentFolderId === 'f_all') {
                 warning.classList.remove('hidden');
                 display.innerText = "ESCOLHA MATÉRIA";
-                display.className = "w-full bg-slate-50 p-4 rounded-2xl text-xs font-black text-rose-500 border border-slate-100";
             } else {
                 warning.classList.add('hidden');
                 const folder = state.folders.find(f => f.id === state.currentFolderId);
                 display.innerText = folder.name.toUpperCase();
-                display.className = "w-full bg-slate-50 p-4 rounded-2xl text-xs font-black text-indigo-600 border border-slate-100";
             }
         }
 
         window.renderBank = () => {
             const searchTerm = document.getElementById('bank-search').value.toLowerCase();
             const list = document.getElementById('bank-list');
-            const folderFilter = state.currentFolderId;
-            let filtered = folderFilter === 'f_all' ? state.questions : state.questions.filter(q => q.folderId === folderFilter);
+            let filtered = state.currentFolderId === 'f_all' ? state.questions : state.questions.filter(q => q.folderId === state.currentFolderId);
             
             if (searchTerm) {
-                filtered = filtered.filter(q => 
-                    q.statement.toLowerCase().includes(searchTerm) || 
-                    (q.explanation && q.explanation.toLowerCase().includes(searchTerm))
-                );
+                filtered = filtered.filter(q => q.statement.toLowerCase().includes(searchTerm));
             }
 
-            if (filtered.length === 0) {
-                list.innerHTML = `<div class="py-24 text-center text-slate-300 italic text-xs">Vazio.</div>`;
-                return;
-            }
             list.innerHTML = filtered.slice().reverse().map(q => `
                 <div class="bg-white p-5 rounded-3xl border border-slate-100 flex justify-between items-center shadow-sm">
                     <div class="truncate mr-4">
                         <p class="text-[11px] text-slate-700 font-bold truncate">${q.statement}</p>
                         <p class="text-[8px] text-slate-400 font-black uppercase mt-1 tracking-tighter">${q.specialty || 'Global'}</p>
                     </div>
-                    <button onclick="window.deleteQ('${q.id}')" class="text-rose-400 p-2 active:scale-90 transition-transform">✕</button>
+                    <button onclick="window.deleteQ('${q.id}')" class="text-rose-400 p-2">✕</button>
                 </div>
             `).join('');
         };
@@ -685,12 +665,8 @@
 
         function renderStudyCard() {
             const container = document.getElementById('study-container');
-            if (studyQueue.length === 0) {
+            if (studyQueue.length === 0 || studyPointer >= studyQueue.length) {
                 container.innerHTML = `<div class="py-24 text-center"><div class="text-6xl mb-6">✅</div><h2 class="text-xl font-black">Meta Batida!</h2><button onclick="window.switchTab('home')" class="mt-8 bg-indigo-600 text-white font-black px-10 py-4 rounded-2xl">Finalizar</button></div>`;
-                return;
-            }
-            if (studyPointer >= studyQueue.length) {
-                container.innerHTML = `<div class="py-24 text-center"><div class="text-6xl mb-6">🎯</div><h2 class="text-xl font-black">Concluído</h2><button onclick="window.switchTab('home')" class="mt-8 bg-indigo-600 text-white font-black px-10 py-4 rounded-2xl">Finalizar</button></div>`;
                 return;
             }
             const q = studyQueue[studyPointer];
@@ -700,11 +676,11 @@
                     <div class="flex justify-between items-center"><span class="text-[10px] font-black text-indigo-500 uppercase tracking-widest">${q.specialty || 'Global'}</span><span class="text-[10px] font-bold text-slate-400">${studyPointer+1}/${studyQueue.length}</span></div>
                     <h3 class="text-lg font-bold text-slate-800 leading-relaxed case-text">${q.statement.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')}</h3>
                     <div class="space-y-3">
-                        ${q.options.map((opt, i) => `<button onclick="window.reveal(${i})" class="opt-btn w-full text-left p-5 rounded-3xl border-2 border-slate-50 bg-slate-50 text-slate-600 text-sm font-semibold active:scale-95 transition-all">${opt}</button>`).join('')}
+                        ${q.options.map((opt, i) => `<button onclick="window.reveal(${i})" class="opt-btn w-full text-left p-5 rounded-3xl border-2 border-slate-50 bg-slate-50 text-slate-600 text-sm font-semibold">${opt}</button>`).join('')}
                     </div>
                     <div id="study-feedback" class="hidden pt-6 border-t border-slate-50 space-y-6">
-                        <div class="bg-slate-900 text-slate-300 p-6 rounded-[28px] text-[11px] leading-relaxed italic">
-                            ${q.explanation || 'Sem notas.'}
+                        <div class="bg-slate-900 text-slate-300 p-6 rounded-[28px] text-[11px] italic">
+                            ${q.explanation || 'Sem comentários.'}
                         </div>
                         <div class="grid grid-cols-4 gap-2">
                             <button onclick="window.submitSRS(1)" class="bg-rose-500 py-5 rounded-2xl text-white font-black text-[9px] uppercase">Errei</button>
@@ -728,17 +704,15 @@
             document.getElementById('study-feedback').classList.remove('hidden');
         };
 
-        // --- INICIALIZAÇÃO E MOTOR GOOGLE ---
+        // --- INICIALIZAÇÃO ---
 
         function initGoogleWithRetry() {
             if (window.gapi && window.google && window.google.accounts) {
                 setupGoogle();
-            } else if (googleRetries < 30) {
+            } else if (googleRetries < 15) {
                 googleRetries++;
-                document.getElementById('login-status-msg').innerText = `Carregando Motores... (${googleRetries}/30)`;
+                document.getElementById('login-status-msg').innerText = `Carregando APIs Google... (${googleRetries}/15)`;
                 setTimeout(initGoogleWithRetry, 1000);
-            } else {
-                document.getElementById('login-status-msg').innerText = "❌ Falha crítica no Google. Reinicie.";
             }
         }
 
@@ -750,9 +724,9 @@
                     tokenClient = google.accounts.oauth2.initTokenClient({
                         client_id: CLIENT_ID,
                         scope: SCOPES,
-                        prompt: 'consent', // Obriga caixinha de permissão
+                        prompt: 'consent', // ESSENCIAL PARA ESCRITA DRIVE.FILE
                         callback: (resp) => {
-                            if (resp.error) return console.error("Identity Error:", resp.error);
+                            if (resp.error) return;
                             accessToken = resp.access_token;
                             localStorage.setItem(TOKEN_STORAGE, JSON.stringify({ token: accessToken, expiry: Date.now() + 3500 * 1000 }));
                             onLoginSuccess();
@@ -764,20 +738,17 @@
                         accessToken = saved.token;
                         onLoginSuccess();
                     } else {
-                        document.getElementById('login-status-msg').innerText = "✅ Motor Google Pronto.";
                         document.getElementById('login-loader').classList.add('hidden');
+                        document.getElementById('login-status-msg').innerText = "Pronto para Sincronização Master.";
                     }
                 });
-            } catch (err) {
-                console.error("Google Init Fail", err);
-                document.getElementById('login-status-msg').innerText = "❌ Falha na conexão GDrive.";
-            }
+            } catch (err) { console.error(err); }
         }
 
         function onLoginSuccess() {
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('main-app').style.display = 'block';
-            manualSync(); // Sincronia Imediata pós-login
+            manualSync();
         }
 
         function saveLocal(cloud = true) {
@@ -795,22 +766,16 @@
         }
 
         window.deleteQ = (id) => { 
-            if (confirm("Excluir card permanentemente?")) { 
+            if (confirm("Excluir card?")) { 
                 state.questions = state.questions.filter(q => q.id !== id); 
-                delete state.srs[id]; 
                 saveLocal(true); 
                 renderBank(); 
             } 
         };
 
         window.clearAll = () => { 
-            if (confirm("Apagar cache local?")) { 
-                localStorage.removeItem(STORAGE_KEY); 
-                location.reload(); 
-            } 
+            if (confirm("Resetar Banco Local?")) { localStorage.removeItem(STORAGE_KEY); location.reload(); } 
         };
-
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
         document.getElementById('file-reader').addEventListener('change', async (e) => {
             const file = e.target.files[0];
@@ -835,10 +800,9 @@
                     extractedFileText = result.value;
                 }
                 status.innerText = "✅ " + file.name;
-            } catch (err) { alert(err.message); status.innerText = ""; }
+            } catch (err) { alert(err.message); }
         });
 
-        // Bootstrap
         loadLocal();
         initChart();
         initGoogleWithRetry();
