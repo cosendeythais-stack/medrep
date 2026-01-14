@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>MedRep - Sincronização Master v13.4.2</title>
+    <title>MedRep - Sincronização Master v13.4.3</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -84,7 +84,7 @@
     <div id="login-screen" class="fixed inset-0 z-[200] bg-white flex flex-col items-center justify-center p-8 text-center pt-24">
         <div class="mb-12">
             <h1 class="text-6xl font-black text-indigo-600 tracking-tighter italic leading-none">MedRep</h1>
-            <p class="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-4">Sincronização Master v13.4.2</p>
+            <p class="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-4">Sincronização Master v13.4.3</p>
         </div>
         <div class="bg-slate-50 p-10 rounded-[40px] w-full max-w-sm border border-slate-100 mb-8 shadow-sm">
             <p id="login-status-msg" class="text-xs font-semibold text-slate-500 mb-6">Aguardando Conexão Google Drive...</p>
@@ -94,7 +94,7 @@
             </button>
             <div id="login-loader" class="hidden mt-6 flex justify-center"><div class="loading-spinner"></div></div>
         </div>
-        <p class="text-[9px] font-black text-slate-300 uppercase tracking-[0.4em]">RESTAURAÇÃO COMPLETA v13.4.2</p>
+        <p class="text-[9px] font-black text-slate-300 uppercase tracking-[0.4em]">RESTAURAÇÃO COMPLETA v13.4.3</p>
     </div>
 
     <!-- APLICATIVO PRINCIPAL -->
@@ -239,9 +239,9 @@
     <script type="module">
         import { GoogleGenAI } from "@google/genai";
 
-        // CONFIGURAÇÕES GLOBAIS
+        // CONFIGURAÇÕES GLOBAIS - ESCOPO DE ESCRITA MANDATÓRIO
         const CLIENT_ID = '648353734848-s9fnmd9tt0i5577grbt3q9oju6h71mpi.apps.googleusercontent.com';
-        const SCOPES = 'https://www.googleapis.com/auth/drive.file';
+        const SCOPES = 'https://www.googleapis.com/auth/drive.file'; 
         const STORAGE_KEY = 'medrep_data_v13_3_global';
         const KEY_STORAGE = 'medrep_gemini_key_v11';
         const TOKEN_STORAGE = 'medrep_google_token_persist';
@@ -309,13 +309,13 @@
             }
         };
 
-        // --- SINCRONIZAÇÃO MASTER ---
+        // --- SINCRONIZAÇÃO MASTER v13.4.3 ---
 
         async function manualSync() {
             if (!accessToken) return;
             showSyncStatus("☁️ Buscando no Drive...");
             try {
-                // Busca global por nome: q: "name = 'medrep_data.json' and trashed = false"
+                // Identificação Global por Nome (Garante paridade PC/Celular)
                 const list = await gapi.client.drive.files.list({ 
                     q: `name = '${FILENAME}' and trashed = false`,
                     spaces: 'drive',
@@ -340,7 +340,7 @@
                     }
                 } else {
                     showSyncStatus("☁️ Criando novo banco...");
-                    console.log("Sincronização: Nenhum arquivo encontrado. Preparando novo.");
+                    console.log("Sincronização: Nenhum arquivo encontrado. Criando novo.");
                 }
             } catch (e) { 
                 console.error("ManualSync falhou crítico:", e);
@@ -353,7 +353,7 @@
             if (!accessToken) return;
             showSyncStatus("☁️ Sincronizando...");
             try {
-                // Se não temos o ID ainda, tenta buscar pelo nome antes de criar um novo
+                // Revalidação do ID por nome se estiver nulo (previne duplicatas)
                 if (!driveFileId) {
                     const list = await gapi.client.drive.files.list({ 
                         q: `name = '${FILENAME}' and trashed = false`,
@@ -361,12 +361,11 @@
                     });
                     if (list.result.files && list.result.files[0]) {
                         driveFileId = list.result.files[0].id;
-                        console.log("AutoBackup: ID recuperado pelo nome: " + driveFileId);
                     }
                 }
 
                 const metadata = { name: FILENAME, mimeType: 'application/json' };
-                const boundary = 'medrep_sync_v13_4_2_final';
+                const boundary = 'medrep_sync_v13_4_3_master';
                 const delimiter = "\r\n--" + boundary + "\r\n";
                 const close_delim = "\r\n--" + boundary + "--";
 
@@ -375,7 +374,7 @@
                     delimiter + 'Content-Type: application/json\r\n\r\n' + JSON.stringify(state) +
                     close_delim;
 
-                // CORREÇÃO: Usar PATCH se existir (atualizar), POST se não (criar)
+                // CORREÇÃO MANDATÓRIA: Usar PATCH se existir para evitar erro de criação duplicada
                 const url = driveFileId 
                     ? `https://www.googleapis.com/upload/drive/v3/files/${driveFileId}?uploadType=multipart`
                     : 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
@@ -392,9 +391,9 @@
                 if (!response.ok) {
                     const errorText = await response.text();
                     console.error("AutoBackup: ERRO DRIVE - Status:", response.status, "Resposta:", errorText);
-                    showSyncStatus("❌ Erro ao Salvar", 'error');
+                    showSyncStatus("❌ Erro ao Salvar no Drive", 'error');
                     
-                    // Se erro de autorização (token expirado), tenta renovação
+                    // Tratamento de token expirado
                     if (response.status === 401 || response.status === 403) {
                         tokenClient.requestAccessToken();
                     }
@@ -402,15 +401,12 @@
                     if (!driveFileId) {
                         const result = await response.json();
                         driveFileId = result.id;
-                        console.log("Novo arquivo criado no Drive: " + driveFileId);
-                    } else {
-                        console.log("Arquivo atualizado com sucesso no Drive: " + driveFileId);
                     }
                     showSyncStatus("✅ Sincronizado", 'success');
                 }
             } catch (e) { 
                 console.error("AutoBackup falhou criticamente:", e);
-                showSyncStatus("❌ Erro de Rede Drive", 'error');
+                showSyncStatus("❌ Erro Crítico Drive", 'error');
             }
         }
 
@@ -420,8 +416,6 @@
             const q = studyQueue[studyPointer];
             const srs = state.srs[q.id] || { interval: 0, repetitions: 0, easeFactor: 2.5 };
             let { interval, repetitions, easeFactor } = srs;
-            
-            // Mapeamento de score: 1:Erro(0), 2:Difícil(2), 3:Bom(4), 4:Fácil(5)
             const score = grade === 1 ? 0 : grade === 2 ? 2 : grade === 3 ? 4 : 5;
             
             if (score >= 3) {
@@ -446,9 +440,7 @@
             
             state.history.push({ cardId: q.id, success: score >= 3, date: Date.now() });
             
-            // Persistência Mandatória e Backup Automático
             saveLocal(true);
-            
             studyPointer++;
             renderStudyCard();
         };
@@ -522,7 +514,7 @@
             document.getElementById('ia-prompt').value = "";
             extractedFileText = "";
             document.getElementById('file-status').classList.add('hidden');
-            alert("✅ Lote sincronizado com sucesso no Drive.");
+            alert("✅ Lote salvo e sincronizado com Drive.");
         };
 
         // --- ANALYTICS ---
@@ -737,10 +729,10 @@
                 setupGoogle();
             } else if (googleRetries < 15) {
                 googleRetries++;
-                document.getElementById('login-status-msg').innerText = `Iniciando Google Identity... (${googleRetries}/15)`;
+                document.getElementById('login-status-msg').innerText = `Carregando APIs Google... (${googleRetries}/15)`;
                 setTimeout(initGoogleWithRetry, 1000);
             } else {
-                document.getElementById('login-status-msg').innerText = "Erro ao carregar APIs. Recarregue a página.";
+                document.getElementById('login-status-msg').innerText = "Erro ao carregar APIs. Tente recarregar.";
             }
         }
 
@@ -752,12 +744,9 @@
                     tokenClient = google.accounts.oauth2.initTokenClient({
                         client_id: CLIENT_ID,
                         scope: SCOPES,
-                        prompt: 'consent', // FORÇAR CONSENTIMENTO PARA PERMISSÕES DE ESCRITA (CRÍTICO)
+                        prompt: 'consent', // FORÇA CONSENTIMENTO PARA PERMISSÕES DRIVE.FILE
                         callback: (resp) => {
-                            if (resp.error) {
-                                console.error("Falha no login Google Identity:", resp.error);
-                                return;
-                            }
+                            if (resp.error) return console.error("Login falhou:", resp.error);
                             accessToken = resp.access_token;
                             localStorage.setItem(TOKEN_STORAGE, JSON.stringify({ token: accessToken, expiry: Date.now() + 3500 * 1000 }));
                             onLoginSuccess();
@@ -769,12 +758,11 @@
                         accessToken = saved.token;
                         onLoginSuccess();
                     } else {
-                        document.getElementById('login-status-msg').innerText = "Pronto para Sincronização Master.";
+                        document.getElementById('login-status-msg').innerText = "MedRep Pronto para Sincronização.";
                         document.getElementById('login-loader').classList.add('hidden');
                     }
                 });
             } catch (err) {
-                console.error("Falha ao configurar Google GIS:", err);
                 document.getElementById('login-status-msg').innerText = "Falha crítica no login.";
             }
         }
@@ -815,7 +803,6 @@
             } 
         };
 
-        // Suporte a PDF e Docx
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
         document.getElementById('file-reader').addEventListener('change', async (e) => {
@@ -841,14 +828,9 @@
                     extractedFileText = result.value;
                 }
                 status.innerText = "✅ " + file.name;
-            } catch (err) { 
-                console.error("Erro na leitura de arquivo:", err);
-                alert("Falha na leitura: " + err.message); 
-                status.innerText = ""; 
-            }
+            } catch (err) { alert(err.message); status.innerText = ""; }
         });
 
-        // Inicialização Final
         loadLocal();
         initChart();
         initGoogleWithRetry();
