@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>MedRep - Sincronização Master v13.4.1</title>
+    <title>MedRep - Sincronização Master v13.4.2</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -84,7 +84,7 @@
     <div id="login-screen" class="fixed inset-0 z-[200] bg-white flex flex-col items-center justify-center p-8 text-center pt-24">
         <div class="mb-12">
             <h1 class="text-6xl font-black text-indigo-600 tracking-tighter italic leading-none">MedRep</h1>
-            <p class="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-4">Sincronização Master v13.4.1</p>
+            <p class="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-4">Sincronização Master v13.4.2</p>
         </div>
         <div class="bg-slate-50 p-10 rounded-[40px] w-full max-w-sm border border-slate-100 mb-8 shadow-sm">
             <p id="login-status-msg" class="text-xs font-semibold text-slate-500 mb-6">Aguardando Conexão Google Drive...</p>
@@ -94,7 +94,7 @@
             </button>
             <div id="login-loader" class="hidden mt-6 flex justify-center"><div class="loading-spinner"></div></div>
         </div>
-        <p class="text-[9px] font-black text-slate-300 uppercase tracking-[0.4em]">RESTAURAÇÃO COMPLETA v13.4.1</p>
+        <p class="text-[9px] font-black text-slate-300 uppercase tracking-[0.4em]">RESTAURAÇÃO COMPLETA v13.4.2</p>
     </div>
 
     <!-- APLICATIVO PRINCIPAL -->
@@ -315,7 +315,7 @@
             if (!accessToken) return;
             showSyncStatus("☁️ Buscando no Drive...");
             try {
-                // Busca global unificada: name = 'medrep_data.json' e não lixeira
+                // Busca global por nome: q: "name = 'medrep_data.json' and trashed = false"
                 const list = await gapi.client.drive.files.list({ 
                     q: `name = '${FILENAME}' and trashed = false`,
                     spaces: 'drive',
@@ -328,10 +328,14 @@
                         fileId: driveFileId, 
                         alt: 'media'
                     });
-                    if (resp.result && resp.result.questions) {
-                        state = resp.result;
+                    
+                    let driveData = resp.result;
+                    if (typeof driveData === 'string') driveData = JSON.parse(driveData);
+
+                    if (driveData && driveData.questions) {
+                        state = driveData;
                         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-                        console.log("Sincronização: Dados carregados via nome: " + driveFileId);
+                        console.log("Sincronização: Dados carregados com sucesso. ID: " + driveFileId);
                         showSyncStatus("✅ Sincronizado", 'success');
                     }
                 } else {
@@ -349,17 +353,20 @@
             if (!accessToken) return;
             showSyncStatus("☁️ Sincronizando...");
             try {
-                // Revalidação do ID para garantir paridade
+                // Se não temos o ID ainda, tenta buscar pelo nome antes de criar um novo
                 if (!driveFileId) {
                     const list = await gapi.client.drive.files.list({ 
                         q: `name = '${FILENAME}' and trashed = false`,
                         spaces: 'drive'
                     });
-                    if (list.result.files && list.result.files[0]) driveFileId = list.result.files[0].id;
+                    if (list.result.files && list.result.files[0]) {
+                        driveFileId = list.result.files[0].id;
+                        console.log("AutoBackup: ID recuperado pelo nome: " + driveFileId);
+                    }
                 }
 
                 const metadata = { name: FILENAME, mimeType: 'application/json' };
-                const boundary = 'medrep_sync_v13_4_1_master';
+                const boundary = 'medrep_sync_v13_4_2_final';
                 const delimiter = "\r\n--" + boundary + "\r\n";
                 const close_delim = "\r\n--" + boundary + "--";
 
@@ -368,7 +375,7 @@
                     delimiter + 'Content-Type: application/json\r\n\r\n' + JSON.stringify(state) +
                     close_delim;
 
-                // CORREÇÃO: Usar PATCH se existir, POST se não
+                // CORREÇÃO: Usar PATCH se existir (atualizar), POST se não (criar)
                 const url = driveFileId 
                     ? `https://www.googleapis.com/upload/drive/v3/files/${driveFileId}?uploadType=multipart`
                     : 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
@@ -387,7 +394,7 @@
                     console.error("AutoBackup: ERRO DRIVE - Status:", response.status, "Resposta:", errorText);
                     showSyncStatus("❌ Erro ao Salvar", 'error');
                     
-                    // Se erro de autorização, tenta renovação automática
+                    // Se erro de autorização (token expirado), tenta renovação
                     if (response.status === 401 || response.status === 403) {
                         tokenClient.requestAccessToken();
                     }
@@ -397,7 +404,7 @@
                         driveFileId = result.id;
                         console.log("Novo arquivo criado no Drive: " + driveFileId);
                     } else {
-                        console.log("Arquivo atualizado no Drive: " + driveFileId);
+                        console.log("Arquivo atualizado com sucesso no Drive: " + driveFileId);
                     }
                     showSyncStatus("✅ Sincronizado", 'success');
                 }
@@ -413,6 +420,8 @@
             const q = studyQueue[studyPointer];
             const srs = state.srs[q.id] || { interval: 0, repetitions: 0, easeFactor: 2.5 };
             let { interval, repetitions, easeFactor } = srs;
+            
+            // Mapeamento de score: 1:Erro(0), 2:Difícil(2), 3:Bom(4), 4:Fácil(5)
             const score = grade === 1 ? 0 : grade === 2 ? 2 : grade === 3 ? 4 : 5;
             
             if (score >= 3) {
@@ -437,7 +446,9 @@
             
             state.history.push({ cardId: q.id, success: score >= 3, date: Date.now() });
             
+            // Persistência Mandatória e Backup Automático
             saveLocal(true);
+            
             studyPointer++;
             renderStudyCard();
         };
@@ -511,7 +522,7 @@
             document.getElementById('ia-prompt').value = "";
             extractedFileText = "";
             document.getElementById('file-status').classList.add('hidden');
-            alert("✅ Lote sincronizado com sucesso.");
+            alert("✅ Lote sincronizado com sucesso no Drive.");
         };
 
         // --- ANALYTICS ---
@@ -741,10 +752,10 @@
                     tokenClient = google.accounts.oauth2.initTokenClient({
                         client_id: CLIENT_ID,
                         scope: SCOPES,
-                        prompt: 'consent', // FORÇAR CONSENTIMENTO PARA PERMISSÕES DE ESCRITA
+                        prompt: 'consent', // FORÇAR CONSENTIMENTO PARA PERMISSÕES DE ESCRITA (CRÍTICO)
                         callback: (resp) => {
                             if (resp.error) {
-                                console.error("Falha no login Google:", resp.error);
+                                console.error("Falha no login Google Identity:", resp.error);
                                 return;
                             }
                             accessToken = resp.access_token;
@@ -804,6 +815,9 @@
             } 
         };
 
+        // Suporte a PDF e Docx
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
         document.getElementById('file-reader').addEventListener('change', async (e) => {
             const file = e.target.files[0];
             if (!file) return;
@@ -827,15 +841,17 @@
                     extractedFileText = result.value;
                 }
                 status.innerText = "✅ " + file.name;
-            } catch (err) { alert(err.message); status.innerText = ""; }
+            } catch (err) { 
+                console.error("Erro na leitura de arquivo:", err);
+                alert("Falha na leitura: " + err.message); 
+                status.innerText = ""; 
+            }
         });
 
+        // Inicialização Final
         loadLocal();
         initChart();
         initGoogleWithRetry();
     </script>
 </body>
 </html>
-
-
-
