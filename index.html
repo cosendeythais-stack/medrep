@@ -10,10 +10,12 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     
+    <!-- Bibliotecas de Suporte -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
     
+    <!-- Google Identity Services -->
     <script src="https://apis.google.com/js/api.js" async defer></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 
@@ -26,8 +28,17 @@
     </script>
 
     <style>
-        :root { --ion-safe-area-top: env(safe-area-inset-top); --ion-safe-area-bottom: env(safe-area-inset-bottom); }
-        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; color: #0f172a; -webkit-tap-highlight-color: transparent; }
+        :root { 
+            --ion-safe-area-top: env(safe-area-inset-top); 
+            --ion-safe-area-bottom: env(safe-area-inset-bottom); 
+        }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #f1f5f9; 
+            color: #0f172a; 
+            -webkit-tap-highlight-color: transparent; 
+            overflow-x: hidden;
+        }
         
         #api-key-bar { z-index: 1000; }
         .tab-content { display: none; }
@@ -63,12 +74,16 @@
         
         #sync-footer { position: fixed; bottom: 100px; left: 0; right: 0; text-align: center; pointer-events: none; z-index: 40; }
         #sync-footer span { background: rgba(255,255,255,0.8); backdrop-filter: blur(4px); padding: 4px 12px; border-radius: 20px; font-size: 9px; font-weight: 800; color: #64748b; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
+
+        .opt-btn { transition: all 0.2s; }
+        .opt-btn:active { transform: scale(0.98); }
     </style>
 </head>
-<body class="antialiased overflow-x-hidden">
+<body class="antialiased">
 
     <div id="sync-toast"></div>
 
+    <!-- BARRA DE CONFIGURAÇÃO DE CHAVE -->
     <div id="api-key-bar" class="fixed top-0 left-0 right-0 bg-slate-900 text-white p-3 shadow-2xl flex flex-col md:flex-row items-center justify-center gap-3 border-b border-white/10">
         <div class="flex items-center gap-2">
             <span class="text-[10px] font-black uppercase tracking-widest text-indigo-400">Gemini Key:</span>
@@ -77,6 +92,7 @@
         <button onclick="window.saveGeminiKey()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-black uppercase px-4 py-1.5 rounded-lg transition-colors">Salvar Chave</button>
     </div>
 
+    <!-- TELA DE LOGIN -->
     <div id="login-screen" class="fixed inset-0 z-[200] bg-white flex flex-col items-center justify-center p-8 text-center pt-24">
         <div class="mb-12">
             <h1 class="text-6xl font-black text-indigo-600 tracking-tighter italic leading-none">MedRep</h1>
@@ -93,6 +109,7 @@
         <p class="text-[9px] font-black text-slate-300 uppercase tracking-[0.4em]">RESTAURAÇÃO COMPLETA v13.4.5</p>
     </div>
 
+    <!-- APLICATIVO PRINCIPAL -->
     <div id="main-app" class="pt-24">
         <header class="glass border-b border-slate-100 px-6 py-4 sticky top-[60px] md:top-[50px] z-50 flex justify-between items-center max-w-xl mx-auto w-full rounded-b-3xl">
             <div class="flex flex-col">
@@ -104,6 +121,7 @@
 
         <main class="max-w-xl mx-auto p-4 space-y-6 pb-32">
             
+            <!-- HOME TAB -->
             <section id="tab-home" class="tab-content active space-y-6">
                 <div class="bg-indigo-600 p-8 rounded-[40px] text-white shadow-xl relative overflow-hidden">
                     <p class="text-[9px] font-black uppercase tracking-widest opacity-60 mb-2">Resumo de Desempenho</p>
@@ -141,17 +159,30 @@
                 </div>
             </section>
 
+            <!-- STUDY TAB -->
             <section id="tab-study" class="tab-content">
                 <div id="study-container" class="space-y-6 min-h-[400px]"></div>
             </section>
 
+            <!-- ADD TAB (FIEL IA) -->
             <section id="tab-add" class="tab-content space-y-6">
                 <div class="bg-white p-8 rounded-[40px] border border-slate-100 shadow-sm space-y-6">
                     <div class="flex items-center gap-4">
                         <div class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-lg">🪄</div>
                         <h2 class="text-lg font-black text-slate-800">Importador IA Fiel</h2>
                     </div>
-                    <div id="active-folder-display" class="w-full bg-slate-50 p-4 rounded-2xl text-xs font-black text-indigo-600 uppercase border border-slate-100">-</div>
+
+                    <div id="ia-folder-warning" class="bg-amber-50 border border-amber-100 p-4 rounded-2xl hidden">
+                        <p class="text-[10px] text-amber-700 font-bold uppercase leading-tight">⚠️ Defina a matéria alvo na Home antes de importar.</p>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Pasta Atual:</label>
+                        <div id="active-folder-display" class="w-full bg-slate-50 p-4 rounded-2xl text-xs font-black text-indigo-600 uppercase border border-slate-100">
+                            -
+                        </div>
+                    </div>
+
                     <div class="bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl p-6 text-center">
                         <label class="cursor-pointer flex flex-col items-center gap-2">
                             <span class="text-2xl">📄</span>
@@ -160,12 +191,15 @@
                             <span id="file-status" class="text-[9px] text-indigo-500 font-bold hidden"></span>
                         </label>
                     </div>
+
                     <textarea id="ia-prompt" placeholder="Cole enunciados ou texto livre..." class="w-full h-40 bg-slate-50 rounded-[24px] p-6 text-sm border border-slate-100 focus:ring-2 ring-indigo-500 outline-none resize-none"></textarea>
+                    
                     <button onclick="window.processIA()" id="btn-ia" class="w-full bg-slate-900 text-white font-black py-5 rounded-[20px] uppercase text-xs flex items-center justify-center gap-4 shadow-xl active:scale-95 transition-transform">
                         <span>Reformatar Lote com IA</span>
                         <div id="ia-loader" class="loading-spinner hidden" style="border-top-color: white;"></div>
                     </button>
                 </div>
+
                 <div id="ia-review-area" class="hidden space-y-4">
                     <div class="flex justify-between items-center bg-white p-6 rounded-[24px] border border-slate-100 shadow-xl sticky top-[130px] z-10">
                         <span id="review-count" class="text-xs font-black text-slate-800">Mapeamento Concluído</span>
@@ -175,73 +209,117 @@
                 </div>
             </section>
 
+            <!-- BANK TAB -->
             <section id="tab-bank" class="tab-content space-y-4">
                 <div class="flex justify-between items-center px-4">
                     <h2 class="text-lg font-black text-slate-800">Acervo</h2>
                     <button onclick="window.clearAll()" class="text-[8px] font-black text-rose-500 uppercase tracking-widest bg-rose-50 px-3 py-1.5 rounded-lg">Reset Local</button>
                 </div>
+                
                 <div class="px-2">
                     <input type="text" id="bank-search" oninput="window.renderBank()" placeholder="🔎 Filtrar banco..." class="search-bar">
                 </div>
+
                 <div id="bank-list" class="space-y-2 pb-24 px-2"></div>
             </section>
         </main>
 
-        <div id="sync-footer"><span id="sync-footer-label">☁️ Iniciando...</span></div>
+        <div id="sync-footer">
+            <span id="sync-footer-label">☁️ Iniciando...</span>
+        </div>
 
+        <!-- MENU DE NAVEGAÇÃO -->
         <nav class="fixed bottom-0 left-0 right-0 max-w-xl mx-auto bg-white/95 backdrop-blur-2xl border-t border-slate-100 flex justify-around py-6 px-4 z-50 rounded-t-[32px] shadow-2xl safe-bottom">
-            <button onclick="window.switchTab('home')" class="nav-btn flex flex-col items-center gap-1 active text-indigo-600" id="nav-home"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3L4 9V21H9V15H15V21H20V9L12 3Z"/></svg><span class="text-[8px] font-black uppercase">Home</span></button>
-            <button onclick="window.switchTab('study')" class="nav-btn flex flex-col items-center gap-1 text-slate-400" id="nav-study"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L4.5 20.29L5.21 21L12 18L18.79 21L19.5 20.29L12 2Z"/></svg><span class="text-[8px] font-black uppercase">Estudar</span></button>
-            <button onclick="window.switchTab('add')" class="nav-btn flex flex-col items-center gap-1 text-slate-400" id="nav-add"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L14.5 8.5L21 11L14.5 13.5L12 20L9.5 13.5L3 11L9.5 8.5L12 2Z"/></svg><span class="text-[8px] font-black uppercase">Fiel</span></button>
-            <button onclick="window.switchTab('bank')" class="nav-btn flex flex-col items-center gap-1 text-slate-400" id="nav-bank"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M4 4H20V20H4V4ZM6 6V18H18V6H6ZM8 8H16V10H8V8ZM8 12H16V14H8V12ZM8 16H13V18H8V16Z"/></svg><span class="text-[8px] font-black uppercase">Banco</span></button>
+            <button onclick="window.switchTab('home')" class="nav-btn flex flex-col items-center gap-1 active text-indigo-600" id="nav-home">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3L4 9V21H9V15H15V21H20V9L12 3Z"/></svg>
+                <span class="text-[8px] font-black uppercase">Home</span>
+            </button>
+            <button onclick="window.switchTab('study')" class="nav-btn flex flex-col items-center gap-1 text-slate-400" id="nav-study">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L4.5 20.29L5.21 21L12 18L18.79 21L19.5 20.29L12 2Z"/></svg>
+                <span class="text-[8px] font-black uppercase">Estudar</span>
+            </button>
+            <button onclick="window.switchTab('add')" class="nav-btn flex flex-col items-center gap-1 text-slate-400" id="nav-add">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L14.5 8.5L21 11L14.5 13.5L12 20L9.5 13.5L3 11L9.5 8.5L12 2Z"/></svg>
+                <span class="text-[8px] font-black uppercase">Fiel</span>
+            </button>
+            <button onclick="window.switchTab('bank')" class="nav-btn flex flex-col items-center gap-1 text-slate-400" id="nav-bank">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M4 4H20V20H4V4ZM6 6V18H18V6H6ZM8 8H16V10H8V8ZM8 12H16V14H8V12ZM8 16H13V18H8V16Z"/></svg>
+                <span class="text-[8px] font-black uppercase">Banco</span>
+            </button>
         </nav>
     </div>
 
     <script type="module">
         import { GoogleGenAI } from "@google/genai";
 
-        // CREDENCIAIS FIXAS
+        // CREDENCIAIS FIXAS EXIGIDAS
         const CLIENT_ID = '648353734848-s9fnmd9tt0i5577grbt3q9oju6h71mpi.apps.googleusercontent.com';
+        const DEFAULT_GEMINI_KEY = 'AIzaSyAIJFacEIsyKUY0LLwjsGxFSdniwKfXkIE';
         const SCOPES = 'https://www.googleapis.com/auth/drive.file'; 
         const STORAGE_KEY = 'medrep_data_v13_3_global';
         const KEY_STORAGE = 'medrep_gemini_key_v11';
         const TOKEN_STORAGE = 'medrep_google_token_persist';
         const FILENAME = 'medrep_data.json';
-        const DEFAULT_AI_KEY = 'AIzaSyAIJFacEIsyKUY0LLwjsGxFSdniwKfXkIE';
 
-        let state = { questions: [], srs: {}, history: [], folders: [{id: 'f_all', name: 'Global'}, {id: 'f_default', name: 'Geral'}], currentFolderId: 'f_all' };
-        let tempExtracted = [], studyQueue = [], studyPointer = 0, isRevealed = false, accessToken = null, tokenClient = null, chartInstance = null, extractedFileText = "", driveFileId = null;
-
-        const getAIClient = () => {
-            const key = localStorage.getItem(KEY_STORAGE) || DEFAULT_AI_KEY;
-            return new GoogleGenAI({ apiKey: key });
+        // ESTADO GLOBAL
+        let state = {
+            questions: [],
+            srs: {}, // cardId: { interval, repetitions, easeFactor, nextReview }
+            history: [],
+            folders: [{id: 'f_all', name: 'Global'}, {id: 'f_default', name: 'Geral'}],
+            currentFolderId: 'f_all'
         };
 
-        // --- MOTOR DE SINCRONIZAÇÃO v13.4.5 ---
+        let tempExtracted = [];
+        let studyQueue = [];
+        let studyPointer = 0;
+        let isRevealed = false;
+        let accessToken = null;
+        let tokenClient = null;
+        let chartInstance = null;
+        let extractedFileText = "";
+        let googleRetries = 0;
+        let driveFileId = null;
+
+        // --- GOOGLE DRIVE SYNC CORE ---
 
         async function manualSync() {
             if (!accessToken) return;
-            showSyncStatus("☁️ Buscando dados no Drive...");
+            showSyncStatus("☁️ Buscando no Drive...");
             try {
+                // Busca global por nome: Crucial para sincronizar PC e Celular
                 const list = await gapi.client.drive.files.list({ 
                     q: `name = '${FILENAME}' and trashed = false`,
                     spaces: 'drive',
                     fields: 'files(id, name)'
                 });
+                
                 const file = list.result.files[0];
                 if (file) {
                     driveFileId = file.id;
-                    const resp = await gapi.client.drive.files.get({ fileId: driveFileId, alt: 'media' });
+                    const resp = await gapi.client.drive.files.get({ 
+                        fileId: driveFileId, 
+                        alt: 'media'
+                    });
+                    
                     let driveData = resp.result;
-                    if (typeof driveData === 'string') driveData = JSON.parse(driveData);
+                    // Tenta parsear caso venha como string
+                    if (typeof driveData === 'string') {
+                        try { driveData = JSON.parse(driveData); } catch(e) {}
+                    }
+
                     if (driveData && driveData.questions) {
                         state = driveData;
                         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+                        console.log("Drive: Sincronia de entrada bem-sucedida. ID:", driveFileId);
                         showSyncStatus("✅ Sincronizado", 'success');
                     }
+                } else {
+                    console.log("Drive: Nenhum arquivo encontrado. Preparando novo.");
+                    showSyncStatus("☁️ Criando Banco...", 'info');
                 }
             } catch (e) { 
-                console.error("Sync Error:", e);
+                console.error("ManualSync: Erro crítico:", e);
                 showSyncStatus("❌ Falha na Sincronia", 'error');
             }
             updateStats();
@@ -249,212 +327,446 @@
 
         async function autoBackup() {
             if (!accessToken) return;
-            showSyncStatus("☁️ Salvando...");
+            showSyncStatus("☁️ Sincronizando...");
             try {
-                // Se o ID sumiu, tenta achar por nome primeiro
+                // Se o ID não existir localmente nesta sessão, tenta buscar pelo nome primeiro
                 if (!driveFileId) {
-                    const list = await gapi.client.drive.files.list({ q: `name = '${FILENAME}' and trashed = false` });
-                    if (list.result.files && list.result.files[0]) driveFileId = list.result.files[0].id;
+                    const list = await gapi.client.drive.files.list({ 
+                        q: `name = '${FILENAME}' and trashed = false`,
+                        spaces: 'drive'
+                    });
+                    if (list.result.files && list.result.files[0]) {
+                        driveFileId = list.result.files[0].id;
+                    }
                 }
 
                 const metadata = { name: FILENAME, mimeType: 'application/json' };
                 const boundary = 'medrep_master_v13_4_5';
                 const delimiter = "\r\n--" + boundary + "\r\n";
                 const close_delim = "\r\n--" + boundary + "--";
-                const body = delimiter + 'Content-Type: application/json; charset=UTF-8\r\n\r\n' + JSON.stringify(metadata) + delimiter + 'Content-Type: application/json\r\n\r\n' + JSON.stringify(state) + close_delim;
 
-                // CORREÇÃO: PATCH para atualizar, POST para criar
+                const body = 
+                    delimiter + 'Content-Type: application/json; charset=UTF-8\r\n\r\n' + JSON.stringify(metadata) +
+                    delimiter + 'Content-Type: application/json\r\n\r\n' + JSON.stringify(state) +
+                    close_delim;
+
+                // CORREÇÃO CRÍTICA: PATCH se ID existir, POST se for novo
                 const url = driveFileId 
                     ? `https://www.googleapis.com/upload/drive/v3/files/${driveFileId}?uploadType=multipart`
                     : 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
 
                 const response = await fetch(url, {
                     method: driveFileId ? 'PATCH' : 'POST',
-                    headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'multipart/related; boundary=' + boundary },
+                    headers: { 
+                        'Authorization': 'Bearer ' + accessToken,
+                        'Content-Type': 'multipart/related; boundary=' + boundary
+                    },
                     body: body
                 });
 
-                if (response.ok) {
-                    const result = await response.json();
-                    driveFileId = result.id;
-                    showSyncStatus("✅ Sincronizado", 'success');
-                } else {
-                    const err = await response.text();
-                    console.error("ERRO DRIVE:", response.status, err);
-                    showSyncStatus("❌ Falha no Backup", 'error');
-                }
-            } catch (e) { console.error(e); showSyncStatus("❌ Erro Crítico", 'error'); }
-        }
-
-        function saveLocal(cloud = true) {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-            updateStats();
-            if (cloud && accessToken) autoBackup();
-        }
-
-        // --- INICIALIZAÇÃO GOOGLE ---
-
-        function setupGoogle() {
-            gapi.load('client', async () => {
-                await gapi.client.init({ discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'] });
-                tokenClient = google.accounts.oauth2.initTokenClient({
-                    client_id: CLIENT_ID,
-                    scope: SCOPES,
-                    prompt: 'consent', // FORÇA CAIXA DE PERMISSÃO EDITAR
-                    callback: (resp) => {
-                        if (resp.error) return;
-                        accessToken = resp.access_token;
-                        onLoginSuccess();
+                if (!response.ok) {
+                    const errorDetails = await response.text();
+                    console.error("Drive Error:", response.status, errorDetails);
+                    showSyncStatus("❌ Erro ao Gravar", 'error');
+                    
+                    // Se token expirou, força re-login silencioso/prompt
+                    if (response.status === 401 || response.status === 403) {
+                        tokenClient.requestAccessToken();
                     }
-                });
-                document.getElementById('login-status-msg').innerText = "MedRep Pronto.";
-                document.getElementById('login-loader').classList.add('hidden');
-            });
+                } else {
+                    if (!driveFileId) {
+                        const result = await response.json();
+                        driveFileId = result.id;
+                    }
+                    showSyncStatus("✅ Sincronizado", 'success');
+                }
+            } catch (e) { 
+                console.error("AutoBackup: Erro de rede:", e);
+                showSyncStatus("❌ Erro Conexão Drive", 'error');
+            }
         }
 
-        function onLoginSuccess() {
-            document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('main-app').style.display = 'block';
-            manualSync();
-        }
-
-        window.fazerLogin = () => {
-            document.getElementById('login-loader').classList.remove('hidden');
-            if (tokenClient) tokenClient.requestAccessToken(); else setupGoogle();
-        };
-
-        // --- LÓGICA SRS ---
+        // --- LÓGICA SRS (SM-2) ---
 
         window.submitSRS = (grade) => {
             const q = studyQueue[studyPointer];
+            if (!q) return;
+
             const srs = state.srs[q.id] || { interval: 0, repetitions: 0, easeFactor: 2.5 };
             let { interval, repetitions, easeFactor } = srs;
+            
+            // Mapeamento Grade -> Score: 1(Errei=0), 2(Difícil=2), 3(Bom=4), 4(Fácil=5)
             const score = grade === 1 ? 0 : grade === 2 ? 2 : grade === 3 ? 4 : 5;
-            if (score >= 3) {
-                if (repetitions === 0) interval = 1; else if (repetitions === 1) interval = 6; else interval = Math.round(interval * easeFactor);
+            
+            if (score >= 3) { // Sucesso
+                if (repetitions === 0) interval = 1;
+                else if (repetitions === 1) interval = 6;
+                else interval = Math.round(interval * easeFactor);
                 repetitions++;
-            } else { repetitions = 0; interval = 1; }
+            } else { // Falha
+                repetitions = 0; 
+                interval = 1; 
+            }
+            
+            // Ajuste Ease Factor
             easeFactor = easeFactor + (0.1 - (5 - score) * (0.08 + (5 - score) * 0.02));
             if (easeFactor < 1.3) easeFactor = 1.3;
-            state.srs[q.id] = { interval, repetitions, easeFactor, nextReview: Date.now() + (interval * 24 * 60 * 60 * 1000) };
+            
+            state.srs[q.id] = { 
+                interval, 
+                repetitions, 
+                easeFactor, 
+                nextReview: Date.now() + (interval * 24 * 60 * 60 * 1000) 
+            };
+            
             state.history.push({ cardId: q.id, success: score >= 3, date: Date.now() });
-            saveLocal(true);
+            
+            saveLocal(true); // Persistência Global
+            
             studyPointer++;
             renderStudyCard();
         };
 
-        // --- UI E IA ---
+        // --- IA IMPORTADOR (FIEL) ---
+
+        const getAIClient = () => {
+            const key = localStorage.getItem(KEY_STORAGE) || process.env.API_KEY || DEFAULT_GEMINI_KEY;
+            return new GoogleGenAI({ apiKey: key });
+        };
 
         window.processIA = async () => {
-            if (state.currentFolderId === 'f_all') return alert("Escolha uma pasta específica.");
+            if (state.currentFolderId === 'f_all') {
+                return alert("⚠️ Selecione uma pasta específica na Home antes de importar.");
+            }
+            
             const userInput = document.getElementById('ia-prompt').value.trim();
+            if (!userInput && !extractedFileText) return alert("⚠️ Digite algo ou anexe um arquivo.");
+            
             const loader = document.getElementById('ia-loader');
             const btn = document.getElementById('btn-ia');
-            loader.classList.remove('hidden'); btn.disabled = true;
+            loader.classList.remove('hidden');
+            btn.disabled = true;
+
             try {
                 const ai = getAIClient();
-                const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
-                const prompt = `Extraia questões do texto. Retorne JSON: [{"statement":"","options":[],"correctIndex":0,"explanation":""}]. Texto: ${userInput || extractedFileText}`;
-                const result = await model.generateContent(prompt);
-                const match = (await result.response).text().match(/\[[\s\S]*\]/);
-                if (match) { tempExtracted = JSON.parse(match[0]); renderReviewList(); }
-            } catch (e) { alert("Erro IA: " + e.message); }
-            finally { loader.classList.add('hidden'); btn.disabled = false; }
+                const sourceData = extractedFileText ? `DOCUMENTO:\n${extractedFileText}\n\nTEXTO USUÁRIO:\n${userInput}` : userInput;
+                const nextNum = state.questions.length + 1;
+
+                const response = await ai.models.generateContent({
+                    model: 'gemini-3-flash-preview',
+                    contents: [{ parts: [{ text: sourceData }] }],
+                    config: { 
+                        maxOutputTokens: 8192,
+                        systemInstruction: `Você é o MEDREP FIEL. Sua missão é extrair questões médicas de textos complexos e PDFs.
+                        REGRAS:
+                        1. FIDELIDADE: Copie enunciados e opções INTEGRALMENTE. Não resuma.
+                        2. FORMATO: Retorne APENAS um JSON array válido.
+                        3. ESTRUTURA: [{"statement": "...", "options": ["A","B","C","D"], "correctIndex": 0, "explanation": "...", "specialty": "..."}]
+                        4. Comece numerando mentalmente a partir da Questão ${nextNum}.`
+                    }
+                });
+
+                const jsonMatch = response.text.match(/\[[\s\S]*\]/);
+                if (jsonMatch) {
+                    tempExtracted = JSON.parse(jsonMatch[0]);
+                    renderReviewList();
+                } else {
+                    alert("A IA não retornou um JSON válido. Tente novamente.");
+                }
+            } catch (e) { 
+                console.error("IA Error:", e);
+                alert("Erro na IA: " + e.message); 
+            } finally { 
+                loader.classList.add('hidden'); 
+                btn.disabled = false; 
+            }
         };
 
         function renderReviewList() {
-            document.getElementById('ia-review-area').classList.remove('hidden');
-            document.getElementById('review-list').innerHTML = tempExtracted.map(q => `
-                <div class="bg-white p-5 rounded-3xl border border-slate-100"><p class="text-xs font-bold text-slate-700">"${q.statement.substring(0,80)}..."</p></div>
+            const area = document.getElementById('ia-review-area');
+            const list = document.getElementById('review-list');
+            area.classList.remove('hidden');
+            
+            list.innerHTML = tempExtracted.map((q, idx) => `
+                <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-3">
+                    <div class="flex justify-between items-start">
+                        <p class="text-[10px] font-black text-indigo-500 uppercase">PRÉVIA QUESTÃO ${idx + 1}</p>
+                        <button onclick="window.removeTemp(${idx})" class="text-rose-400">Remover</button>
+                    </div>
+                    <p class="text-xs font-bold text-slate-700 italic leading-relaxed">"${q.statement}"</p>
+                    <div class="pt-2 border-t border-slate-50">
+                        <p class="text-[9px] text-slate-400 font-bold">Explicação: ${q.explanation ? q.explanation.substring(0, 100) + '...' : 'Sem notas.'}</p>
+                    </div>
+                </div>
             `).join('');
+            
+            document.getElementById('review-count').innerText = `${tempExtracted.length} cards prontos para salvar.`;
+            window.scrollTo({ top: area.offsetTop - 100, behavior: 'smooth' });
         }
 
-        window.confirmBatch = () => {
-            const news = tempExtracted.map(q => ({ ...q, id: 'q_' + Math.random().toString(36).substr(2, 9), folderId: state.currentFolderId, date: Date.now() }));
-            state.questions = [...state.questions, ...news];
-            saveLocal(true);
-            document.getElementById('ia-review-area').classList.add('hidden');
-            document.getElementById('ia-prompt').value = "";
-            alert("✅ Salvo!");
+        window.removeTemp = (idx) => {
+            tempExtracted.splice(idx, 1);
+            if (tempExtracted.length === 0) document.getElementById('ia-review-area').classList.add('hidden');
+            else renderReviewList();
         };
 
-        function updateStats() {
-            document.getElementById('stat-total').innerText = state.questions.length;
-            const history = state.history;
-            const hits = history.filter(h => h.success).length;
-            document.getElementById('stat-accuracy').innerText = history.length ? Math.round((hits / history.length) * 100) + "%" : "0%";
-            const now = Date.now();
-            const due = state.questions.filter(q => !state.srs[q.id] || state.srs[q.id].nextReview <= now).length;
-            document.getElementById('due-badge').innerText = due;
-            document.getElementById('due-badge').classList.toggle('hidden', due === 0);
-            initChart();
-            renderFoldersUI();
-        }
+        window.confirmBatch = () => {
+            const folderId = state.currentFolderId;
+            const folderName = state.folders.find(f => f.id === folderId).name;
+            
+            const news = tempExtracted.map(q => ({ 
+                ...q, 
+                id: 'q_' + Math.random().toString(36).substr(2, 9),
+                folderId: folderId,
+                specialty: q.specialty || folderName,
+                date: Date.now()
+            }));
+            
+            state.questions = [...state.questions, ...news];
+            saveLocal(true);
+            
+            document.getElementById('ia-review-area').classList.add('hidden');
+            document.getElementById('ia-prompt').value = "";
+            extractedFileText = "";
+            document.getElementById('file-status').classList.add('hidden');
+            alert(`✅ ${news.length} questões adicionadas à pasta "${folderName}" e sincronizadas.`);
+            switchTab('bank');
+        };
+
+        // --- ANALYTICS & STATS ---
 
         function initChart() {
-            const ctx = document.getElementById('performanceChart').getContext('2d');
-            if (chartInstance) chartInstance.destroy();
+            const canvas = document.getElementById('performanceChart');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
             chartInstance = new Chart(ctx, {
                 type: 'line',
-                data: { labels: ['S', 'T', 'Q', 'Q', 'S', 'S', 'D'], datasets: [{ data: [12, 19, 3, 5, 2, 3, 9], borderColor: '#fff', backgroundColor: 'rgba(255,255,255,0.1)', fill: true, tension: 0.4, borderWidth: 3, pointRadius: 0 }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false } } }
+                data: {
+                    labels: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'],
+                    datasets: [{
+                        label: 'Acertos',
+                        data: [0,0,0,0,0,0,0],
+                        borderColor: '#fff',
+                        backgroundColor: 'rgba(255,255,255,0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 2,
+                        pointRadius: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { display: true, ticks: { color: 'rgba(255,255,255,0.6)', font: { size: 9 } }, grid: { display: false } },
+                        y: { display: false }
+                    }
+                }
             });
         }
 
-        function renderFoldersUI() {
-            document.getElementById('folders-scroll').innerHTML = state.folders.map(f => `<div onclick="window.onFolderChange('${f.id}')" class="folder-chip px-6 py-2 rounded-full text-[10px] font-black uppercase border border-slate-200 bg-white ${state.currentFolderId === f.id ? 'active shadow-lg' : 'text-slate-500'}">${f.name}</div>`).join('');
+        function updateStats() {
+            const folderId = state.currentFolderId;
+            const now = Date.now();
+            const questions = folderId === 'f_all' ? state.questions : state.questions.filter(q => q.folderId === folderId);
+            const questionIds = new Set(questions.map(q => q.id));
+            const history = state.history.filter(h => folderId === 'f_all' || questionIds.has(h.cardId));
+            
+            const due = questions.filter(q => {
+                const srs = state.srs[q.id];
+                return !srs || srs.nextReview <= now;
+            }).length;
+            
+            document.getElementById('stat-total').innerText = questions.length;
+            const hits = history.filter(h => h.success).length;
+            document.getElementById('stat-accuracy').innerText = history.length ? Math.round((hits / history.length) * 100) + "%" : "0%";
+            
+            const dueText = document.getElementById('home-due-text');
+            if (dueText) dueText.innerText = due > 0 ? `${due} cards pendentes de revisão.` : "Parabéns! Tudo revisado.";
+            
+            const badge = document.getElementById('due-badge');
+            if (badge) {
+                badge.innerText = due;
+                badge.classList.toggle('hidden', due === 0);
+            }
+
+            if (chartInstance) {
+                const weeklyData = [0,0,0,0,0,0,0];
+                const last7Days = history.filter(h => h.date > (Date.now() - 7 * 24 * 60 * 60 * 1000));
+                last7Days.forEach(h => {
+                    const day = new Date(h.date).getDay();
+                    if (h.success) weeklyData[day]++;
+                });
+                chartInstance.data.datasets[0].data = weeklyData;
+                chartInstance.update();
+            }
+            renderFoldersUI();
         }
 
-        window.onFolderChange = (id) => { state.currentFolderId = id; updateStats(); if (document.getElementById('tab-bank').classList.contains('active')) renderBank(); };
-        window.switchTab = (id) => {
+        function renderFoldersUI() {
+            const scroll = document.getElementById('folders-scroll');
+            if (!scroll) return;
+            scroll.innerHTML = state.folders.map(f => {
+                const isActive = state.currentFolderId === f.id;
+                return `<div onclick="window.onFolderChange('${f.id}')" class="folder-chip px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest border border-slate-200 bg-white ${isActive ? 'active shadow-lg' : 'text-slate-500'}">${f.name}</div>`;
+            }).join('');
+        }
+
+        // --- NAVEGAÇÃO E UI ---
+
+        window.switchTab = (tabId) => {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(el => el.classList.replace('text-indigo-600', 'text-slate-400'));
-            document.getElementById('tab-' + id).classList.add('active');
-            document.getElementById('nav-' + id).classList.replace('text-slate-400', 'text-indigo-600');
-            if (id === 'home') updateStats(); if (id === 'study') startStudy(); if (id === 'bank') renderBank();
+            document.querySelectorAll('.nav-btn').forEach(el => {
+                el.classList.remove('active', 'text-indigo-600');
+                el.classList.add('text-slate-400');
+            });
+            
+            const target = document.getElementById('tab-' + tabId);
+            if (target) target.classList.add('active');
+            
+            const btn = document.getElementById('nav-' + tabId);
+            if (btn) {
+                btn.classList.add('active', 'text-indigo-600');
+                btn.classList.remove('text-slate-400');
+            }
+            
+            if (tabId === 'home') updateStats();
+            if (tabId === 'study') startStudy();
+            if (tabId === 'bank') renderBank();
+            if (tabId === 'add') validateIAFolder();
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         };
 
+        window.onFolderChange = (id) => {
+            state.currentFolderId = id;
+            const folder = state.folders.find(f => f.id === id);
+            document.getElementById('header-subtitle').innerText = folder ? folder.name : 'Global';
+            updateStats();
+            if (document.getElementById('tab-bank').classList.contains('active')) renderBank();
+        };
+
+        window.createNewFolder = () => {
+            const name = prompt("Nome da nova matéria/pasta:");
+            if (name && name.trim()) {
+                const folder = { id: 'f_' + Date.now(), name: name.trim() };
+                state.folders.push(folder);
+                state.currentFolderId = folder.id;
+                saveLocal(true);
+                updateStats();
+            }
+        };
+
+        function validateIAFolder() {
+            const warning = document.getElementById('ia-folder-warning');
+            const display = document.getElementById('active-folder-display');
+            if (state.currentFolderId === 'f_all') {
+                warning.classList.remove('hidden');
+                display.innerText = "ESCOLHA UMA PASTA";
+                display.classList.add('text-rose-500');
+            } else {
+                warning.classList.add('hidden');
+                const folder = state.folders.find(f => f.id === state.currentFolderId);
+                display.innerText = folder.name.toUpperCase();
+                display.classList.remove('text-rose-500');
+            }
+        }
+
         window.renderBank = () => {
+            const searchTerm = document.getElementById('bank-search').value.toLowerCase();
             const list = document.getElementById('bank-list');
+            if (!list) return;
+
             let filtered = state.currentFolderId === 'f_all' ? state.questions : state.questions.filter(q => q.folderId === state.currentFolderId);
-            list.innerHTML = filtered.slice().reverse().map(q => `<div class="bg-white p-5 rounded-3xl border border-slate-100 flex justify-between items-center shadow-sm"><div class="truncate mr-4"><p class="text-[11px] text-slate-700 font-bold truncate">${q.statement}</p></div><button onclick="window.deleteQ('${q.id}')" class="text-rose-400 p-2">✕</button></div>`).join('');
+            
+            if (searchTerm) {
+                filtered = filtered.filter(q => 
+                    q.statement.toLowerCase().includes(searchTerm) || 
+                    (q.explanation && q.explanation.toLowerCase().includes(searchTerm))
+                );
+            }
+
+            if (filtered.length === 0) {
+                list.innerHTML = `<div class="py-24 text-center text-slate-300 italic text-xs">Vazio.</div>`;
+                return;
+            }
+
+            list.innerHTML = filtered.slice().reverse().map(q => `
+                <div class="bg-white p-5 rounded-3xl border border-slate-100 flex justify-between items-center shadow-sm">
+                    <div class="truncate mr-4 flex-1">
+                        <p class="text-[11px] text-slate-700 font-bold truncate">${q.statement}</p>
+                        <p class="text-[8px] text-indigo-400 font-black uppercase mt-1 tracking-tighter">${q.specialty || 'Geral'}</p>
+                    </div>
+                    <button onclick="window.deleteQ('${q.id}')" class="text-rose-400 p-2 hover:bg-rose-50 rounded-lg transition-colors">✕</button>
+                </div>
+            `).join('');
         };
 
         function startStudy() {
             const now = Date.now();
             const questions = state.currentFolderId === 'f_all' ? state.questions : state.questions.filter(q => q.folderId === state.currentFolderId);
-            studyQueue = questions.filter(q => !state.srs[q.id] || state.srs[q.id].nextReview <= now);
+            
+            studyQueue = questions.filter(q => {
+                const srs = state.srs[q.id];
+                return !srs || srs.nextReview <= now;
+            });
+            
             studyQueue.sort(() => Math.random() - 0.5);
-            studyPointer = 0; renderStudyCard();
+            studyPointer = 0;
+            renderStudyCard();
         }
 
         function renderStudyCard() {
             const container = document.getElementById('study-container');
+            if (!container) return;
+
             if (studyQueue.length === 0 || studyPointer >= studyQueue.length) {
-                container.innerHTML = `<div class="py-24 text-center"><h2 class="text-xl font-black">Meta Batida!</h2><button onclick="window.switchTab('home')" class="mt-8 bg-indigo-600 text-white font-black px-10 py-4 rounded-2xl">Finalizar</button></div>`;
+                container.innerHTML = `
+                    <div class="py-24 text-center">
+                        <div class="text-6xl mb-6">🎯</div>
+                        <h2 class="text-xl font-black text-slate-800">Sessão Concluída!</h2>
+                        <p class="text-xs text-slate-400 mt-2">Você revisou todos os cards pendentes desta pasta.</p>
+                        <button onclick="window.switchTab('home')" class="mt-8 bg-indigo-600 text-white font-black px-10 py-4 rounded-2xl shadow-lg active:scale-95">Voltar ao Início</button>
+                    </div>`;
                 return;
             }
-            const q = studyQueue[studyPointer]; isRevealed = false;
+
+            const q = studyQueue[studyPointer];
+            isRevealed = false;
+            
             container.innerHTML = `
                 <div class="bg-white p-8 rounded-[40px] border border-slate-100 shadow-xl space-y-6">
-                    <h3 class="text-lg font-bold text-slate-800 leading-relaxed case-text">${q.statement}</h3>
+                    <div class="flex justify-between items-center">
+                        <span class="text-[10px] font-black text-indigo-500 uppercase tracking-widest">${q.specialty || 'Médica'}</span>
+                        <span class="text-[10px] font-bold text-slate-400">${studyPointer+1} / ${studyQueue.length}</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-800 leading-relaxed case-text">
+                        ${q.statement.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')}
+                    </h3>
                     <div class="space-y-3">
-                        ${q.options.map((opt, i) => `<button onclick="window.reveal(${i})" class="opt-btn w-full text-left p-5 rounded-3xl border-2 border-slate-50 bg-slate-50 text-slate-600 text-sm font-semibold">${opt}</button>`).join('')}
+                        ${q.options.map((opt, i) => `
+                            <button onclick="window.reveal(${i})" class="opt-btn w-full text-left p-5 rounded-3xl border-2 border-slate-50 bg-slate-50 text-slate-600 text-sm font-semibold">
+                                ${opt}
+                            </button>`).join('')}
                     </div>
                     <div id="study-feedback" class="hidden pt-6 border-t border-slate-50 space-y-6">
-                        <div class="bg-slate-900 text-slate-300 p-6 rounded-[28px] text-[11px] italic">${q.explanation || ''}</div>
+                        <div class="bg-slate-900 text-slate-200 p-6 rounded-[28px] text-[11px] leading-relaxed italic">
+                            <b>Explicação:</b><br>${q.explanation || 'Comentário indisponível.'}
+                        </div>
                         <div class="grid grid-cols-4 gap-2">
-                            <button onclick="window.submitSRS(1)" class="bg-rose-500 py-5 rounded-2xl text-white font-black text-[9px] uppercase">Errei</button>
-                            <button onclick="window.submitSRS(2)" class="bg-orange-400 py-5 rounded-2xl text-white font-black text-[9px] uppercase">Difícil</button>
-                            <button onclick="window.submitSRS(3)" class="bg-indigo-500 py-5 rounded-2xl text-white font-black text-[9px] uppercase">Bom</button>
-                            <button onclick="window.submitSRS(4)" class="bg-emerald-500 py-5 rounded-2xl text-white font-black text-[9px] uppercase">Fácil</button>
+                            <button onclick="window.submitSRS(1)" class="bg-rose-500 py-5 rounded-2xl text-white font-black text-[9px] uppercase shadow-md active:scale-90">Errei</button>
+                            <button onclick="window.submitSRS(2)" class="bg-orange-400 py-5 rounded-2xl text-white font-black text-[9px] uppercase shadow-md active:scale-90">Difícil</button>
+                            <button onclick="window.submitSRS(3)" class="bg-indigo-500 py-5 rounded-2xl text-white font-black text-[9px] uppercase shadow-md active:scale-90">Bom</button>
+                            <button onclick="window.submitSRS(4)" class="bg-emerald-500 py-5 rounded-2xl text-white font-black text-[9px] uppercase shadow-md active:scale-90">Fácil</button>
                         </div>
                     </div>
                 </div>`;
         }
 
         window.reveal = (idx) => {
-            if (isRevealed) return; isRevealed = true;
+            if (isRevealed) return;
+            isRevealed = true;
             const q = studyQueue[studyPointer];
             document.querySelectorAll('.opt-btn').forEach((btn, i) => { 
                 if (i === q.correctIndex) btn.classList.add('option-btn-correct');
@@ -464,24 +776,138 @@
             document.getElementById('study-feedback').classList.remove('hidden');
         };
 
-        window.deleteQ = (id) => { if (confirm("Excluir?")) { state.questions = state.questions.filter(q => q.id !== id); saveLocal(true); renderBank(); } };
-        window.clearAll = () => { if (confirm("Limpar?")) { localStorage.removeItem(STORAGE_KEY); location.reload(); } };
-
-        function showSyncStatus(msg, type = 'info') {
-            const footer = document.getElementById('sync-footer-label');
-            if (footer) { footer.innerText = msg; footer.style.color = type === 'error' ? '#ef4444' : type === 'success' ? '#10b981' : '#64748b'; }
-        }
+        // --- INICIALIZAÇÃO GOOGLE ---
 
         function initGoogleWithRetry() {
-            if (window.gapi && window.google && window.google.accounts) setupGoogle();
-            else setTimeout(initGoogleWithRetry, 1000);
+            if (window.gapi && window.google && window.google.accounts) {
+                setupGoogle();
+            } else if (googleRetries < 15) {
+                googleRetries++;
+                document.getElementById('login-status-msg').innerText = `Iniciando Google Identity... (${googleRetries}/15)`;
+                setTimeout(initGoogleWithRetry, 1000);
+            } else {
+                document.getElementById('login-status-msg').innerText = "Erro ao carregar APIs. Recarregue.";
+            }
         }
 
-        window.addEventListener('load', () => {
-            const localData = localStorage.getItem(STORAGE_KEY);
-            if (localData) state = JSON.parse(localData);
-            initGoogleWithRetry();
+        function setupGoogle() {
+            try {
+                gapi.load('client', async () => {
+                    await gapi.client.init({ discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'] });
+                    
+                    tokenClient = google.accounts.oauth2.initTokenClient({
+                        client_id: CLIENT_ID,
+                        scope: SCOPES,
+                        prompt: 'consent', // ESSENCIAL: Garante permissões de escrita (drive.file) no mobile
+                        callback: (resp) => {
+                            if (resp.error) return;
+                            accessToken = resp.access_token;
+                            localStorage.setItem(TOKEN_STORAGE, JSON.stringify({ token: accessToken, expiry: Date.now() + 3500 * 1000 }));
+                            onLoginSuccess();
+                        }
+                    });
+
+                    // Tenta restaurar token persistente
+                    const saved = JSON.parse(localStorage.getItem(TOKEN_STORAGE));
+                    if (saved && saved.expiry > Date.now()) {
+                        accessToken = saved.token;
+                        onLoginSuccess();
+                    } else {
+                        document.getElementById('login-status-msg').innerText = "MedRep Master v13.4.5 Pronto.";
+                        document.getElementById('login-loader').classList.add('hidden');
+                    }
+                });
+            } catch (err) {
+                console.error("SetupGoogle error:", err);
+            }
+        }
+
+        function onLoginSuccess() {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('main-app').style.display = 'block';
+            manualSync(); // Busca dados remotos ao entrar
+        }
+
+        // --- PERSISTÊNCIA LOCAL ---
+
+        function saveLocal(cloud = true) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            updateStats();
+            if (cloud && accessToken) autoBackup();
+        }
+
+        function loadLocal() {
+            const data = localStorage.getItem(STORAGE_KEY);
+            if (data) state = JSON.parse(data);
+            const savedKey = localStorage.getItem(KEY_STORAGE);
+            if (savedKey) document.getElementById('gemini-key-input').value = savedKey;
+            updateStats();
+        }
+
+        window.deleteQ = (id) => { 
+            if (confirm("⚠️ Excluir esta questão permanentemente?")) { 
+                state.questions = state.questions.filter(q => q.id !== id); 
+                delete state.srs[id]; 
+                saveLocal(true); 
+                renderBank(); 
+            } 
+        };
+
+        window.clearAll = () => { 
+            if (confirm("☢️ Apagar todo o banco local? (Isso não afeta o Drive)")) { 
+                localStorage.removeItem(STORAGE_KEY); 
+                location.reload(); 
+            } 
+        };
+
+        window.saveGeminiKey = () => {
+            const key = document.getElementById('gemini-key-input').value.trim();
+            if (!key.startsWith('AIza')) return alert("Chave Gemini inválida.");
+            localStorage.setItem(KEY_STORAGE, key);
+            alert("✅ Chave Salva.");
+            location.reload();
+        };
+
+        // --- LEITOR DE DOCUMENTOS (MAMMOTH / PDFJS) ---
+
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+        document.getElementById('file-reader').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const status = document.getElementById('file-status');
+            status.innerText = "⏳ Lendo...";
+            status.classList.remove('hidden');
+            
+            try {
+                if (file.name.endsWith('.pdf')) {
+                    const arrayBuffer = await file.arrayBuffer();
+                    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                    let fullText = "";
+                    for (let i = 1; i <= pdf.numPages; i++) {
+                        const page = await pdf.getPage(i);
+                        const content = await page.getTextContent();
+                        fullText += content.items.map(item => item.str).join(" ") + " ";
+                    }
+                    extractedFileText = fullText;
+                } else if (file.name.endsWith('.docx')) {
+                    const arrayBuffer = await file.arrayBuffer();
+                    const result = await mammoth.extractRawText({ arrayBuffer });
+                    extractedFileText = result.value;
+                }
+                status.innerText = "✅ " + file.name;
+            } catch (err) { 
+                console.error("Reader error:", err);
+                alert("Erro ao ler arquivo: " + err.message); 
+                status.innerText = ""; 
+            }
         });
+
+        // --- STARTUP ---
+        loadLocal();
+        initChart();
+        initGoogleWithRetry();
+
     </script>
 </body>
 </html>
