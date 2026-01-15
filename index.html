@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>MedRep - Sincronização Master v13.4.5</title>
+    <title>MedRep - Sincronização Master v13.4.6</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -38,6 +38,7 @@
             color: #0f172a; 
             -webkit-tap-highlight-color: transparent; 
             overflow-x: hidden;
+            user-select: none;
         }
         
         #api-key-bar { z-index: 1000; }
@@ -75,15 +76,15 @@
         #sync-footer { position: fixed; bottom: 100px; left: 0; right: 0; text-align: center; pointer-events: none; z-index: 40; }
         #sync-footer span { background: rgba(255,255,255,0.8); backdrop-filter: blur(4px); padding: 4px 12px; border-radius: 20px; font-size: 9px; font-weight: 800; color: #64748b; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
 
-        .opt-btn { transition: all 0.2s; }
-        .opt-btn:active { transform: scale(0.98); }
+        .opt-btn { transition: all 0.15s; }
+        .opt-btn:active { transform: scale(0.97); }
     </style>
 </head>
 <body class="antialiased">
 
     <div id="sync-toast"></div>
 
-    <!-- BARRA DE CONFIGURAÇÃO DE CHAVE -->
+    <!-- BARRA DE CONFIGURAÇÃO DE CHAVE IA -->
     <div id="api-key-bar" class="fixed top-0 left-0 right-0 bg-slate-900 text-white p-3 shadow-2xl flex flex-col md:flex-row items-center justify-center gap-3 border-b border-white/10">
         <div class="flex items-center gap-2">
             <span class="text-[10px] font-black uppercase tracking-widest text-indigo-400">Gemini Key:</span>
@@ -92,21 +93,21 @@
         <button onclick="window.saveGeminiKey()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-black uppercase px-4 py-1.5 rounded-lg transition-colors">Salvar Chave</button>
     </div>
 
-    <!-- TELA DE LOGIN -->
+    <!-- TELA DE LOGIN MASTER -->
     <div id="login-screen" class="fixed inset-0 z-[200] bg-white flex flex-col items-center justify-center p-8 text-center pt-24">
         <div class="mb-12">
             <h1 class="text-6xl font-black text-indigo-600 tracking-tighter italic leading-none">MedRep</h1>
-            <p class="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-4">Sincronização Master v13.4.5</p>
+            <p class="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-4">Sincronização Master v13.4.6</p>
         </div>
         <div class="bg-slate-50 p-10 rounded-[40px] w-full max-w-sm border border-slate-100 mb-8 shadow-sm">
-            <p id="login-status-msg" class="text-xs font-semibold text-slate-500 mb-6">Aguardando Conexão Google Drive...</p>
-            <button onclick="window.fazerLogin()" class="w-full bg-slate-900 text-white font-black py-5 rounded-[22px] shadow-xl flex items-center justify-center gap-4 active:scale-95 transition-transform">
-                <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" class="w-6" alt="Google">
+            <p id="login-status-msg" class="text-xs font-semibold text-slate-500 mb-6 italic">Aguardando APIs Google...</p>
+            <button id="login-btn" onclick="window.fazerLogin()" disabled class="w-full bg-slate-200 text-slate-400 font-black py-5 rounded-[22px] shadow-sm flex items-center justify-center gap-4 transition-all opacity-50 cursor-not-allowed">
+                <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" class="w-6 grayscale" alt="Google">
                 <span class="text-xs uppercase tracking-widest">Login via Drive Master</span>
             </button>
             <div id="login-loader" class="hidden mt-6 flex justify-center"><div class="loading-spinner"></div></div>
         </div>
-        <p class="text-[9px] font-black text-slate-300 uppercase tracking-[0.4em]">RESTAURAÇÃO COMPLETA v13.4.5</p>
+        <p class="text-[9px] font-black text-slate-300 uppercase tracking-[0.4em]">RESTAURAÇÃO COMPLETA v13.4.6</p>
     </div>
 
     <!-- APLICATIVO PRINCIPAL -->
@@ -124,7 +125,7 @@
             <!-- HOME TAB -->
             <section id="tab-home" class="tab-content active space-y-6">
                 <div class="bg-indigo-600 p-8 rounded-[40px] text-white shadow-xl relative overflow-hidden">
-                    <p class="text-[9px] font-black uppercase tracking-widest opacity-60 mb-2">Resumo de Desempenho</p>
+                    <p class="text-[9px] font-black uppercase tracking-widest opacity-60 mb-2">Desempenho Geral</p>
                     <div class="grid grid-cols-2 gap-4 mb-4">
                         <div class="bg-white/10 p-4 rounded-2xl">
                             <p class="text-[9px] font-bold uppercase opacity-50">Cards Totais</p>
@@ -173,37 +174,37 @@
                     </div>
 
                     <div id="ia-folder-warning" class="bg-amber-50 border border-amber-100 p-4 rounded-2xl hidden">
-                        <p class="text-[10px] text-amber-700 font-bold uppercase leading-tight">⚠️ Defina a matéria alvo na Home antes de importar.</p>
+                        <p class="text-[10px] text-amber-700 font-bold uppercase leading-tight">⚠️ Escolha uma matéria na Home antes de processar.</p>
                     </div>
 
                     <div class="space-y-2">
                         <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Pasta Atual:</label>
-                        <div id="active-folder-display" class="w-full bg-slate-50 p-4 rounded-2xl text-xs font-black text-indigo-600 uppercase border border-slate-100">
-                            -
+                        <div id="active-folder-display" class="w-full bg-slate-50 p-4 rounded-2xl text-xs font-black text-indigo-600 uppercase border border-slate-100 italic">
+                            Escolha na Home
                         </div>
                     </div>
 
                     <div class="bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl p-6 text-center">
                         <label class="cursor-pointer flex flex-col items-center gap-2">
                             <span class="text-2xl">📄</span>
-                            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Anexar Documento (PDF/Docx)</span>
+                            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Anexar PDF ou Docx</span>
                             <input type="file" id="file-reader" class="hidden" accept=".pdf,.docx">
                             <span id="file-status" class="text-[9px] text-indigo-500 font-bold hidden"></span>
                         </label>
                     </div>
 
-                    <textarea id="ia-prompt" placeholder="Cole enunciados ou texto livre..." class="w-full h-40 bg-slate-50 rounded-[24px] p-6 text-sm border border-slate-100 focus:ring-2 ring-indigo-500 outline-none resize-none"></textarea>
+                    <textarea id="ia-prompt" placeholder="Cole textos ou enunciados aqui..." class="w-full h-40 bg-slate-50 rounded-[24px] p-6 text-sm border border-slate-100 focus:ring-2 ring-indigo-500 outline-none resize-none"></textarea>
                     
                     <button onclick="window.processIA()" id="btn-ia" class="w-full bg-slate-900 text-white font-black py-5 rounded-[20px] uppercase text-xs flex items-center justify-center gap-4 shadow-xl active:scale-95 transition-transform">
-                        <span>Reformatar Lote com IA</span>
+                        <span>Reformatar via IA Gemini</span>
                         <div id="ia-loader" class="loading-spinner hidden" style="border-top-color: white;"></div>
                     </button>
                 </div>
 
                 <div id="ia-review-area" class="hidden space-y-4">
                     <div class="flex justify-between items-center bg-white p-6 rounded-[24px] border border-slate-100 shadow-xl sticky top-[130px] z-10">
-                        <span id="review-count" class="text-xs font-black text-slate-800">Mapeamento Concluído</span>
-                        <button onclick="window.confirmBatch()" class="bg-emerald-600 text-white text-[10px] font-black uppercase px-6 py-3 rounded-xl">Salvar Lote</button>
+                        <span id="review-count" class="text-xs font-black text-slate-800">Cards Prontos</span>
+                        <button onclick="window.confirmBatch()" class="bg-emerald-600 text-white text-[10px] font-black uppercase px-6 py-3 rounded-xl">Salvar Tudo</button>
                     </div>
                     <div id="review-list" class="space-y-4 pb-20"></div>
                 </div>
@@ -212,12 +213,12 @@
             <!-- BANK TAB -->
             <section id="tab-bank" class="tab-content space-y-4">
                 <div class="flex justify-between items-center px-4">
-                    <h2 class="text-lg font-black text-slate-800">Acervo</h2>
-                    <button onclick="window.clearAll()" class="text-[8px] font-black text-rose-500 uppercase tracking-widest bg-rose-50 px-3 py-1.5 rounded-lg">Reset Local</button>
+                    <h2 class="text-lg font-black text-slate-800">Seu Acervo</h2>
+                    <button onclick="window.clearAll()" class="text-[8px] font-black text-rose-500 uppercase tracking-widest bg-rose-50 px-3 py-1.5 rounded-lg">Limpar Local</button>
                 </div>
                 
                 <div class="px-2">
-                    <input type="text" id="bank-search" oninput="window.renderBank()" placeholder="🔎 Filtrar banco..." class="search-bar">
+                    <input type="text" id="bank-search" oninput="window.renderBank()" placeholder="🔎 Pesquisar questões..." class="search-bar">
                 </div>
 
                 <div id="bank-list" class="space-y-2 pb-24 px-2"></div>
@@ -225,10 +226,10 @@
         </main>
 
         <div id="sync-footer">
-            <span id="sync-footer-label">☁️ Iniciando...</span>
+            <span id="sync-footer-label">☁️ Offline</span>
         </div>
 
-        <!-- MENU DE NAVEGAÇÃO -->
+        <!-- MENU DE NAVEGAÇÃO MASTER -->
         <nav class="fixed bottom-0 left-0 right-0 max-w-xl mx-auto bg-white/95 backdrop-blur-2xl border-t border-slate-100 flex justify-around py-6 px-4 z-50 rounded-t-[32px] shadow-2xl safe-bottom">
             <button onclick="window.switchTab('home')" class="nav-btn flex flex-col items-center gap-1 active text-indigo-600" id="nav-home">
                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3L4 9V21H9V15H15V21H20V9L12 3Z"/></svg>
@@ -252,16 +253,16 @@
     <script type="module">
         import { GoogleGenAI } from "@google/genai";
 
-        // CREDENCIAIS FIXAS EXIGIDAS
+        // CREDENCIAIS FIXAS MASTER
         const CLIENT_ID = '648353734848-s9fnmd9tt0i5577grbt3q9oju6h71mpi.apps.googleusercontent.com';
-        const DEFAULT_GEMINI_KEY = 'AIzaSyAIJFacEIsyKUY0LLwjsGxFSdniwKfXkIE';
+        const DEFAULT_AI_KEY = 'AIzaSyAIJFacEIsyKUY0LLwjsGxFSdniwKfXkIE';
         const SCOPES = 'https://www.googleapis.com/auth/drive.file'; 
         const STORAGE_KEY = 'medrep_data_v13_3_global';
         const KEY_STORAGE = 'medrep_gemini_key_v11';
         const TOKEN_STORAGE = 'medrep_google_token_persist';
         const FILENAME = 'medrep_data.json';
 
-        // ESTADO GLOBAL
+        // ESTADO GLOBAL DO APP
         let state = {
             questions: [],
             srs: {}, // cardId: { interval, repetitions, easeFactor, nextReview }
@@ -281,13 +282,13 @@
         let googleRetries = 0;
         let driveFileId = null;
 
-        // --- GOOGLE DRIVE SYNC CORE ---
+        // --- GOOGLE DRIVE CORE SYNC ---
 
         async function manualSync() {
             if (!accessToken) return;
             showSyncStatus("☁️ Buscando no Drive...");
             try {
-                // Busca global por nome: Crucial para sincronizar PC e Celular
+                // Identificação por NOME (Cross-Device Parity)
                 const list = await gapi.client.drive.files.list({ 
                     q: `name = '${FILENAME}' and trashed = false`,
                     spaces: 'drive',
@@ -303,23 +304,20 @@
                     });
                     
                     let driveData = resp.result;
-                    // Tenta parsear caso venha como string
-                    if (typeof driveData === 'string') {
-                        try { driveData = JSON.parse(driveData); } catch(e) {}
-                    }
+                    if (typeof driveData === 'string') driveData = JSON.parse(driveData);
 
                     if (driveData && driveData.questions) {
                         state = driveData;
                         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-                        console.log("Drive: Sincronia de entrada bem-sucedida. ID:", driveFileId);
+                        console.log("Drive: Sincronia Master restaurada. ID:", driveFileId);
                         showSyncStatus("✅ Sincronizado", 'success');
                     }
                 } else {
-                    console.log("Drive: Nenhum arquivo encontrado. Preparando novo.");
-                    showSyncStatus("☁️ Criando Banco...", 'info');
+                    console.log("Drive: Nenhum arquivo encontrado. Preparando novo banco.");
+                    showSyncStatus("☁️ Novo Banco", 'info');
                 }
             } catch (e) { 
-                console.error("ManualSync: Erro crítico:", e);
+                console.error("Drive Error:", e);
                 showSyncStatus("❌ Falha na Sincronia", 'error');
             }
             updateStats();
@@ -329,19 +327,14 @@
             if (!accessToken) return;
             showSyncStatus("☁️ Sincronizando...");
             try {
-                // Se o ID não existir localmente nesta sessão, tenta buscar pelo nome primeiro
+                // Prevenção de duplicidade cross-device
                 if (!driveFileId) {
-                    const list = await gapi.client.drive.files.list({ 
-                        q: `name = '${FILENAME}' and trashed = false`,
-                        spaces: 'drive'
-                    });
-                    if (list.result.files && list.result.files[0]) {
-                        driveFileId = list.result.files[0].id;
-                    }
+                    const list = await gapi.client.drive.files.list({ q: `name = '${FILENAME}' and trashed = false` });
+                    if (list.result.files && list.result.files[0]) driveFileId = list.result.files[0].id;
                 }
 
                 const metadata = { name: FILENAME, mimeType: 'application/json' };
-                const boundary = 'medrep_master_v13_4_5';
+                const boundary = 'medrep_sync_v13_4_6_master';
                 const delimiter = "\r\n--" + boundary + "\r\n";
                 const close_delim = "\r\n--" + boundary + "--";
 
@@ -350,7 +343,7 @@
                     delimiter + 'Content-Type: application/json\r\n\r\n' + JSON.stringify(state) +
                     close_delim;
 
-                // CORREÇÃO CRÍTICA: PATCH se ID existir, POST se for novo
+                // MÉTODO PATCH MANDATÓRIO PARA ATUALIZAÇÃO
                 const url = driveFileId 
                     ? `https://www.googleapis.com/upload/drive/v3/files/${driveFileId}?uploadType=multipart`
                     : 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
@@ -365,28 +358,23 @@
                 });
 
                 if (!response.ok) {
-                    const errorDetails = await response.text();
-                    console.error("Drive Error:", response.status, errorDetails);
+                    const errorMsg = await response.text();
+                    console.error("Drive Backup Erro:", response.status, errorMsg);
                     showSyncStatus("❌ Erro ao Gravar", 'error');
-                    
-                    // Se token expirou, força re-login silencioso/prompt
-                    if (response.status === 401 || response.status === 403) {
-                        tokenClient.requestAccessToken();
-                    }
                 } else {
                     if (!driveFileId) {
-                        const result = await response.json();
-                        driveFileId = result.id;
+                        const resJson = await response.json();
+                        driveFileId = resJson.id;
                     }
                     showSyncStatus("✅ Sincronizado", 'success');
                 }
             } catch (e) { 
-                console.error("AutoBackup: Erro de rede:", e);
-                showSyncStatus("❌ Erro Conexão Drive", 'error');
+                console.error("Network Sync Error:", e);
+                showSyncStatus("❌ Erro Rede", 'error');
             }
         }
 
-        // --- LÓGICA SRS (SM-2) ---
+        // --- LÓGICA SRS SM-2 ---
 
         window.submitSRS = (grade) => {
             const q = studyQueue[studyPointer];
@@ -395,7 +383,7 @@
             const srs = state.srs[q.id] || { interval: 0, repetitions: 0, easeFactor: 2.5 };
             let { interval, repetitions, easeFactor } = srs;
             
-            // Mapeamento Grade -> Score: 1(Errei=0), 2(Difícil=2), 3(Bom=4), 4(Fácil=5)
+            // Score SM-2: 1(Erro=0), 2(Difícil=2), 3(Bom=4), 4(Fácil=5)
             const score = grade === 1 ? 0 : grade === 2 ? 2 : grade === 3 ? 4 : 5;
             
             if (score >= 3) { // Sucesso
@@ -408,7 +396,6 @@
                 interval = 1; 
             }
             
-            // Ajuste Ease Factor
             easeFactor = easeFactor + (0.1 - (5 - score) * (0.08 + (5 - score) * 0.02));
             if (easeFactor < 1.3) easeFactor = 1.3;
             
@@ -420,27 +407,23 @@
             };
             
             state.history.push({ cardId: q.id, success: score >= 3, date: Date.now() });
-            
-            saveLocal(true); // Persistência Global
+            saveLocal(true);
             
             studyPointer++;
             renderStudyCard();
         };
 
-        // --- IA IMPORTADOR (FIEL) ---
+        // --- IA IMPORTADOR (GEMINI FLASH) ---
 
         const getAIClient = () => {
-            const key = localStorage.getItem(KEY_STORAGE) || process.env.API_KEY || DEFAULT_GEMINI_KEY;
+            const key = localStorage.getItem(KEY_STORAGE) || process.env.API_KEY || DEFAULT_AI_KEY;
             return new GoogleGenAI({ apiKey: key });
         };
 
         window.processIA = async () => {
-            if (state.currentFolderId === 'f_all') {
-                return alert("⚠️ Selecione uma pasta específica na Home antes de importar.");
-            }
-            
+            if (state.currentFolderId === 'f_all') return alert("⚠️ Selecione uma matéria na Home.");
             const userInput = document.getElementById('ia-prompt').value.trim();
-            if (!userInput && !extractedFileText) return alert("⚠️ Digite algo ou anexe um arquivo.");
+            if (!userInput && !extractedFileText) return alert("⚠️ Insira texto ou anexe arquivo.");
             
             const loader = document.getElementById('ia-loader');
             const btn = document.getElementById('btn-ia');
@@ -449,7 +432,7 @@
 
             try {
                 const ai = getAIClient();
-                const sourceData = extractedFileText ? `DOCUMENTO:\n${extractedFileText}\n\nTEXTO USUÁRIO:\n${userInput}` : userInput;
+                const sourceData = extractedFileText ? `DOC:\n${extractedFileText}\n\nUSER:\n${userInput}` : userInput;
                 const nextNum = state.questions.length + 1;
 
                 const response = await ai.models.generateContent({
@@ -457,12 +440,9 @@
                     contents: [{ parts: [{ text: sourceData }] }],
                     config: { 
                         maxOutputTokens: 8192,
-                        systemInstruction: `Você é o MEDREP FIEL. Sua missão é extrair questões médicas de textos complexos e PDFs.
-                        REGRAS:
-                        1. FIDELIDADE: Copie enunciados e opções INTEGRALMENTE. Não resuma.
-                        2. FORMATO: Retorne APENAS um JSON array válido.
-                        3. ESTRUTURA: [{"statement": "...", "options": ["A","B","C","D"], "correctIndex": 0, "explanation": "...", "specialty": "..."}]
-                        4. Comece numerando mentalmente a partir da Questão ${nextNum}.`
+                        systemInstruction: `Extraia questões médicas integralmente.
+                        Regras: 1. FIDELIDADE: Não resuma enunciados. 2. JSON: Retorne apenas um array.
+                        Formato: [{"statement": "...", "options": ["A","B","C","D"], "correctIndex": 0, "explanation": "...", "specialty": "..."}]`
                     }
                 });
 
@@ -471,15 +451,10 @@
                     tempExtracted = JSON.parse(jsonMatch[0]);
                     renderReviewList();
                 } else {
-                    alert("A IA não retornou um JSON válido. Tente novamente.");
+                    alert("Formato de retorno IA inválido.");
                 }
-            } catch (e) { 
-                console.error("IA Error:", e);
-                alert("Erro na IA: " + e.message); 
-            } finally { 
-                loader.classList.add('hidden'); 
-                btn.disabled = false; 
-            }
+            } catch (e) { alert("IA Erro: " + e.message); }
+            finally { loader.classList.add('hidden'); btn.disabled = false; }
         };
 
         function renderReviewList() {
@@ -489,31 +464,18 @@
             
             list.innerHTML = tempExtracted.map((q, idx) => `
                 <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-3">
-                    <div class="flex justify-between items-start">
-                        <p class="text-[10px] font-black text-indigo-500 uppercase">PRÉVIA QUESTÃO ${idx + 1}</p>
-                        <button onclick="window.removeTemp(${idx})" class="text-rose-400">Remover</button>
-                    </div>
-                    <p class="text-xs font-bold text-slate-700 italic leading-relaxed">"${q.statement}"</p>
-                    <div class="pt-2 border-t border-slate-50">
-                        <p class="text-[9px] text-slate-400 font-bold">Explicação: ${q.explanation ? q.explanation.substring(0, 100) + '...' : 'Sem notas.'}</p>
-                    </div>
+                    <p class="text-[10px] font-black text-indigo-500 uppercase">PRÉVIA ${idx + 1}</p>
+                    <p class="text-xs font-bold text-slate-700 italic leading-relaxed">"${q.statement.substring(0, 150)}..."</p>
                 </div>
             `).join('');
             
-            document.getElementById('review-count').innerText = `${tempExtracted.length} cards prontos para salvar.`;
+            document.getElementById('review-count').innerText = `${tempExtracted.length} cards extraídos.`;
             window.scrollTo({ top: area.offsetTop - 100, behavior: 'smooth' });
         }
-
-        window.removeTemp = (idx) => {
-            tempExtracted.splice(idx, 1);
-            if (tempExtracted.length === 0) document.getElementById('ia-review-area').classList.add('hidden');
-            else renderReviewList();
-        };
 
         window.confirmBatch = () => {
             const folderId = state.currentFolderId;
             const folderName = state.folders.find(f => f.id === folderId).name;
-            
             const news = tempExtracted.map(q => ({ 
                 ...q, 
                 id: 'q_' + Math.random().toString(36).substr(2, 9),
@@ -521,19 +483,16 @@
                 specialty: q.specialty || folderName,
                 date: Date.now()
             }));
-            
             state.questions = [...state.questions, ...news];
             saveLocal(true);
-            
             document.getElementById('ia-review-area').classList.add('hidden');
             document.getElementById('ia-prompt').value = "";
             extractedFileText = "";
-            document.getElementById('file-status').classList.add('hidden');
-            alert(`✅ ${news.length} questões adicionadas à pasta "${folderName}" e sincronizadas.`);
+            alert(`✅ ${news.length} cards salvos em "${folderName}".`);
             switchTab('bank');
         };
 
-        // --- ANALYTICS & STATS ---
+        // --- ANALYTICS ---
 
         function initChart() {
             const canvas = document.getElementById('performanceChart');
@@ -583,7 +542,7 @@
             document.getElementById('stat-accuracy').innerText = history.length ? Math.round((hits / history.length) * 100) + "%" : "0%";
             
             const dueText = document.getElementById('home-due-text');
-            if (dueText) dueText.innerText = due > 0 ? `${due} cards pendentes de revisão.` : "Parabéns! Tudo revisado.";
+            if (dueText) dueText.innerText = due > 0 ? `${due} cards pendentes.` : "Tudo revisado!";
             
             const badge = document.getElementById('due-badge');
             if (badge) {
@@ -593,10 +552,10 @@
 
             if (chartInstance) {
                 const weeklyData = [0,0,0,0,0,0,0];
-                const last7Days = history.filter(h => h.date > (Date.now() - 7 * 24 * 60 * 60 * 1000));
-                last7Days.forEach(h => {
-                    const day = new Date(h.date).getDay();
-                    if (h.success) weeklyData[day]++;
+                const last7 = history.filter(h => h.date > (Date.now() - 7*24*60*60*1000));
+                last7.forEach(h => {
+                    const d = new Date(h.date).getDay();
+                    if (h.success) weeklyData[d]++;
                 });
                 chartInstance.data.datasets[0].data = weeklyData;
                 chartInstance.update();
@@ -613,7 +572,7 @@
             }).join('');
         }
 
-        // --- NAVEGAÇÃO E UI ---
+        // --- UI E NAVEGAÇÃO ---
 
         window.switchTab = (tabId) => {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -621,22 +580,16 @@
                 el.classList.remove('active', 'text-indigo-600');
                 el.classList.add('text-slate-400');
             });
-            
-            const target = document.getElementById('tab-' + tabId);
-            if (target) target.classList.add('active');
-            
+            document.getElementById('tab-' + tabId).classList.add('active');
             const btn = document.getElementById('nav-' + tabId);
-            if (btn) {
-                btn.classList.add('active', 'text-indigo-600');
-                btn.classList.remove('text-slate-400');
-            }
+            btn.classList.add('active', 'text-indigo-600');
+            btn.classList.remove('text-slate-400');
             
             if (tabId === 'home') updateStats();
             if (tabId === 'study') startStudy();
             if (tabId === 'bank') renderBank();
             if (tabId === 'add') validateIAFolder();
-
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            window.scrollTo(0, 0);
         };
 
         window.onFolderChange = (id) => {
@@ -648,7 +601,7 @@
         };
 
         window.createNewFolder = () => {
-            const name = prompt("Nome da nova matéria/pasta:");
+            const name = prompt("Nome da matéria:");
             if (name && name.trim()) {
                 const folder = { id: 'f_' + Date.now(), name: name.trim() };
                 state.folders.push(folder);
@@ -663,13 +616,13 @@
             const display = document.getElementById('active-folder-display');
             if (state.currentFolderId === 'f_all') {
                 warning.classList.remove('hidden');
-                display.innerText = "ESCOLHA UMA PASTA";
-                display.classList.add('text-rose-500');
+                display.innerText = "ESCOLHA NA HOME";
+                display.className = "w-full bg-slate-50 p-4 rounded-2xl text-xs font-black text-rose-500 border border-slate-100 italic";
             } else {
                 warning.classList.add('hidden');
                 const folder = state.folders.find(f => f.id === state.currentFolderId);
                 display.innerText = folder.name.toUpperCase();
-                display.classList.remove('text-rose-500');
+                display.className = "w-full bg-slate-50 p-4 rounded-2xl text-xs font-black text-indigo-600 uppercase border border-slate-100";
             }
         }
 
@@ -681,14 +634,11 @@
             let filtered = state.currentFolderId === 'f_all' ? state.questions : state.questions.filter(q => q.folderId === state.currentFolderId);
             
             if (searchTerm) {
-                filtered = filtered.filter(q => 
-                    q.statement.toLowerCase().includes(searchTerm) || 
-                    (q.explanation && q.explanation.toLowerCase().includes(searchTerm))
-                );
+                filtered = filtered.filter(q => q.statement.toLowerCase().includes(searchTerm));
             }
 
             if (filtered.length === 0) {
-                list.innerHTML = `<div class="py-24 text-center text-slate-300 italic text-xs">Vazio.</div>`;
+                list.innerHTML = `<div class="py-24 text-center text-slate-300 italic text-xs">Sem resultados.</div>`;
                 return;
             }
 
@@ -696,9 +646,9 @@
                 <div class="bg-white p-5 rounded-3xl border border-slate-100 flex justify-between items-center shadow-sm">
                     <div class="truncate mr-4 flex-1">
                         <p class="text-[11px] text-slate-700 font-bold truncate">${q.statement}</p>
-                        <p class="text-[8px] text-indigo-400 font-black uppercase mt-1 tracking-tighter">${q.specialty || 'Geral'}</p>
+                        <p class="text-[8px] text-indigo-400 font-black uppercase mt-1 tracking-tighter">${q.specialty || 'Médica'}</p>
                     </div>
-                    <button onclick="window.deleteQ('${q.id}')" class="text-rose-400 p-2 hover:bg-rose-50 rounded-lg transition-colors">✕</button>
+                    <button onclick="window.deleteQ('${q.id}')" class="text-rose-400 p-2 active:scale-90 transition-transform">✕</button>
                 </div>
             `).join('');
         };
@@ -706,12 +656,7 @@
         function startStudy() {
             const now = Date.now();
             const questions = state.currentFolderId === 'f_all' ? state.questions : state.questions.filter(q => q.folderId === state.currentFolderId);
-            
-            studyQueue = questions.filter(q => {
-                const srs = state.srs[q.id];
-                return !srs || srs.nextReview <= now;
-            });
-            
+            studyQueue = questions.filter(q => !state.srs[q.id] || state.srs[q.id].nextReview <= now);
             studyQueue.sort(() => Math.random() - 0.5);
             studyPointer = 0;
             renderStudyCard();
@@ -720,45 +665,33 @@
         function renderStudyCard() {
             const container = document.getElementById('study-container');
             if (!container) return;
-
             if (studyQueue.length === 0 || studyPointer >= studyQueue.length) {
                 container.innerHTML = `
                     <div class="py-24 text-center">
-                        <div class="text-6xl mb-6">🎯</div>
-                        <h2 class="text-xl font-black text-slate-800">Sessão Concluída!</h2>
-                        <p class="text-xs text-slate-400 mt-2">Você revisou todos os cards pendentes desta pasta.</p>
-                        <button onclick="window.switchTab('home')" class="mt-8 bg-indigo-600 text-white font-black px-10 py-4 rounded-2xl shadow-lg active:scale-95">Voltar ao Início</button>
+                        <div class="text-6xl mb-6">✅</div>
+                        <h2 class="text-xl font-black">Meta Alcançada!</h2>
+                        <button onclick="window.switchTab('home')" class="mt-8 bg-indigo-600 text-white font-black px-10 py-4 rounded-2xl shadow-lg">Finalizar</button>
                     </div>`;
                 return;
             }
-
             const q = studyQueue[studyPointer];
             isRevealed = false;
-            
             container.innerHTML = `
                 <div class="bg-white p-8 rounded-[40px] border border-slate-100 shadow-xl space-y-6">
-                    <div class="flex justify-between items-center">
-                        <span class="text-[10px] font-black text-indigo-500 uppercase tracking-widest">${q.specialty || 'Médica'}</span>
-                        <span class="text-[10px] font-bold text-slate-400">${studyPointer+1} / ${studyQueue.length}</span>
-                    </div>
-                    <h3 class="text-lg font-bold text-slate-800 leading-relaxed case-text">
-                        ${q.statement.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')}
-                    </h3>
+                    <div class="flex justify-between items-center"><span class="text-[10px] font-black text-indigo-500 uppercase tracking-widest">${q.specialty || 'Geral'}</span><span class="text-[10px] font-bold text-slate-400">${studyPointer+1}/${studyQueue.length}</span></div>
+                    <h3 class="text-lg font-bold text-slate-800 leading-relaxed case-text">${q.statement.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')}</h3>
                     <div class="space-y-3">
-                        ${q.options.map((opt, i) => `
-                            <button onclick="window.reveal(${i})" class="opt-btn w-full text-left p-5 rounded-3xl border-2 border-slate-50 bg-slate-50 text-slate-600 text-sm font-semibold">
-                                ${opt}
-                            </button>`).join('')}
+                        ${q.options.map((opt, i) => `<button onclick="window.reveal(${i})" class="opt-btn w-full text-left p-5 rounded-3xl border-2 border-slate-50 bg-slate-50 text-slate-600 text-sm font-semibold">${opt}</button>`).join('')}
                     </div>
                     <div id="study-feedback" class="hidden pt-6 border-t border-slate-50 space-y-6">
-                        <div class="bg-slate-900 text-slate-200 p-6 rounded-[28px] text-[11px] leading-relaxed italic">
-                            <b>Explicação:</b><br>${q.explanation || 'Comentário indisponível.'}
+                        <div class="bg-slate-900 text-slate-200 p-6 rounded-[28px] text-[11px] leading-relaxed italic italic">
+                            <b>Comentário:</b><br>${q.explanation || 'Comentário em breve.'}
                         </div>
                         <div class="grid grid-cols-4 gap-2">
-                            <button onclick="window.submitSRS(1)" class="bg-rose-500 py-5 rounded-2xl text-white font-black text-[9px] uppercase shadow-md active:scale-90">Errei</button>
-                            <button onclick="window.submitSRS(2)" class="bg-orange-400 py-5 rounded-2xl text-white font-black text-[9px] uppercase shadow-md active:scale-90">Difícil</button>
-                            <button onclick="window.submitSRS(3)" class="bg-indigo-500 py-5 rounded-2xl text-white font-black text-[9px] uppercase shadow-md active:scale-90">Bom</button>
-                            <button onclick="window.submitSRS(4)" class="bg-emerald-500 py-5 rounded-2xl text-white font-black text-[9px] uppercase shadow-md active:scale-90">Fácil</button>
+                            <button onclick="window.submitSRS(1)" class="bg-rose-500 py-5 rounded-2xl text-white font-black text-[9px] uppercase active:scale-90">Errei</button>
+                            <button onclick="window.submitSRS(2)" class="bg-orange-400 py-5 rounded-2xl text-white font-black text-[9px] uppercase active:scale-90">Difícil</button>
+                            <button onclick="window.submitSRS(3)" class="bg-indigo-500 py-5 rounded-2xl text-white font-black text-[9px] uppercase active:scale-90">Bom</button>
+                            <button onclick="window.submitSRS(4)" class="bg-emerald-500 py-5 rounded-2xl text-white font-black text-[9px] uppercase active:scale-90">Fácil</button>
                         </div>
                     </div>
                 </div>`;
@@ -776,19 +709,20 @@
             document.getElementById('study-feedback').classList.remove('hidden');
         };
 
-        // --- INICIALIZAÇÃO GOOGLE ---
+        // --- INICIALIZAÇÃO E LOGIN ---
 
-        function initGoogleWithRetry() {
+        const initInterval = setInterval(() => {
             if (window.gapi && window.google && window.google.accounts) {
+                const btn = document.getElementById('login-btn');
+                btn.disabled = false;
+                btn.classList.remove('bg-slate-200', 'text-slate-400', 'opacity-50', 'cursor-not-allowed');
+                btn.classList.add('bg-slate-900', 'text-white', 'cursor-pointer');
+                btn.querySelector('img').classList.remove('grayscale');
+                document.getElementById('login-status-msg').innerText = "Motor Drive Pronto.";
                 setupGoogle();
-            } else if (googleRetries < 15) {
-                googleRetries++;
-                document.getElementById('login-status-msg').innerText = `Iniciando Google Identity... (${googleRetries}/15)`;
-                setTimeout(initGoogleWithRetry, 1000);
-            } else {
-                document.getElementById('login-status-msg').innerText = "Erro ao carregar APIs. Recarregue.";
+                clearInterval(initInterval);
             }
-        }
+        }, 500);
 
         function setupGoogle() {
             try {
@@ -798,7 +732,7 @@
                     tokenClient = google.accounts.oauth2.initTokenClient({
                         client_id: CLIENT_ID,
                         scope: SCOPES,
-                        prompt: 'consent', // ESSENCIAL: Garante permissões de escrita (drive.file) no mobile
+                        prompt: 'consent', // FORÇA CAIXA DE PERMISSÃO DRIVE.FILE
                         callback: (resp) => {
                             if (resp.error) return;
                             accessToken = resp.access_token;
@@ -807,28 +741,30 @@
                         }
                     });
 
-                    // Tenta restaurar token persistente
                     const saved = JSON.parse(localStorage.getItem(TOKEN_STORAGE));
                     if (saved && saved.expiry > Date.now()) {
                         accessToken = saved.token;
                         onLoginSuccess();
-                    } else {
-                        document.getElementById('login-status-msg').innerText = "MedRep Master v13.4.5 Pronto.";
-                        document.getElementById('login-loader').classList.add('hidden');
                     }
                 });
-            } catch (err) {
-                console.error("SetupGoogle error:", err);
-            }
+            } catch (err) { console.error(err); }
         }
 
         function onLoginSuccess() {
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('main-app').style.display = 'block';
-            manualSync(); // Busca dados remotos ao entrar
+            manualSync(); // BUSCA POR NOME MANDATÓRIA NO LOGIN
         }
 
-        // --- PERSISTÊNCIA LOCAL ---
+        window.fazerLogin = () => {
+            document.getElementById('login-loader').classList.remove('hidden');
+            tokenClient.requestAccessToken();
+        };
+
+        function showSyncStatus(msg, type = 'info') {
+            const footer = document.getElementById('sync-footer-label');
+            if (footer) footer.innerText = msg;
+        }
 
         function saveLocal(cloud = true) {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
@@ -845,30 +781,26 @@
         }
 
         window.deleteQ = (id) => { 
-            if (confirm("⚠️ Excluir esta questão permanentemente?")) { 
+            if (confirm("Excluir card permanentemente?")) { 
                 state.questions = state.questions.filter(q => q.id !== id); 
-                delete state.srs[id]; 
                 saveLocal(true); 
                 renderBank(); 
             } 
         };
 
         window.clearAll = () => { 
-            if (confirm("☢️ Apagar todo o banco local? (Isso não afeta o Drive)")) { 
-                localStorage.removeItem(STORAGE_KEY); 
-                location.reload(); 
-            } 
+            if (confirm("Resetar Banco Local?")) { localStorage.removeItem(STORAGE_KEY); location.reload(); } 
         };
 
         window.saveGeminiKey = () => {
             const key = document.getElementById('gemini-key-input').value.trim();
-            if (!key.startsWith('AIza')) return alert("Chave Gemini inválida.");
+            if (!key.startsWith('AIza')) return alert("Chave inválida.");
             localStorage.setItem(KEY_STORAGE, key);
-            alert("✅ Chave Salva.");
+            alert("✅ Chave IA Salva.");
             location.reload();
         };
 
-        // --- LEITOR DE DOCUMENTOS (MAMMOTH / PDFJS) ---
+        // --- LEITOR DE DOCS ---
 
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
@@ -878,37 +810,31 @@
             const status = document.getElementById('file-status');
             status.innerText = "⏳ Lendo...";
             status.classList.remove('hidden');
-            
             try {
                 if (file.name.endsWith('.pdf')) {
-                    const arrayBuffer = await file.arrayBuffer();
-                    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-                    let fullText = "";
+                    const ab = await file.arrayBuffer();
+                    const pdf = await pdfjsLib.getDocument({ data: ab }).promise;
+                    let txt = "";
                     for (let i = 1; i <= pdf.numPages; i++) {
                         const page = await pdf.getPage(i);
-                        const content = await page.getTextContent();
-                        fullText += content.items.map(item => item.str).join(" ") + " ";
+                        const c = await page.getTextContent();
+                        txt += c.items.map(item => item.str).join(" ") + " ";
                     }
-                    extractedFileText = fullText;
+                    extractedFileText = txt;
                 } else if (file.name.endsWith('.docx')) {
-                    const arrayBuffer = await file.arrayBuffer();
-                    const result = await mammoth.extractRawText({ arrayBuffer });
-                    extractedFileText = result.value;
+                    const ab = await file.arrayBuffer();
+                    const res = await mammoth.extractRawText({ arrayBuffer: ab });
+                    extractedFileText = res.value;
                 }
                 status.innerText = "✅ " + file.name;
-            } catch (err) { 
-                console.error("Reader error:", err);
-                alert("Erro ao ler arquivo: " + err.message); 
-                status.innerText = ""; 
-            }
+            } catch (err) { alert(err.message); }
         });
 
-        // --- STARTUP ---
+        // BOOTSTRAP
         loadLocal();
         initChart();
-        initGoogleWithRetry();
-
     </script>
 </body>
 </html>
+
 
