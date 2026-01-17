@@ -3,18 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>MedRep - Master v13.8.0</title>
+    <title>MedRep Master - v14.0.0</title>
     
+    <!-- PWA & Mobile Optimization -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <meta name="theme-color" content="#4f46e5">
     
+    <!-- External Resources -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
     
-    <!-- Google API Scripts -->
+    <!-- Google Infrastructure -->
     <script src="https://apis.google.com/js/api.js"></script>
     <script src="https://accounts.google.com/gsi/client"></script>
 
@@ -27,341 +30,435 @@
     </script>
 
     <style>
-        :root { --ion-safe-area-top: env(safe-area-inset-top); --ion-safe-area-bottom: env(safe-area-inset-bottom); }
-        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #0f172a; -webkit-tap-highlight-color: transparent; overflow-x: hidden; }
-        
+        :root {
+            --safe-top: env(safe-area-inset-top);
+            --safe-bottom: env(safe-area-inset-bottom);
+            --brand-primary: #4f46e5;
+            --brand-secondary: #10b981;
+            --bg-main: #f8fafc;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-main);
+            color: #0f172a;
+            -webkit-font-smoothing: antialiased;
+            -webkit-tap-highlight-color: transparent;
+            overflow-x: hidden;
+            height: 100vh;
+        }
+
+        /* Glassmorphism Classes */
+        .glass {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+        }
+
+        .glass-dark {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 0px; height: 0px; }
+
+        /* Animations */
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes pulse-ring {
+            0% { transform: scale(0.8); opacity: 0.5; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+
         .tab-content { display: none; }
-        .tab-content.active { display: block; animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
-        .option-btn-correct { border-color: #10b981 !important; background-color: #ecfdf5 !important; color: #064e3b !important; font-weight: 700; box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1); }
-        .option-btn-wrong { border-color: #ef4444 !important; background-color: #fef2f2 !important; color: #7f1d1d !important; }
-        
-        .loading-spinner { border: 3px solid #e2e8f0; border-top: 3px solid #4f46e5; border-radius: 50%; width: 24px; height: 24px; animation: spin 0.8s linear infinite; }
+        .tab-content.active { display: block; animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+
+        .btn-active:active { transform: scale(0.95); transition: transform 0.1s; }
+
+        /* SRS Button Styles */
+        .opt-btn-correct { border-color: #10b981 !important; background: #ecfdf5 !important; color: #064e3b !important; font-weight: 700; box-shadow: 0 0 20px rgba(16, 185, 129, 0.2); }
+        .opt-btn-wrong { border-color: #ef4444 !important; background: #fef2f2 !important; color: #7f1d1d !important; }
+
+        /* Folder chips */
+        .folder-chip {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid transparent;
+        }
+        .folder-chip.active {
+            background: var(--brand-primary);
+            color: white;
+            box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.4);
+            transform: translateY(-2px);
+        }
+
+        /* Navigation */
+        .nav-active { color: var(--brand-primary); font-weight: 800; }
+        .nav-active svg { transform: translateY(-4px); filter: drop-shadow(0 4px 8px rgba(79, 70, 229, 0.3)); transition: all 0.3s; }
+
+        /* Input Styles */
+        input, textarea, select { 
+            font-size: 16px !important; /* Prevents iOS zoom */
+            outline: none !important;
+        }
+
+        .loading-spinner {
+            border: 3px solid rgba(0,0,0,0.05);
+            border-top: 3px solid var(--brand-primary);
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 0.8s linear infinite;
+        }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        
-        #login-screen { display: flex; background: radial-gradient(circle at top right, #e0e7ff 0%, #ffffff 40%); }
-        #main-app { display: none; }
-        
-        .folder-chip { cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); white-space: nowrap; border-width: 2px; }
-        .folder-chip.active { background-color: #4f46e5; color: white; border-color: #4f46e5; transform: scale(1.05); box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3); }
-        
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        input, select, textarea { font-size: 16px !important; transition: all 0.2s; }
-        input:focus, textarea:focus { border-color: #4f46e5; ring: 4px; ring-color: rgba(79, 70, 229, 0.1); outline: none; }
 
-        #sync-toast { position: fixed; top: 24px; left: 50%; transform: translateX(-50%); z-index: 2000; padding: 12px 24px; border-radius: 20px; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; display: none; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); animation: bounceIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        @keyframes bounceIn { from { opacity: 0; transform: translate(-50%, -20px) scale(0.9); } to { opacity: 1; transform: translate(-50%, 0) scale(1); } }
-
-        #settings-panel { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(12px); z-index: 1000; align-items: center; justify-center; padding: 20px; }
-        #settings-panel.active { display: flex; }
-        
-        .safe-bottom { padding-bottom: calc(1.5rem + env(safe-area-inset-bottom)); }
-        .btn-primary { background: #0f172a; color: white; font-weight: 800; transition: all 0.2s; }
-        .btn-primary:active { transform: scale(0.96); opacity: 0.9; }
+        /* Safe Area Spacing */
+        .padding-safe-top { padding-top: var(--safe-top); }
+        .padding-safe-bottom { padding-bottom: var(--safe-bottom); }
     </style>
 </head>
-<body class="antialiased">
+<body>
 
-    <div id="sync-toast"></div>
+    <!-- NOTIFICATION TOAST -->
+    <div id="toast" class="fixed top-8 left-1/2 -translate-x-1/2 z-[3000] hidden">
+        <div class="bg-slate-900 text-white px-6 py-3 rounded-full text-xs font-black uppercase tracking-widest shadow-2xl flex items-center gap-3">
+            <span id="toast-icon">✨</span>
+            <span id="toast-msg">Sincronizado</span>
+        </div>
+    </div>
 
-    <!-- PAINEL DE CONFIGURAÇÕES -->
-    <div id="settings-panel">
-        <div class="bg-white w-full max-w-md rounded-[48px] p-10 shadow-2xl space-y-8">
-            <div class="flex justify-between items-center">
-                <h2 class="text-2xl font-black text-slate-800 tracking-tight">Conexão Cloud</h2>
-                <button onclick="window.toggleSettings()" class="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-400 font-black">✕</button>
+    <!-- SETTINGS MODAL -->
+    <div id="settings-modal" class="fixed inset-0 z-[2500] hidden">
+        <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-md" onclick="window.toggleSettings()"></div>
+        <div class="absolute bottom-0 left-0 right-0 max-w-2xl mx-auto bg-white rounded-t-[48px] p-10 shadow-2xl animate-[slideUp_0.4s]">
+            <div class="flex justify-between items-center mb-10">
+                <h2 class="text-3xl font-black text-slate-800 tracking-tight italic">Configurações</h2>
+                <button onclick="window.toggleSettings()" class="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center font-black">✕</button>
             </div>
             
-            <div class="space-y-6">
-                <div class="space-y-2">
-                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">Google OAuth Client ID</label>
-                    <input type="text" id="cfg-client-id" placeholder="Insira seu Client ID do Google Cloud..." class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-medium">
-                    <p class="text-[10px] text-slate-400 leading-relaxed px-1 italic">Dica: Se o login padrão falhar (Erro 400), crie seu próprio Client ID no console do Google Cloud para uso pessoal.</p>
+            <div class="space-y-8">
+                <div class="space-y-3">
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Gemini AI Key</label>
+                    <input type="password" id="cfg-gemini-key" placeholder="AIzaSy..." class="w-full bg-slate-50 border border-slate-200 rounded-3xl px-6 py-5 text-sm font-medium focus:ring-4 ring-indigo-50 transition-all">
+                    <div class="flex items-center gap-2 mt-2 px-1">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                        <p class="text-[9px] text-slate-400 font-bold uppercase tracking-widest">Ativo para Importação IA</p>
+                    </div>
                 </div>
-                <div class="p-5 bg-indigo-50 rounded-3xl border border-indigo-100">
-                    <p class="text-[10px] font-bold text-indigo-600 uppercase mb-1">Status da IA Gemini</p>
-                    <p class="text-xs text-indigo-900 leading-relaxed">A chave da IA é injetada automaticamente pelo sistema. Não é necessária configuração manual.</p>
+
+                <div class="space-y-3">
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Google OAuth Client ID</label>
+                    <input type="text" id="cfg-client-id" placeholder="648353..." class="w-full bg-slate-50 border border-slate-200 rounded-3xl px-6 py-5 text-sm font-medium">
+                    <p class="text-[9px] text-slate-400 font-medium italic">Apenas altere se o login com Drive falhar sistematicamente.</p>
                 </div>
-                <button onclick="window.saveSettings()" class="w-full btn-primary py-5 rounded-3xl text-sm uppercase tracking-widest shadow-xl shadow-slate-200">Salvar Alterações</button>
+
+                <div class="pt-4 space-y-3">
+                    <button onclick="window.saveSettings()" class="w-full bg-slate-900 text-white py-6 rounded-[32px] font-black text-xs uppercase tracking-[0.2em] shadow-xl hover:bg-slate-800 transition-all">Salvar Alterações</button>
+                    <button onclick="window.clearLocalData()" class="w-full bg-rose-50 text-rose-500 py-4 rounded-[28px] font-bold text-[10px] uppercase tracking-widest border border-rose-100">Resetar Cache Local</button>
+                </div>
+            </div>
+            <div class="mt-8 text-center">
+                <p class="text-[8px] font-black text-slate-300 uppercase tracking-[0.4em]">MedRep Master v14.0.0 (Stable)</p>
             </div>
         </div>
     </div>
 
-    <!-- TELA DE LOGIN -->
-    <div id="login-screen" class="fixed inset-0 z-[500] flex flex-col items-center justify-center p-8 text-center">
-        <div class="mb-16">
-            <div class="w-24 h-24 bg-indigo-600 rounded-[32px] mx-auto mb-8 flex items-center justify-center shadow-2xl shadow-indigo-200 transform -rotate-6">
-                <span class="text-white text-5xl font-black italic">M</span>
+    <!-- LOGIN OVERLAY -->
+    <div id="login-overlay" class="fixed inset-0 z-[4000] flex flex-col items-center justify-center p-10 bg-white">
+        <div class="mb-20 text-center">
+            <div class="w-28 h-28 bg-indigo-600 rounded-[40px] mx-auto mb-10 flex items-center justify-center shadow-2xl shadow-indigo-200 rotate-[-8deg] animate-bounce">
+                <span class="text-white text-6xl font-black italic">M</span>
             </div>
             <h1 class="text-7xl font-black text-slate-900 tracking-tighter italic leading-none">MedRep</h1>
-            <p class="text-slate-400 font-bold uppercase tracking-[0.3em] text-[10px] mt-6 opacity-60">Sincronização Master v13.8.0</p>
+            <p class="text-slate-400 font-bold uppercase tracking-[0.4em] text-[10px] mt-6 opacity-60">Study Master System</p>
         </div>
         
-        <div class="w-full max-w-sm space-y-4">
-            <div id="login-card" class="bg-white/80 glass p-10 rounded-[56px] border border-white shadow-2xl">
-                <p id="login-status-msg" class="text-xs font-semibold text-slate-500 mb-8 leading-relaxed">Conecte sua conta Google para manter suas questões sincronizadas em qualquer dispositivo.</p>
-                <button id="btn-login-google" onclick="window.fazerLogin()" class="w-full bg-slate-900 text-white font-black py-6 rounded-3xl shadow-2xl flex items-center justify-center gap-4 active:scale-95 transition-all">
-                    <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" class="w-6" alt="Google">
-                    <span class="text-xs uppercase tracking-widest">Ativar Google Drive</span>
+        <div class="w-full max-w-sm space-y-6">
+            <div class="bg-white/50 border border-slate-100 p-10 rounded-[60px] shadow-2xl text-center space-y-8">
+                <p class="text-xs font-semibold text-slate-500 leading-relaxed">Conecte sua conta do Google Drive para manter seu progresso sincronizado em tempo real.</p>
+                <button onclick="window.initGoogleAuth()" id="btn-login" class="w-full bg-slate-900 text-white font-black py-7 rounded-[32px] shadow-2xl flex items-center justify-center gap-4 btn-active">
+                    <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" class="w-6" alt="G">
+                    <span class="text-xs uppercase tracking-widest">Sincronizar Cloud</span>
                 </button>
-                <div id="login-loader" class="hidden mt-8 flex justify-center"><div class="loading-spinner"></div></div>
+                <div id="login-spinner" class="hidden justify-center"><div class="loading-spinner"></div></div>
             </div>
-            <button onclick="window.toggleSettings()" class="text-[10px] font-black text-indigo-600 uppercase tracking-[0.2em] underline opacity-80 hover:opacity-100 transition-opacity">Configurar OAuth Client ID</button>
+            <button onclick="window.toggleSettings()" class="w-full text-[10px] font-black text-indigo-500 uppercase tracking-[0.3em] underline">Configurar APIs Manualmente</button>
         </div>
     </div>
 
-    <!-- APLICATIVO PRINCIPAL -->
-    <div id="main-app" class="pb-32">
-        <header class="glass border-b border-slate-100 px-8 py-6 sticky top-0 z-50 flex justify-between items-center max-w-2xl mx-auto w-full rounded-b-[40px] shadow-sm">
+    <!-- APP WRAPPER -->
+    <div id="app" class="hidden min-h-screen flex flex-col">
+        
+        <!-- HEADER -->
+        <header class="glass fixed top-0 left-0 right-0 z-[1000] border-b border-slate-100 px-8 py-6 flex justify-between items-center rounded-b-[40px] max-w-2xl mx-auto w-full">
             <div class="flex flex-col">
                 <h1 class="text-2xl font-black text-indigo-600 tracking-tighter italic leading-none">MedRep</h1>
-                <span id="header-subtitle" class="text-[9px] font-black text-slate-400 uppercase mt-2 tracking-[0.2em]">Visão Geral</span>
+                <span id="current-folder-label" class="text-[9px] font-black text-slate-400 uppercase mt-2 tracking-[0.2em]">Visão Global</span>
             </div>
-            <div class="flex items-center gap-3">
-                <div id="sync-indicator" class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_10px_#10b981]"></div>
-                <button onclick="window.toggleSettings()" class="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-xl hover:bg-slate-100 transition-colors">⚙️</button>
+            <div class="flex items-center gap-4">
+                <div id="cloud-indicator" class="relative group">
+                    <div class="w-3 h-3 rounded-full bg-emerald-500 shadow-[0_0_12px_#10b981] animate-pulse"></div>
+                    <div class="absolute right-0 top-full mt-2 hidden group-hover:block bg-slate-900 text-white text-[8px] font-bold p-2 rounded-lg whitespace-nowrap uppercase tracking-widest z-10">Drive Sincronizado</div>
+                </div>
+                <button onclick="window.toggleSettings()" class="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-xl hover:bg-slate-100 transition-all">⚙️</button>
             </div>
         </header>
 
-        <main class="max-w-2xl mx-auto p-6 space-y-8">
-            <!-- HOME TAB -->
-            <section id="tab-home" class="tab-content active space-y-8">
-                <div class="bg-slate-900 p-10 rounded-[56px] text-white shadow-2xl relative overflow-hidden">
-                    <div class="absolute top-0 right-0 p-8 opacity-10">
-                        <svg class="w-32 h-32" fill="currentColor" viewBox="0 0 24 24"><path d="M13 3V11H21V3H13M3 21H11V13H3V21M3 3V11H11V3H3M13 21H21V13H13V21Z"/></svg>
-                    </div>
-                    <p class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mb-6">Métricas de Estudo</p>
-                    <div class="grid grid-cols-2 gap-6 mb-8 relative z-10">
-                        <div class="bg-white/5 backdrop-blur-md p-6 rounded-3xl border border-white/10">
-                            <p class="text-[9px] font-bold uppercase text-slate-400 tracking-widest mb-1">Acervo Total</p>
-                            <p id="stat-total" class="text-4xl font-black tracking-tighter">0</p>
+        <!-- MAIN CONTENT -->
+        <main class="flex-1 mt-32 mb-40 max-w-2xl mx-auto w-full px-6 space-y-10 overflow-y-auto">
+            
+            <!-- HOME / DASHBOARD -->
+            <section id="tab-home" class="tab-content active space-y-10">
+                <div class="bg-slate-900 p-12 rounded-[64px] text-white shadow-2xl relative overflow-hidden group">
+                    <div class="absolute -top-10 -right-10 w-48 h-48 bg-indigo-500/20 rounded-full blur-[60px] group-hover:bg-indigo-500/30 transition-all duration-700"></div>
+                    <p class="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400 mb-8 opacity-60">Status de Aprendizado</p>
+                    <div class="grid grid-cols-2 gap-8 mb-10 relative z-10">
+                        <div class="bg-white/5 backdrop-blur-md p-8 rounded-[40px] border border-white/10 shadow-inner">
+                            <p class="text-[9px] font-bold uppercase text-slate-400 tracking-widest mb-1">Cards Totais</p>
+                            <p id="stat-total" class="text-5xl font-black tracking-tighter">0</p>
                         </div>
-                        <div class="bg-white/5 backdrop-blur-md p-6 rounded-3xl border border-white/10">
-                            <p class="text-[9px] font-bold uppercase text-slate-400 tracking-widest mb-1">Hoje</p>
-                            <p id="stat-due" class="text-4xl font-black tracking-tighter text-indigo-400">0</p>
+                        <div class="bg-white/5 backdrop-blur-md p-8 rounded-[40px] border border-white/10 shadow-inner">
+                            <p class="text-[9px] font-bold uppercase text-slate-400 tracking-widest mb-1">Para Hoje</p>
+                            <p id="stat-due" class="text-5xl font-black tracking-tighter text-indigo-400">0</p>
                         </div>
                     </div>
-                    <div class="bg-white/5 rounded-[32px] border border-white/10 p-6 h-48">
+                    <div class="bg-white/5 rounded-[40px] border border-white/10 p-8 h-56">
                         <canvas id="performanceChart"></canvas>
                     </div>
                 </div>
 
-                <div class="space-y-5">
+                <!-- CATEGORIES -->
+                <div class="space-y-6">
                     <div class="flex justify-between items-center px-4">
-                        <h2 class="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Minhas Matérias</h2>
-                        <button onclick="window.createNewFolder()" class="bg-indigo-50 text-indigo-600 text-[10px] font-black uppercase px-4 py-2 rounded-xl">Criar +</button>
+                        <h2 class="text-[11px] font-black text-slate-400 uppercase tracking-[0.3em]">Suas Matérias</h2>
+                        <button onclick="window.createNewFolder()" class="bg-indigo-50 text-indigo-600 text-[10px] font-black uppercase px-5 py-2.5 rounded-2xl hover:bg-indigo-100 transition-all">Novo +</button>
                     </div>
-                    <div id="folders-scroll" class="flex gap-3 overflow-x-auto pb-4 px-2 no-scrollbar"></div>
+                    <div id="folders-scroll" class="flex gap-4 overflow-x-auto pb-4 px-2 no-scrollbar">
+                        <!-- Folders chips go here -->
+                    </div>
                 </div>
 
-                <div onclick="window.switchTab('study')" class="group bg-white p-8 rounded-[48px] border border-slate-100 shadow-xl shadow-slate-200/50 flex items-center justify-between cursor-pointer active:scale-95 transition-all hover:border-indigo-200">
-                    <div class="flex items-center gap-6">
-                        <div class="w-16 h-16 bg-indigo-600 text-white rounded-[24px] flex items-center justify-center text-3xl shadow-lg shadow-indigo-100 group-hover:rotate-6 transition-transform">⚡</div>
+                <!-- START SESSION -->
+                <div onclick="window.switchTab('study')" class="group bg-white p-10 rounded-[60px] border border-slate-100 shadow-2xl shadow-slate-200/40 flex items-center justify-between cursor-pointer active:scale-[0.97] transition-all hover:border-indigo-200">
+                    <div class="flex items-center gap-8">
+                        <div class="w-20 h-20 bg-indigo-600 text-white rounded-[32px] flex items-center justify-center text-4xl shadow-2xl shadow-indigo-100 group-hover:rotate-6 transition-transform duration-500">⚡</div>
                         <div>
-                            <h3 class="text-xl font-black text-slate-900 tracking-tight">Iniciar Revisão</h3>
-                            <p id="home-due-text" class="text-sm font-medium text-slate-400 mt-1">Nenhum card pendente no momento.</p>
+                            <h3 class="text-2xl font-black text-slate-900 tracking-tight">Praticar Agora</h3>
+                            <p id="home-due-text" class="text-sm font-medium text-slate-400 mt-1">Nenhuma revisão pendente no momento.</p>
                         </div>
                     </div>
-                    <div class="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center text-slate-300">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"/></svg>
+                    <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center text-slate-300 group-hover:bg-indigo-50 group-hover:text-indigo-400 transition-all">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M9 5l7 7-7 7"/></svg>
                     </div>
                 </div>
             </section>
 
-            <!-- STUDY TAB -->
-            <section id="tab-study" class="tab-content"><div id="study-container" class="min-h-[500px]"></div></section>
+            <!-- STUDY MODE -->
+            <section id="tab-study" class="tab-content space-y-6">
+                <div id="study-card-container" class="min-h-[600px] flex flex-col justify-center">
+                    <!-- Cards are injected here -->
+                </div>
+            </section>
 
-            <!-- ADD TAB -->
-            <section id="tab-add" class="tab-content space-y-8">
-                <div class="bg-white p-10 rounded-[56px] border border-slate-100 shadow-2xl space-y-8">
-                    <div class="flex items-center gap-5">
-                        <div class="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-[20px] flex items-center justify-center text-2xl shadow-inner">🪄</div>
+            <!-- IA IMPORT TAB -->
+            <section id="tab-add" class="tab-content space-y-10">
+                <div class="bg-white p-12 rounded-[64px] border border-slate-100 shadow-2xl space-y-10">
+                    <div class="flex items-center gap-6">
+                        <div class="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-[24px] flex items-center justify-center text-3xl">🪄</div>
                         <div>
-                            <h2 class="text-2xl font-black text-slate-900 tracking-tight">IA Importador</h2>
-                            <p class="text-xs text-slate-400 font-medium">Gere cards a partir de textos ou PDFs.</p>
+                            <h2 class="text-2xl font-black text-slate-900 tracking-tight">Importador IA</h2>
+                            <p class="text-xs text-slate-400 font-medium">Extraia questões de PDFs ou textos com Gemini.</p>
                         </div>
                     </div>
 
-                    <div id="ia-folder-warning" class="bg-amber-50 border border-amber-200 p-6 rounded-3xl hidden">
-                        <p class="text-xs text-amber-700 font-bold leading-relaxed">⚠️ Selecione uma matéria específica na Home para que a IA saiba onde salvar os novos cards.</p>
+                    <div id="ia-no-folder-warn" class="bg-amber-50 border border-amber-200 p-8 rounded-[36px] hidden">
+                        <p class="text-xs text-amber-700 font-bold leading-relaxed italic">⚠️ Você está no modo "Global". Selecione uma matéria específica na aba Dashboard para salvar novos cards nela.</p>
                     </div>
 
-                    <div class="space-y-3">
-                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Matéria Destino:</label>
-                        <div id="active-folder-display" class="w-full bg-slate-50 border border-slate-100 p-5 rounded-3xl text-sm font-black text-indigo-600 uppercase tracking-widest">-</div>
+                    <div class="space-y-4">
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-3">Matéria Destino:</label>
+                        <div id="ia-folder-display" class="w-full bg-slate-50 border border-slate-100 p-6 rounded-[32px] text-xs font-black text-indigo-600 uppercase tracking-widest flex justify-between items-center">
+                            <span>Selecionada: <span id="ia-folder-name">Global</span></span>
+                            <span class="text-[10px] opacity-40">Auto-Detect</span>
+                        </div>
                     </div>
 
-                    <div class="bg-slate-50 border-3 border-dashed border-slate-200 rounded-[32px] p-10 text-center hover:bg-slate-100 transition-colors cursor-pointer group">
-                        <label class="cursor-pointer flex flex-col items-center gap-3">
-                            <span class="text-4xl group-hover:scale-110 transition-transform">📄</span>
-                            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Anexar Questões (PDF/DOCX)</span>
-                            <input type="file" id="file-reader" class="hidden" accept=".pdf,.docx">
-                            <span id="file-status" class="text-xs text-indigo-600 font-black mt-2 hidden"></span>
+                    <div class="bg-slate-50 border-4 border-dashed border-slate-200 rounded-[48px] p-12 text-center hover:bg-slate-100 transition-all cursor-pointer group">
+                        <label class="cursor-pointer flex flex-col items-center gap-4">
+                            <span class="text-5xl group-hover:scale-110 transition-transform">📄</span>
+                            <span class="text-[11px] font-black text-slate-400 uppercase tracking-widest group-hover:text-indigo-600">Arraste seu PDF ou DOCX</span>
+                            <input type="file" id="file-input" class="hidden" accept=".pdf,.docx">
+                            <span id="file-feedback" class="text-xs text-indigo-600 font-black mt-2 hidden animate-pulse">Arquivo pronto para leitura</span>
                         </label>
                     </div>
 
-                    <div class="space-y-3">
-                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Texto da Questão:</label>
-                        <textarea id="ia-prompt" placeholder="Cole o enunciado e as alternativas aqui..." class="w-full h-48 bg-slate-50 border border-slate-100 rounded-[32px] p-8 text-sm font-medium leading-relaxed resize-none"></textarea>
+                    <div class="space-y-4">
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-3">Ou cole o texto aqui:</label>
+                        <textarea id="ia-text-input" placeholder="Cole o enunciado e as alternativas da questão..." class="w-full h-56 bg-slate-50 border border-slate-100 rounded-[40px] p-8 text-sm font-medium leading-relaxed resize-none focus:bg-white transition-all"></textarea>
                     </div>
                     
-                    <button onclick="window.processIA()" id="btn-ia" class="w-full btn-primary py-6 rounded-[28px] uppercase text-xs tracking-[0.2em] flex items-center justify-center gap-4 shadow-2xl shadow-slate-200">
-                        <span>Gerar Cards com Gemini</span>
-                        <div id="ia-loader" class="loading-spinner hidden" style="border-top-color: white;"></div>
+                    <button onclick="window.runGeminiIA()" id="btn-ia-run" class="w-full bg-slate-900 text-white py-8 rounded-[36px] uppercase text-xs font-black tracking-[0.3em] flex items-center justify-center gap-4 shadow-2xl btn-active">
+                        <span>Extrair Inteligente</span>
+                        <div id="ia-loader" class="hidden loading-spinner" style="border-top-color: white;"></div>
                     </button>
                 </div>
 
-                <div id="ia-review-area" class="hidden space-y-6">
-                    <div class="flex justify-between items-center bg-white/80 glass p-8 rounded-[32px] border border-white shadow-xl sticky top-[100px] z-10">
+                <div id="ia-review-panel" class="hidden space-y-8 pb-32">
+                    <div class="flex justify-between items-center bg-white/90 glass p-8 rounded-[40px] border border-white shadow-xl sticky top-[120px] z-50">
                         <div class="flex flex-col">
-                            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Revisão IA</span>
-                            <span id="review-count" class="text-lg font-black text-slate-900">Validar Cards</span>
+                            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Aprovação IA</span>
+                            <span id="review-count-label" class="text-xl font-black text-slate-900">Validar Cards</span>
                         </div>
-                        <button onclick="window.confirmBatch()" class="bg-emerald-600 text-white text-xs font-black uppercase px-8 py-4 rounded-2xl shadow-lg shadow-emerald-100 active:scale-95 transition-all">Salvar Tudo</button>
+                        <button onclick="window.saveBatchToState()" class="bg-emerald-600 text-white text-xs font-black uppercase px-10 py-5 rounded-[24px] shadow-lg shadow-emerald-200 active:scale-95 transition-all">Salvar Todos</button>
                     </div>
-                    <div id="review-list" class="space-y-4 pb-24"></div>
+                    <div id="review-list" class="space-y-4"></div>
                 </div>
             </section>
 
-            <!-- BANK TAB -->
-            <section id="tab-bank" class="tab-content space-y-6">
+            <!-- ACERVO TAB -->
+            <section id="tab-bank" class="tab-content space-y-8">
                 <div class="flex justify-between items-center px-4">
-                    <h2 class="text-2xl font-black text-slate-900 tracking-tight">Seu Banco</h2>
-                    <button onclick="window.clearAll()" class="text-[9px] font-black text-rose-500 uppercase tracking-widest bg-rose-50 px-5 py-2.5 rounded-xl border border-rose-100">Reset Total</button>
+                    <h2 class="text-3xl font-black text-slate-900 tracking-tight italic">Acervo</h2>
+                    <button onclick="window.clearCloudBackup()" class="text-[10px] font-black text-rose-500 uppercase tracking-widest bg-rose-50 px-6 py-3 rounded-2xl border border-rose-100">Limpar Nuvem</button>
                 </div>
                 <div class="px-2">
-                    <input type="text" id="bank-search" oninput="window.renderBank()" placeholder="Pesquisar questões no acervo..." class="w-full bg-white border border-slate-200 rounded-3xl px-8 py-5 text-sm font-medium shadow-sm">
+                    <input type="text" id="bank-search" oninput="window.renderBankList()" placeholder="Pesquisar questões no seu banco..." class="w-full bg-white border border-slate-100 rounded-[32px] px-10 py-6 text-sm font-medium shadow-xl focus:ring-4 ring-indigo-50 transition-all">
                 </div>
-                <div id="bank-list" class="space-y-3 pb-24"></div>
+                <div id="bank-list" class="space-y-4 pb-32">
+                    <!-- Bank items go here -->
+                </div>
             </section>
+
         </main>
 
-        <div id="sync-footer" class="fixed bottom-[110px] left-0 right-0 text-center pointer-events-none z-40">
-            <span id="sync-footer-label" class="bg-white/90 glass px-6 py-2.5 rounded-full text-[10px] font-black text-slate-400 border border-slate-100 shadow-lg uppercase tracking-widest">Sincronizado</span>
+        <!-- FOOTER SYNC STATUS -->
+        <div class="fixed bottom-[115px] left-0 right-0 text-center pointer-events-none z-40">
+            <span id="sync-label" class="bg-slate-900/90 backdrop-blur-md px-8 py-3 rounded-full text-[10px] font-black text-white/60 border border-white/10 shadow-2xl uppercase tracking-[0.3em]">Nuvem Sincronizada</span>
         </div>
 
-        <nav class="fixed bottom-0 left-0 right-0 max-w-2xl mx-auto bg-white/95 glass border-t border-slate-100 flex justify-around py-8 px-8 z-50 rounded-t-[48px] shadow-[0_-20px_50px_rgba(0,0,0,0.05)] safe-bottom">
-            <button onclick="window.switchTab('home')" class="nav-btn flex flex-col items-center gap-2 active text-indigo-600 transition-all" id="nav-home">
-                <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3L4 9V21H9V15H15V21H20V9L12 3Z"/></svg>
+        <!-- NAVIGATION BAR -->
+        <nav class="fixed bottom-0 left-0 right-0 max-w-2xl mx-auto glass border-t border-slate-100 flex justify-around py-10 px-10 z-[1500] rounded-t-[56px] shadow-[0_-20px_60px_rgba(0,0,0,0.08)] padding-safe-bottom">
+            <button onclick="window.switchTab('home')" class="nav-btn flex flex-col items-center gap-2 nav-active" id="nav-home">
+                <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3L4 9V21H9V15H15V21H20V9L12 3Z"/></svg>
                 <span class="text-[9px] font-black uppercase tracking-widest">Dashboard</span>
             </button>
-            <button onclick="window.switchTab('study')" class="nav-btn flex flex-col items-center gap-2 text-slate-300 transition-all" id="nav-study">
-                <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L4.5 20.29L5.21 21L12 18L18.79 21L19.5 20.29L12 2Z"/></svg>
-                <span class="text-[9px] font-black uppercase tracking-widest">Estudar</span>
+            <button onclick="window.switchTab('study')" class="nav-btn flex flex-col items-center gap-2 text-slate-300" id="nav-study">
+                <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L4.5 20.29L5.21 21L12 18L18.79 21L19.5 20.29L12 2Z"/></svg>
+                <span class="text-[9px] font-black uppercase tracking-widest">Praticar</span>
             </button>
-            <button onclick="window.switchTab('add')" class="nav-btn flex flex-col items-center gap-2 text-slate-300 transition-all" id="nav-add">
-                <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L14.5 8.5L21 11L14.5 13.5L12 20L9.5 13.5L3 11L9.5 8.5L12 2Z"/></svg>
-                <span class="text-[9px] font-black uppercase tracking-widest">IA Import</span>
+            <button onclick="window.switchTab('add')" class="nav-btn flex flex-col items-center gap-2 text-slate-300" id="nav-add">
+                <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L14.5 8.5L21 11L14.5 13.5L12 20L9.5 13.5L3 11L9.5 8.5L12 2Z"/></svg>
+                <span class="text-[9px] font-black uppercase tracking-widest">Import IA</span>
             </button>
-            <button onclick="window.switchTab('bank')" class="nav-btn flex flex-col items-center gap-2 text-slate-300 transition-all" id="nav-bank">
-                <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M4 4H20V20H4V4ZM6 6V18H18V6H6ZM8 8H16V10H8V8ZM8 12H16V14H8V12ZM8 16H13V18H8V16Z"/></svg>
+            <button onclick="window.switchTab('bank')" class="nav-btn flex flex-col items-center gap-2 text-slate-300" id="nav-bank">
+                <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M4 4H20V20H4V4ZM6 6V18H18V6H6ZM8 8H16V10H8V8ZM8 12H16V14H8V12ZM8 16H13V18H8V16Z"/></svg>
                 <span class="text-[9px] font-black uppercase tracking-widest">Acervo</span>
             </button>
         </nav>
     </div>
 
+    <!-- CORE LOGIC -->
     <script type="module">
-        import { GoogleGenAI } from "@google/genai";
+        import { GoogleGenAI, Type } from "@google/genai";
 
-        // CONFIGS DE SEGURANÇA E ESCALA
-        const DEFAULT_CLIENT_ID = '648353734848-s9fnmd9tt0i5577grbt3q9oju6h71mpi.apps.googleusercontent.com';
-        const STORAGE_KEY = 'medrep_master_v13_8';
-        const TOKEN_STORAGE = 'medrep_auth_v4';
-        const CFG_STORAGE = 'medrep_cfg_v13';
-        const FILENAME = 'medrep_database_v13.json';
+        // APP CONFIG & CONSTANTS
+        const VERSION = '14.0.0';
+        const APP_FILENAME = 'medrep_cloud_v14.json';
+        const STORAGE_KEY = 'medrep_master_data_v14';
+        const AUTH_STORAGE = 'medrep_auth_v14';
+        const SETTINGS_STORAGE = 'medrep_settings_v14';
         const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
+        const DEFAULT_CLIENT_ID = '648353734848-s9fnmd9tt0i5577grbt3q9oju6h71mpi.apps.googleusercontent.com';
 
+        // STATE OBJECT
         let state = {
             questions: [],
-            srs: {},
-            history: [],
-            folders: [{id: 'f_all', name: 'Global'}, {id: 'f_default', name: 'Geral'}],
-            currentFolderId: 'f_all'
+            srs: {}, // cardId -> { interval, easeFactor, repetitions, nextReview }
+            folders: [
+                { id: 'f_all', name: 'Global' },
+                { id: 'f_default', name: 'Geral' }
+            ],
+            history: [], // { cardId, grade, date }
+            currentFolderId: 'f_all',
+            lastSync: null
         };
 
-        let accessToken = null, tokenClient = null, studyQueue = [], studyPointer = 0, isRevealed = false, driveFileId = null, extractedFileText = "", chartInstance = null, tempExtracted = [];
+        // GLOBAL VARS
+        let accessToken = null;
+        let tokenClient = null;
+        let driveFileId = null;
+        let studyQueue = [];
+        let studyIndex = 0;
+        let chartInstance = null;
+        let extractedFileContent = "";
+        let tempBatch = [];
 
+        // DOM UTILS
         const el = (id) => document.getElementById(id);
-        const getSettings = () => JSON.parse(localStorage.getItem(CFG_STORAGE)) || { clientId: DEFAULT_CLIENT_ID };
-
-        // FEEDBACK VISUAL
-        function showSyncStatus(msg, type = 'info') {
-            const toast = el('sync-toast'), footer = el('sync-footer-label'), indicator = el('sync-indicator');
-            if (footer) footer.innerText = msg;
-            if (indicator) {
-                indicator.style.backgroundColor = type === 'success' ? '#10b981' : (type === 'error' ? '#ef4444' : '#4f46e5');
-                indicator.style.boxShadow = `0 0 10px ${indicator.style.backgroundColor}`;
-            }
-            if (toast) {
-                toast.innerText = msg;
-                toast.style.display = 'block';
-                toast.style.backgroundColor = type === 'success' ? '#10b981' : (type === 'error' ? '#ef4444' : '#4f46e5');
-                setTimeout(() => { if (toast) toast.style.display = 'none'; }, 3000);
-            }
+        
+        function showToast(msg, icon = '✨', type = 'info') {
+            const toast = el('toast');
+            el('toast-msg').innerText = msg;
+            el('toast-icon').innerText = icon;
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 3500);
+            
+            // Sync Footer label
+            if (el('sync-label')) el('sync-label').innerText = msg;
         }
 
-        // CONFIGURAÇÕES
-        window.toggleSettings = () => {
-            const panel = el('settings-panel');
-            if (panel) {
-                panel.classList.toggle('active');
-                if (panel.classList.contains('active')) el('cfg-client-id').value = getSettings().clientId;
-            }
-        };
-
-        window.saveSettings = () => {
-            const newId = el('cfg-client-id').value.trim();
-            localStorage.setItem(CFG_STORAGE, JSON.stringify({ clientId: newId || DEFAULT_CLIENT_ID }));
-            alert("Configurações salvas. O app será reiniciado para aplicar o novo Client ID.");
-            location.reload();
-        };
-
-        // GOOGLE DRIVE SYNC (REBUILT FOR v13.8)
-        window.fazerLogin = () => {
-            if (el('login-loader')) el('login-loader').classList.remove('hidden');
-            if (tokenClient) tokenClient.requestAccessToken(); else setupGoogle();
-        };
-
-        async function manualSync() {
+        // 1. DATA PERSISTENCE & SYNC (GOOGLE DRIVE MULTIPART)
+        async function cloudSync() {
             if (!accessToken) return;
-            showSyncStatus("☁️ Sincronizando Banco...");
+            showToast('Cloud: Sincronizando...', '☁️');
+            
             try {
-                const listUrl = `https://www.googleapis.com/drive/v3/files?q=name='${FILENAME}' and trashed=false&fields=files(id, name)`;
-                const list = await fetch(listUrl, { headers: { 'Authorization': `Bearer ${accessToken}` } }).then(r => r.json());
-                
-                const file = list.files && list.files[0];
-                if (file) {
-                    driveFileId = file.id;
+                // Search for the file first
+                const searchRes = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='${APP_FILENAME}' and trashed=false`, {
+                    headers: { 'Authorization': `Bearer ${accessToken}` }
+                }).then(r => r.json());
+
+                if (searchRes.files && searchRes.files[0]) {
+                    driveFileId = searchRes.files[0].id;
                     const content = await fetch(`https://www.googleapis.com/drive/v3/files/${driveFileId}?alt=media`, {
                         headers: { 'Authorization': `Bearer ${accessToken}` }
                     }).then(r => r.json());
-                    
-                    if (content && content.questions) {
+
+                    if (content && Array.isArray(content.questions)) {
+                        // Merge logic: simple overwrite for this project, but cloud always wins
                         state = content;
-                        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-                        showSyncStatus("Banco Atualizado", "success");
+                        saveLocalOnly();
+                        showToast('Cloud: Atualizado', '✅', 'success');
                     }
                 } else {
-                    showSyncStatus("Criando Novo Banco", "info");
+                    showToast('Cloud: Criando Banco...', '📂');
+                    await cloudBackup(); // Create it
                 }
-            } catch (e) { 
-                console.error("Manual Sync Error:", e);
-                showSyncStatus("Falha na Nuvem", "error"); 
+            } catch (err) {
+                console.error("Sync error:", err);
+                showToast('Erro na Nuvem', '⚠️', 'error');
             }
             updateStats();
         }
 
-        async function autoBackup() {
+        async function cloudBackup() {
             if (!accessToken) return;
-            showSyncStatus("☁️ Salvando Nuvem...");
+            showToast('Nuvem: Salvando...', '☁️');
+            
             try {
-                const boundary = 'medrep_multipart_boundary_v13_8';
-                const metadata = { name: FILENAME, mimeType: 'application/json' };
+                const boundary = 'medrep_boundary_v14';
+                const metadata = { name: APP_FILENAME, mimeType: 'application/json' };
                 const content = JSON.stringify(state);
 
-                // Construção robusta do corpo multipart usando Blobs
                 const bodyParts = [
                     `--${boundary}\r\n`,
                     'Content-Type: application/json; charset=UTF-8\r\n\r\n',
@@ -372,7 +469,7 @@
                     `\r\n--${boundary}--`
                 ];
 
-                const multipartBody = new Blob(bodyParts, { type: 'multipart/related; boundary=' + boundary });
+                const blob = new Blob(bodyParts, { type: 'multipart/related; boundary=' + boundary });
                 const url = driveFileId 
                     ? `https://www.googleapis.com/upload/drive/v3/files/${driveFileId}?uploadType=multipart`
                     : 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
@@ -380,417 +477,482 @@
                 const response = await fetch(url, {
                     method: driveFileId ? 'PATCH' : 'POST',
                     headers: { 'Authorization': `Bearer ${accessToken}` },
-                    body: multipartBody
+                    body: blob
                 });
 
                 if (response.ok) {
-                    if (!driveFileId) { 
-                        const result = await response.json(); 
-                        driveFileId = result.id; 
-                    }
-                    showSyncStatus("Nuvem OK", "success");
+                    const result = await response.json();
+                    if (!driveFileId) driveFileId = result.id;
+                    showToast('Backup Concluído', '💎', 'success');
                 } else {
-                    const err = await response.json();
-                    console.error("Backup Error 400 Details:", err);
-                    if (response.status === 401) fazerLogin(); // Re-auth se expirado
-                    showSyncStatus("Erro de Sync (400)", "error");
+                    if (response.status === 401) {
+                        accessToken = null;
+                        localStorage.removeItem(AUTH_STORAGE);
+                        el('login-overlay').classList.remove('hidden');
+                        el('app').classList.add('hidden');
+                    }
+                    showToast('Erro no Backup', '⚠️');
                 }
-            } catch (e) { 
-                console.error("AutoBackup Network Error:", e);
-                showSyncStatus("Erro de Rede", "error"); 
+            } catch (err) {
+                showToast('Falha na Rede', '📶');
             }
         }
 
-        // IA GEMINI INTEGRATION
-        window.processIA = async () => {
-            if (state.currentFolderId === 'f_all') return alert("Por favor, selecione uma Matéria na aba Dashboard antes de importar.");
-            const promptInput = el('ia-prompt');
-            const userInput = promptInput ? promptInput.value.trim() : '';
-            if (!userInput && !extractedFileText) return alert("Insira o texto da questão ou anexe um PDF/DOCX.");
+        function saveLocalOnly() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            updateStats();
+        }
+
+        function saveState(cloud = true) {
+            saveLocalOnly();
+            if (cloud && accessToken) cloudBackup();
+        }
+
+        // 2. IA EXTRACTION (GEMINI)
+        window.runGeminiIA = async () => {
+            const userInput = el('ia-text-input').value.trim();
+            if (!userInput && !extractedFileContent) return alert("Forneça texto ou arquivo para extração.");
             
-            const loader = el('ia-loader'), btn = el('btn-ia');
-            if (loader) loader.classList.remove('hidden');
-            if (btn) btn.disabled = true;
+            const loader = el('ia-loader');
+            const btn = el('btn-ia-run');
+            loader.classList.remove('hidden');
+            btn.disabled = true;
 
             try {
-                const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-                const sourceData = extractedFileText ? `DOCUMENTO ANEXADO:\n${extractedFileText}\n\nSOLICITAÇÃO DO USUÁRIO:\n${userInput}` : userInput;
+                const cfg = JSON.parse(localStorage.getItem(SETTINGS_STORAGE)) || {};
+                const apiKey = cfg.geminiKey || process.env.API_KEY;
+                if (!apiKey) throw new Error("Chave Gemini não configurada.");
+
+                const genAI = new GoogleGenAI({ apiKey });
+                const prompt = `Analise o seguinte material de residência médica e extraia o máximo de questões objetivas possíveis.
                 
-                const response = await ai.models.generateContent({
+                MATERIAL FONTE:
+                ${extractedFileContent}
+
+                INPUT DO USUÁRIO:
+                ${userInput}
+
+                Regras:
+                - Use JSON rigoroso.
+                - Statement deve conter o enunciado (use Markdown **negrito** para palavras chaves).
+                - Options deve ser um array de 4 ou 5 strings.
+                - CorrectIndex é o índice da resposta certa (0 a 4).
+                - Explanation deve ser curta e técnica.`;
+
+                const response = await genAI.models.generateContent({
                     model: 'gemini-3-flash-preview',
-                    contents: [{ parts: [{ text: sourceData }] }],
-                    config: { 
-                        systemInstruction: `Você é um tutor de Residência Médica. Transforme o texto fornecido em cards de estudo no formato JSON rigoroso: [{"statement":"","options":["A","B","C","D"],"correctIndex":0,"explanation":""}]. Use Markdown **negrito** para termos técnicos no enunciado.`
+                    contents: [{ parts: [{ text: prompt }] }],
+                    config: {
+                        responseMimeType: "application/json",
+                        responseSchema: {
+                            type: Type.ARRAY,
+                            items: {
+                                type: Type.OBJECT,
+                                properties: {
+                                    statement: { type: Type.STRING },
+                                    options: { type: Type.ARRAY, items: { type: Type.STRING } },
+                                    correctIndex: { type: Type.INTEGER },
+                                    explanation: { type: Type.STRING }
+                                },
+                                required: ["statement", "options", "correctIndex", "explanation"]
+                            }
+                        }
                     }
                 });
 
-                const rawText = response.text;
-                const match = rawText.match(/\[[\s\S]*\]/);
-                if (match) {
-                    tempExtracted = JSON.parse(match[0]);
-                    const area = el('ia-review-area');
-                    const list = el('review-list');
-                    if (area) area.classList.remove('hidden');
-                    if (list) {
-                        list.innerHTML = tempExtracted.map((q, i) => `
-                            <div class="bg-white p-6 rounded-[32px] border border-slate-100 shadow-lg space-y-3">
-                                <div class="flex justify-between items-center">
-                                    <span class="text-[10px] font-black text-indigo-500 uppercase tracking-widest">Card ${i+1}</span>
-                                    <span class="text-[10px] font-bold text-emerald-500 uppercase">Gerado com Sucesso</span>
-                                </div>
-                                <p class="text-sm font-medium text-slate-700 leading-relaxed italic line-clamp-2">"${q.statement}"</p>
-                            </div>
-                        `).join('');
-                    }
-                    window.scrollTo({ top: el('ia-review-area').offsetTop - 100, behavior: 'smooth' });
-                } else {
-                    alert("O Gemini não conseguiu estruturar as questões. Tente copiar e colar o texto de forma mais clara.");
+                const data = JSON.parse(response.text);
+                if (data && Array.isArray(data)) {
+                    tempBatch = data;
+                    renderIAReview();
+                    el('ia-review-panel').classList.remove('hidden');
+                    window.scrollTo({ top: el('ia-review-panel').offsetTop - 120, behavior: 'smooth' });
                 }
-            } catch (e) { 
-                console.error("Gemini IA Error:", e);
-                alert("Erro na IA: " + e.message + ". Verifique sua conexão ou tente novamente."); 
-            } finally { 
-                if (loader) loader.classList.add('hidden'); 
-                if (btn) btn.disabled = false; 
+            } catch (err) {
+                alert("Erro IA: " + err.message);
+            } finally {
+                loader.classList.add('hidden');
+                btn.disabled = false;
             }
         };
 
-        window.confirmBatch = () => {
+        function renderIAReview() {
+            const list = el('review-list');
+            el('review-count-label').innerText = `${tempBatch.length} Cards Gerados`;
+            list.innerHTML = tempBatch.map((q, i) => `
+                <div class="bg-white p-8 rounded-[40px] border border-slate-100 shadow-xl space-y-4 animate-fadeIn">
+                    <div class="flex justify-between items-center">
+                        <span class="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Card ${i+1}</span>
+                        <button onclick="window.removeTemp(${i})" class="text-rose-500 font-bold text-[10px] uppercase">Remover</button>
+                    </div>
+                    <p class="text-sm font-black text-slate-800 leading-relaxed">${q.statement}</p>
+                    <div class="grid grid-cols-1 gap-2">
+                        ${q.options.map((opt, oi) => `
+                            <div class="text-[10px] font-bold p-3 rounded-2xl ${oi === q.correctIndex ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-50 text-slate-400'}">
+                                ${String.fromCharCode(65 + oi)}) ${opt}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        window.removeTemp = (idx) => {
+            tempBatch.splice(idx, 1);
+            if (tempBatch.length === 0) el('ia-review-panel').classList.add('hidden');
+            renderIAReview();
+        };
+
+        window.saveBatchToState = () => {
             const folder = state.folders.find(f => f.id === state.currentFolderId);
             const folderName = folder ? folder.name : 'Geral';
             
-            const news = tempExtracted.map(q => ({ 
-                ...q, 
+            const questions = tempBatch.map(q => ({
+                ...q,
                 id: 'q_' + Math.random().toString(36).substr(2, 9),
                 folderId: state.currentFolderId,
                 specialty: folderName,
-                date: Date.now()
+                createdAt: Date.now()
             }));
 
-            state.questions = [...state.questions, ...news];
-            saveLocal(true);
+            state.questions = [...state.questions, ...questions];
+            tempBatch = [];
+            el('ia-review-panel').classList.add('hidden');
+            el('ia-text-input').value = "";
+            el('file-feedback').classList.add('hidden');
+            extractedFileContent = "";
             
-            const area = el('ia-review-area'), promptInput = el('ia-prompt'), status = el('file-status');
-            if (area) area.classList.add('hidden');
-            if (promptInput) promptInput.value = "";
-            extractedFileText = "";
-            if (status) status.classList.add('hidden');
-            
-            switchTab('bank');
-            showSyncStatus("Cards Adicionados!", "success");
+            saveState(true);
+            switchTab('home');
+            showToast('Importado com Sucesso', '🪄');
         };
 
-        // SRS LOGIC & STUDY
-        function startStudy() {
+        // 3. SRS LOGIC (SM-2)
+        function getStudyQueue() {
             const now = Date.now();
-            const questions = state.currentFolderId === 'f_all' ? state.questions : state.questions.filter(q => q.folderId === state.currentFolderId);
-            studyQueue = questions.filter(q => !state.srs[q.id] || state.srs[q.id].nextReview <= now).sort(() => Math.random() - 0.5);
-            studyPointer = 0;
-            renderStudyCard();
+            const questions = state.currentFolderId === 'f_all' 
+                ? state.questions 
+                : state.questions.filter(q => q.folderId === state.currentFolderId);
+            
+            return questions.filter(q => {
+                const srs = state.srs[q.id];
+                return !srs || srs.nextReview <= now;
+            }).sort(() => Math.random() - 0.5);
         }
 
         function renderStudyCard() {
-            const container = el('study-container');
-            if (!container) return;
-            
-            if (studyQueue.length === 0 || studyPointer >= studyQueue.length) {
+            const container = el('study-card-container');
+            if (studyQueue.length === 0 || studyIndex >= studyQueue.length) {
                 container.innerHTML = `
-                    <div class="py-24 text-center space-y-6">
-                        <div class="w-24 h-24 bg-emerald-50 text-emerald-500 rounded-full mx-auto flex items-center justify-center text-5xl">🏆</div>
-                        <h2 class="text-3xl font-black text-slate-800 tracking-tight">Sessão Finalizada!</h2>
-                        <p class="text-slate-400 font-medium">Você concluiu todos os cards pendentes desta matéria.</p>
-                        <button onclick="window.switchTab('home')" class="mt-8 bg-indigo-600 text-white font-black px-12 py-5 rounded-3xl shadow-xl active:scale-95 transition-all uppercase tracking-widest text-xs">Voltar ao Início</button>
+                    <div class="text-center space-y-8 animate-fadeIn">
+                        <div class="w-32 h-32 bg-emerald-50 text-emerald-500 rounded-full mx-auto flex items-center justify-center text-6xl">🏆</div>
+                        <div class="space-y-2">
+                            <h2 class="text-4xl font-black text-slate-900 tracking-tight leading-none">Meta Atingida!</h2>
+                            <p class="text-slate-400 font-medium">Você concluiu todos os cards pendentes desta matéria.</p>
+                        </div>
+                        <button onclick="window.switchTab('home')" class="bg-indigo-600 text-white font-black px-12 py-6 rounded-[32px] shadow-2xl uppercase text-xs tracking-widest btn-active">Voltar ao Dashboard</button>
                     </div>`;
                 return;
             }
 
-            const q = studyQueue[studyPointer];
-            isRevealed = false;
-            
+            const q = studyQueue[studyIndex];
             container.innerHTML = `
-                <div class="bg-white p-10 rounded-[56px] border border-slate-100 shadow-2xl space-y-8 animate-fadeIn">
+                <div class="bg-white p-12 rounded-[64px] border border-slate-100 shadow-2xl space-y-10 animate-fadeIn">
                     <div class="flex justify-between items-center">
-                        <span class="text-[10px] font-black text-indigo-500 uppercase tracking-widest">${q.specialty || 'Geral'}</span>
-                        <span class="text-[10px] font-bold text-slate-300 uppercase">${studyPointer + 1} / ${studyQueue.length}</span>
+                        <span class="text-[10px] font-black text-indigo-500 uppercase tracking-widest">${q.specialty}</span>
+                        <span class="text-[10px] font-black text-slate-300 uppercase tracking-widest">Sessão: ${studyIndex + 1}/${studyQueue.length}</span>
                     </div>
-                    <h3 class="text-2xl font-bold text-slate-800 leading-tight">${q.statement.replace(/\*\*(.*?)\*\*/g, '<b class="text-indigo-600">$1</b>')}</h3>
                     
-                    <div class="space-y-3">
+                    <div class="space-y-2">
+                        <h3 class="text-2xl font-bold text-slate-800 leading-tight">${q.statement.replace(/\*\*(.*?)\*\*/g, '<b class="text-indigo-600">$1</b>')}</h3>
+                    </div>
+
+                    <div id="options-stack" class="space-y-3">
                         ${q.options.map((opt, i) => `
-                            <button onclick="window.reveal(${i})" class="opt-btn w-full text-left p-6 rounded-[28px] border-2 border-slate-50 bg-slate-50 text-slate-600 text-sm font-bold hover:bg-slate-100 active:scale-[0.98] transition-all">
-                                <span class="inline-block w-8 text-indigo-300">${String.fromCharCode(65 + i)})</span> ${opt}
+                            <button onclick="window.revealAnswer(${i})" class="study-opt w-full text-left p-7 rounded-[32px] border-2 border-slate-50 bg-slate-50 text-slate-600 text-sm font-bold active:scale-[0.98] transition-all flex gap-4">
+                                <span class="w-8 opacity-40 font-black">${String.fromCharCode(65 + i)}</span>
+                                <span>${opt}</span>
                             </button>
                         `).join('')}
                     </div>
 
-                    <div id="study-feedback" class="hidden pt-8 border-t border-slate-100 space-y-8">
-                        <div class="bg-slate-900 text-slate-300 p-8 rounded-[36px] text-xs leading-relaxed italic shadow-inner">
-                            <p class="font-black text-white uppercase text-[9px] mb-3 tracking-widest opacity-40">Explicação do Professor</p>
-                            ${q.explanation || 'Nenhuma nota adicional para esta questão.'}
+                    <div id="study-feedback-area" class="hidden animate-fadeIn space-y-8 border-t border-slate-100 pt-10">
+                        <div class="bg-slate-900 text-slate-300 p-10 rounded-[48px] text-xs italic leading-relaxed shadow-inner">
+                            <p class="font-black text-white uppercase text-[8px] mb-4 tracking-[0.3em] opacity-40">Explicação Médica</p>
+                            ${q.explanation || 'Nenhuma nota adicional cadastrada para esta questão.'}
                         </div>
-                        <div class="grid grid-cols-3 gap-3">
-                            <button onclick="window.submitSRS(1)" class="bg-rose-500 py-6 rounded-3xl text-white font-black text-[10px] uppercase shadow-lg shadow-rose-100">Errei</button>
-                            <button onclick="window.submitSRS(3)" class="bg-indigo-600 py-6 rounded-3xl text-white font-black text-[10px] uppercase shadow-lg shadow-indigo-100">Bom</button>
-                            <button onclick="window.submitSRS(5)" class="bg-emerald-500 py-6 rounded-3xl text-white font-black text-[10px] uppercase shadow-lg shadow-emerald-100">Fácil</button>
+                        
+                        <div class="grid grid-cols-4 gap-3">
+                            <button onclick="window.processSRS(1)" class="bg-rose-500 py-6 rounded-3xl text-white font-black text-[9px] uppercase tracking-widest shadow-lg shadow-rose-100 btn-active">Errei</button>
+                            <button onclick="window.processSRS(3)" class="bg-slate-800 py-6 rounded-3xl text-white font-black text-[9px] uppercase tracking-widest shadow-lg shadow-slate-200 btn-active">Médio</button>
+                            <button onclick="window.processSRS(4)" class="bg-indigo-600 py-6 rounded-3xl text-white font-black text-[9px] uppercase tracking-widest shadow-lg shadow-indigo-100 btn-active">Bom</button>
+                            <button onclick="window.processSRS(5)" class="bg-emerald-500 py-6 rounded-3xl text-white font-black text-[9px] uppercase tracking-widest shadow-lg shadow-emerald-100 btn-active">Fácil</button>
                         </div>
                     </div>
                 </div>`;
         }
 
-        window.reveal = (idx) => {
-            if (isRevealed) return;
-            isRevealed = true;
-            const q = studyQueue[studyPointer];
-            document.querySelectorAll('.opt-btn').forEach((btn, i) => { 
-                if (i === q.correctIndex) btn.classList.add('option-btn-correct');
-                else if (i === idx) btn.classList.add('option-btn-wrong');
+        window.revealAnswer = (selectedIdx) => {
+            const q = studyQueue[studyIndex];
+            const btns = document.querySelectorAll('.study-opt');
+            btns.forEach((btn, i) => {
                 btn.disabled = true;
+                if (i === q.correctIndex) btn.classList.add('opt-btn-correct');
+                else if (i === selectedIdx) btn.classList.add('opt-btn-wrong');
             });
-            const feedback = el('study-feedback');
-            if (feedback) feedback.classList.remove('hidden');
+            el('study-feedback-area').classList.remove('hidden');
         };
 
-        window.submitSRS = (grade) => {
-            const q = studyQueue[studyPointer];
-            if (!q) return;
+        window.processSRS = (grade) => {
+            const q = studyQueue[studyIndex];
+            const now = Date.now();
             
-            const srs = state.srs[q.id] || { interval: 0, repetitions: 0, easeFactor: 2.5 };
-            let { interval, repetitions, easeFactor } = srs;
-            
-            if (grade >= 3) {
+            // SM-2 Algorithm
+            let srs = state.srs[q.id] || { interval: 0, easeFactor: 2.5, repetitions: 0 };
+            let { interval, easeFactor, repetitions } = srs;
+
+            if (grade >= 3) { // Success
                 if (repetitions === 0) interval = 1;
                 else if (repetitions === 1) interval = 6;
                 else interval = Math.round(interval * easeFactor);
                 repetitions++;
-            } else { 
-                repetitions = 0; 
-                interval = 1; 
+            } else { // Fail
+                repetitions = 0;
+                interval = 1;
             }
-            
+
+            // Ease Factor adjustment
             easeFactor = Math.max(1.3, easeFactor + (0.1 - (5 - grade) * (0.08 + (5 - grade) * 0.02)));
-            state.srs[q.id] = { 
-                interval, 
-                repetitions, 
-                easeFactor, 
-                nextReview: Date.now() + (interval * 24 * 60 * 60 * 1000) 
-            };
             
-            state.history.push({ cardId: q.id, success: grade >= 3, date: Date.now() });
-            saveLocal(true);
-            studyPointer++;
+            state.srs[q.id] = {
+                interval,
+                easeFactor,
+                repetitions,
+                nextReview: now + (interval * 24 * 60 * 60 * 1000)
+            };
+
+            state.history.push({ cardId: q.id, grade, date: now });
+            
+            studyIndex++;
+            saveState(true);
             renderStudyCard();
         };
 
-        // DASHBOARD & STATS
-        function initChart() {
-            const canvas = el('performanceChart');
-            if (!canvas) return;
-            const ctx = canvas.getContext('2d');
-            if (chartInstance) chartInstance.destroy();
+        // 4. UI ENGINE
+        window.switchTab = (tabId) => {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('nav-active', 'text-indigo-600'));
             
-            chartInstance = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'],
-                    datasets: [{ 
-                        data: [0,0,0,0,0,0,0], 
-                        borderColor: '#6366f1', 
-                        backgroundColor: 'rgba(99, 102, 241, 0.1)', 
-                        fill: true, 
-                        tension: 0.5, 
-                        borderWidth: 4, 
-                        pointRadius: 0 
-                    }]
-                },
-                options: { 
-                    responsive: true, 
-                    maintainAspectRatio: false, 
-                    plugins: { legend: { display: false } }, 
-                    scales: { 
-                        x: { display: true, ticks: { color: 'rgba(255,255,255,0.4)', font: { size: 9, weight: 'bold' } }, grid: { display: false } }, 
-                        y: { display: false } 
-                    } 
-                }
-            });
+            el('tab-' + tabId).classList.add('active');
+            const navBtn = el('nav-' + tabId);
+            if (navBtn) {
+                navBtn.classList.add('nav-active', 'text-indigo-600');
+                navBtn.classList.remove('text-slate-300');
+            }
+
+            if (tabId === 'home') updateStats();
+            if (tabId === 'study') startStudySession();
+            if (tabId === 'bank') renderBankList();
+            if (tabId === 'add') validateIAFolder();
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        function startStudySession() {
+            studyQueue = getStudyQueue();
+            studyIndex = 0;
+            renderStudyCard();
         }
 
         function updateStats() {
-            const folderId = state.currentFolderId;
-            const qSet = folderId === 'f_all' ? state.questions : state.questions.filter(q => q.folderId === folderId);
-            const due = qSet.filter(q => !state.srs[q.id] || state.srs[q.id].nextReview <= Date.now()).length;
+            const qList = state.currentFolderId === 'f_all' ? state.questions : state.questions.filter(q => q.folderId === state.currentFolderId);
+            const dueCount = qList.filter(q => !state.srs[q.id] || state.srs[q.id].nextReview <= Date.now()).length;
             
-            if (el('stat-total')) el('stat-total').innerText = qSet.length;
-            if (el('stat-due')) el('stat-due').innerText = due;
-            if (el('home-due-text')) el('home-due-text').innerText = due > 0 ? `${due} cards pendentes agora.` : "Nenhuma revisão agora.";
-            
-            const badge = el('due-badge');
-            if (badge) {
-                badge.innerText = due;
-                badge.classList.toggle('hidden', due === 0);
-            }
-            
-            // Atualizar Gráfico com Histórico Real
-            if (chartInstance) {
-                const weekly = [0,0,0,0,0,0,0];
-                const now = new Date();
-                state.history.forEach(h => {
-                    const d = new Date(h.date);
-                    if (now - d < 7 * 86400000) weekly[d.getDay()]++;
-                });
-                chartInstance.data.datasets[0].data = weekly;
-                chartInstance.update();
-            }
+            if (el('stat-total')) el('stat-total').innerText = qList.length;
+            if (el('stat-due')) el('stat-due').innerText = dueCount;
+            if (el('home-due-text')) el('home-due-text').innerText = dueCount > 0 ? `${dueCount} cards pendentes agora.` : "Nenhuma revisão para o momento.";
             
             renderFoldersUI();
-            validateIAFolder();
+            updateChart();
         }
 
         function renderFoldersUI() {
             const scroll = el('folders-scroll');
-            if (scroll) {
-                scroll.innerHTML = state.folders.map(f => {
-                    const isActive = state.currentFolderId === f.id;
-                    return `<div onclick="window.onFolderChange('${f.id}')" class="folder-chip px-8 py-3.5 rounded-3xl text-[10px] font-black uppercase tracking-widest border border-slate-100 bg-white shadow-sm ${isActive ? 'active' : 'text-slate-400'}">${f.name}</div>`;
-                }).join('');
-            }
+            scroll.innerHTML = state.folders.map(f => `
+                <div onclick="window.selectFolder('${f.id}')" class="folder-chip px-10 py-4 rounded-[28px] text-[10px] font-black uppercase tracking-widest border border-slate-100 bg-white shadow-sm cursor-pointer whitespace-nowrap btn-active ${state.currentFolderId === f.id ? 'active' : 'text-slate-400'}">
+                    ${f.name}
+                </div>
+            `).join('');
         }
 
-        function validateIAFolder() {
-            const warning = el('ia-folder-warning');
-            const display = el('active-folder-display');
-            if (state.currentFolderId === 'f_all') {
-                if (warning) warning.classList.remove('hidden');
-                if (display) display.innerText = "ESCOLHA UMA MATÉRIA";
-                if (display) display.style.color = "#ef4444";
-            } else {
-                if (warning) warning.classList.add('hidden');
-                const folder = state.folders.find(f => f.id === state.currentFolderId);
-                if (display && folder) display.innerText = folder.name.toUpperCase();
-                if (display) display.style.color = "#4f46e5";
-            }
-        }
-
-        // APP CORE
-        window.switchTab = (tabId) => {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(btn => { 
-                btn.classList.remove('active', 'text-indigo-600'); 
-                btn.classList.add('text-slate-300'); 
-            });
-            
-            const target = el('tab-' + tabId);
-            if (target) target.classList.add('active');
-            
-            const btn = el('nav-' + tabId);
-            if (btn) {
-                btn.classList.add('active', 'text-indigo-600');
-                btn.classList.remove('text-slate-300');
-            }
-            
-            if (tabId === 'home') updateStats();
-            if (tabId === 'study') startStudy();
-            if (tabId === 'bank') renderBank();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        };
-
-        window.onFolderChange = (id) => {
+        window.selectFolder = (id) => {
             state.currentFolderId = id;
             const folder = state.folders.find(f => f.id === id);
-            const subTitle = el('header-subtitle');
-            if (subTitle && folder) subTitle.innerText = folder.name;
+            el('current-folder-label').innerText = folder.name;
             updateStats();
         };
 
         window.createNewFolder = () => {
-            const name = prompt("Nome da nova matéria (Ex: Pediatria, SUS...):");
+            const name = prompt("Nome da nova matéria (Ex: Cardiologia, SUS):");
             if (name && name.trim()) {
-                const folder = { id: 'f_' + Date.now(), name: name.trim() };
-                state.folders.push(folder);
-                state.currentFolderId = folder.id;
-                saveLocal(true);
+                const id = 'f_' + Date.now();
+                state.folders.push({ id, name: name.trim() });
+                state.currentFolderId = id;
+                saveState(true);
             }
         };
 
-        window.renderBank = () => {
-            const searchTerm = el('bank-search') ? el('bank-search').value.toLowerCase() : '';
+        function validateIAFolder() {
+            const isAll = state.currentFolderId === 'f_all';
+            el('ia-no-folder-warn').classList.toggle('hidden', !isAll);
+            const folder = state.folders.find(f => f.id === state.currentFolderId);
+            el('ia-folder-name').innerText = folder ? folder.name : 'Global';
+        }
+
+        window.renderBankList = () => {
+            const search = el('bank-search').value.toLowerCase();
             const list = el('bank-list');
-            if (!list) return;
             
-            const folderFilter = state.currentFolderId;
-            let filtered = folderFilter === 'f_all' ? state.questions : state.questions.filter(q => q.folderId === folderFilter);
-            if (searchTerm) filtered = filtered.filter(q => q.statement.toLowerCase().includes(searchTerm));
-            
+            let filtered = state.currentFolderId === 'f_all' ? state.questions : state.questions.filter(q => q.folderId === state.currentFolderId);
+            if (search) filtered = filtered.filter(q => q.statement.toLowerCase().includes(search));
+
             list.innerHTML = filtered.slice().reverse().map(q => `
-                <div class="bg-white p-6 rounded-[32px] border border-slate-100 flex justify-between items-center shadow-sm hover:border-indigo-100 transition-colors">
-                    <div class="truncate mr-4">
+                <div class="bg-white p-8 rounded-[40px] border border-slate-100 flex justify-between items-center shadow-xl shadow-slate-200/20 group hover:border-indigo-200 transition-all">
+                    <div class="truncate mr-6">
                         <p class="text-sm font-bold text-slate-700 truncate">${q.statement}</p>
-                        <p class="text-[9px] text-slate-400 font-black uppercase mt-1 tracking-widest">${q.specialty || 'Geral'}</p>
+                        <p class="text-[9px] font-black text-indigo-400 uppercase tracking-widest mt-2">${q.specialty}</p>
                     </div>
-                    <button onclick="window.deleteQ('${q.id}')" class="w-10 h-10 bg-rose-50 text-rose-500 rounded-xl flex items-center justify-center font-bold">✕</button>
+                    <button onclick="window.deleteCard('${q.id}')" class="w-12 h-12 bg-rose-50 text-rose-500 rounded-2xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all active:scale-90">✕</button>
                 </div>
-            `).join('') || '<div class="py-24 text-center text-slate-300 italic text-xs font-black uppercase tracking-widest">Nenhum card encontrado</div>';
+            `).join('') || '<p class="py-20 text-center text-slate-300 font-black uppercase tracking-widest text-[10px]">Banco vazio</p>';
+        }
+
+        window.deleteCard = (id) => {
+            if (confirm("Excluir card permanentemente?")) {
+                state.questions = state.questions.filter(q => q.id !== id);
+                delete state.srs[id];
+                saveState(true);
+                renderBankList();
+            }
         };
 
-        // GOOGLE INITIALIZATION
-        function setupGoogle() {
-            const cfg = getSettings();
-            gapi.load('client', async () => {
-                try {
-                    await gapi.client.init({ discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'] });
-                    tokenClient = google.accounts.oauth2.initTokenClient({
-                        client_id: cfg.clientId,
-                        scope: DRIVE_SCOPE,
-                        prompt: 'select_account',
-                        callback: (resp) => {
-                            if (resp.error) return alert("Erro de Login OAuth: " + resp.error);
-                            accessToken = resp.access_token;
-                            localStorage.setItem(TOKEN_STORAGE, JSON.stringify({ token: accessToken, expiry: Date.now() + 3500 * 1000 }));
-                            onLoginSuccess();
-                        }
-                    });
-                    
-                    const saved = JSON.parse(localStorage.getItem(TOKEN_STORAGE));
-                    if (saved && saved.expiry > Date.now()) { 
-                        accessToken = saved.token; 
-                        onLoginSuccess(); 
-                    } else { 
-                        if (el('login-loader')) el('login-loader').classList.add('hidden'); 
+        // 5. CHART ENGINE
+        function initChart() {
+            const ctx = el('performanceChart').getContext('2d');
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab'],
+                    datasets: [{
+                        data: [0, 0, 0, 0, 0, 0, 0],
+                        borderColor: '#6366f1',
+                        backgroundColor: 'rgba(99, 102, 241, 0.2)',
+                        fill: true,
+                        tension: 0.5,
+                        borderWidth: 4,
+                        pointRadius: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { display: true, ticks: { color: 'rgba(255,255,255,0.4)', font: { size: 9, weight: '900' } }, grid: { display: false } },
+                        y: { display: false }
                     }
-                } catch (e) {
-                    console.error("GAPI Fallback:", e);
-                    showSyncStatus("Erro GAPI", "error");
                 }
             });
         }
 
-        async function onLoginSuccess() {
-            if (el('login-screen')) el('login-screen').style.display = 'none';
-            if (el('main-app')) el('main-app').style.display = 'block';
-            await manualSync();
+        function updateChart() {
+            if (!chartInstance) return;
+            const weekStats = [0,0,0,0,0,0,0];
+            const now = new Date();
+            state.history.forEach(h => {
+                const date = new Date(h.date);
+                if (now - date < 7 * 24 * 60 * 60 * 1000) {
+                    weekStats[date.getDay()]++;
+                }
+            });
+            chartInstance.data.datasets[0].data = weekStats;
+            chartInstance.update();
         }
 
-        function saveLocal(cloud = true) {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-            updateStats();
-            if (cloud && accessToken) autoBackup();
+        // 6. SETTINGS & AUTH
+        window.toggleSettings = () => el('settings-modal').classList.toggle('hidden');
+
+        window.saveSettings = () => {
+            const geminiKey = el('cfg-gemini-key').value.trim();
+            const clientId = el('cfg-client-id').value.trim();
+            localStorage.setItem(SETTINGS_STORAGE, JSON.stringify({ geminiKey, clientId }));
+            alert("Configurações salvas. Reiniciando App...");
+            location.reload();
+        };
+
+        window.clearLocalData = () => {
+            if (confirm("Deseja apagar o cache local? A nuvem NÃO será afetada até que você clique em sincronizar.")) {
+                localStorage.removeItem(STORAGE_KEY);
+                location.reload();
+            }
+        };
+
+        window.clearCloudBackup = async () => {
+            if (confirm("Deseja apagar o backup na nuvem? Esta ação é irreversível.")) {
+                if (!driveFileId || !accessToken) return alert("Drive não conectado.");
+                await fetch(`https://www.googleapis.com/drive/v3/files/${driveFileId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${accessToken}` }
+                });
+                driveFileId = null;
+                showToast("Nuvem Limpa", "🗑️");
+            }
+        };
+
+        window.initGoogleAuth = () => {
+            el('login-spinner').classList.remove('hidden');
+            el('btn-login').classList.add('hidden');
+            if (tokenClient) tokenClient.requestAccessToken();
+        };
+
+        function setupAuth() {
+            const cfg = JSON.parse(localStorage.getItem(SETTINGS_STORAGE)) || {};
+            gapi.load('client', async () => {
+                await gapi.client.init({ discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'] });
+                
+                tokenClient = google.accounts.oauth2.initTokenClient({
+                    client_id: cfg.clientId || DEFAULT_CLIENT_ID,
+                    scope: DRIVE_SCOPE,
+                    callback: (resp) => {
+                        accessToken = resp.access_token;
+                        localStorage.setItem(AUTH_STORAGE, JSON.stringify({ token: accessToken, expiry: Date.now() + 3500000 }));
+                        onAuthSuccess();
+                    }
+                });
+
+                const savedAuth = JSON.parse(localStorage.getItem(AUTH_STORAGE));
+                if (savedAuth && savedAuth.expiry > Date.now()) {
+                    accessToken = savedAuth.token;
+                    onAuthSuccess();
+                } else {
+                    el('login-spinner').classList.add('hidden');
+                    el('btn-login').classList.remove('hidden');
+                }
+            });
         }
 
-        function loadLocal() {
-            const data = localStorage.getItem(STORAGE_KEY);
-            if (data) state = JSON.parse(data);
-            updateStats();
+        async function onAuthSuccess() {
+            el('login-overlay').classList.add('hidden');
+            el('app').classList.remove('hidden');
+            await cloudSync();
         }
 
-        window.deleteQ = (id) => { if (confirm("Excluir card permanentemente?")) { state.questions = state.questions.filter(q => q.id !== id); saveLocal(true); renderBank(); } };
-        window.clearAll = () => { if (confirm("Deseja apagar TODOS os dados locais? Isso não afetará a nuvem.")) { localStorage.removeItem(STORAGE_KEY); location.reload(); } };
-
-        // FILE READING (PDF/DOCX)
+        // 7. FILE PROCESSING
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-        document.getElementById('file-reader').addEventListener('change', async (e) => {
+        el('file-input').addEventListener('change', async (e) => {
             const file = e.target.files[0];
             if (!file) return;
-            const status = el('file-status');
-            if (status) { status.innerText = "⏳ Lendo Arquivo..."; status.classList.remove('hidden'); }
+            el('file-feedback').classList.remove('hidden');
+            el('file-feedback').innerText = "⏳ Lendo arquivo...";
             
             try {
                 if (file.name.endsWith('.pdf')) {
@@ -800,28 +962,37 @@
                     for (let i = 1; i <= pdf.numPages; i++) {
                         const page = await pdf.getPage(i);
                         const content = await page.getTextContent();
-                        fullText += content.items.map(item => item.str).join(" ") + " ";
+                        fullText += content.items.map(it => it.str).join(" ") + " ";
                     }
-                    extractedFileText = fullText;
+                    extractedFileContent = fullText;
                 } else if (file.name.endsWith('.docx')) {
                     const arrayBuffer = await file.arrayBuffer();
                     const result = await mammoth.extractRawText({ arrayBuffer });
-                    extractedFileText = result.value;
+                    extractedFileContent = result.value;
                 }
-                if (status) status.innerText = "✅ " + file.name + " pronto!";
+                el('file-feedback').innerText = "✅ " + file.name + " carregado.";
             } catch (err) {
-                if (status) status.innerText = "❌ Erro ao ler arquivo";
+                el('file-feedback').innerText = "❌ Erro ao ler arquivo.";
             }
         });
 
-        // INIT
-        loadLocal();
+        // INIT APP
+        const localData = localStorage.getItem(STORAGE_KEY);
+        if (localData) state = JSON.parse(localData);
+        
+        const settings = JSON.parse(localStorage.getItem(SETTINGS_STORAGE));
+        if (settings) {
+            el('cfg-client-id').value = settings.clientId || DEFAULT_CLIENT_ID;
+            el('cfg-gemini-key').value = settings.geminiKey || '';
+        }
+
+        updateStats();
         initChart();
-        setupGoogle();
+        setupAuth();
+
     </script>
 </body>
 </html>
-
 
 
 
