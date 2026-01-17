@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>MedRep - Sincronização Master v13.4.11</title>
+    <title>MedRep - Sincronização Master v13.4.12</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -15,7 +15,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
     
-    <!-- Google Identity Services - CARREGAMENTO SÍNCRONO PARA ESTABILIDADE -->
+    <!-- Google Identity Services - CARREGAMENTO SÍNCRONO -->
     <script src="https://apis.google.com/js/api.js"></script>
     <script src="https://accounts.google.com/gsi/client"></script>
 
@@ -88,10 +88,10 @@
     <div id="login-screen" class="fixed inset-0 z-[200] bg-white flex flex-col items-center justify-center p-8 text-center">
         <div class="mb-12">
             <h1 class="text-6xl font-black text-indigo-600 tracking-tighter italic leading-none">MedRep</h1>
-            <p class="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-4">Sincronização Master v13.4.11</p>
+            <p class="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-4">Sincronização Master v13.4.12</p>
         </div>
         <div class="bg-slate-50 p-10 rounded-[40px] w-full max-w-sm border border-slate-100 mb-8 shadow-sm">
-            <p id="login-status-msg" class="text-xs font-semibold text-slate-500 mb-6 italic">Aguardando motor Google...</p>
+            <p id="login-status-msg" class="text-xs font-semibold text-slate-500 mb-6 italic">Iniciando serviços...</p>
             <button id="login-btn" onclick="window.fazerLogin()" disabled class="w-full bg-slate-200 text-slate-400 font-black py-5 rounded-[22px] shadow-sm flex items-center justify-center gap-4 transition-all opacity-50 cursor-not-allowed">
                 <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" class="w-6 grayscale" alt="Google">
                 <span id="login-btn-text" class="text-xs uppercase tracking-widest">Carregando APIs...</span>
@@ -244,12 +244,12 @@
     <script type="module">
         import { GoogleGenAI } from "@google/genai";
 
-        // MASTER API KEY ABSOLUTA
+        // MASTER API KEY ABSOLUTA - HARDCODED
         const MASTER_API_KEY = 'AIzaSyAIJFacEIsyKUY0LLwjsGxFSdniwKfXkIE';
         
         // CONFIGURAÇÕES DRIVE
         const CLIENT_ID = '648353734848-s9fnmd9tt0i5577grbt3q9oju6h71mpi.apps.googleusercontent.com';
-        const SCOPES = 'https://www.googleapis.com/auth/drive.file'; 
+        const SCOPES = 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email'; 
         const STORAGE_KEY = 'medrep_data_v13_3_global';
         const TOKEN_STORAGE = 'medrep_google_token_persist';
         const FILENAME = 'medrep_data.json';
@@ -274,12 +274,14 @@
         let driveFileId = null;
         let hasInitialSync = false;
 
-        // --- GOOGLE DRIVE SYNC MASTER ---
+        // --- GOOGLE DRIVE SYNC MASTER (v13.4.12) ---
 
         async function manualSync() {
             if (!accessToken) return;
+            console.log("ManualSync: Iniciando download prioritário...");
             showSyncStatus("☁️ Sincronizando...");
             try {
+                // Busca global por NOME (Garante paridade PC/Mobile)
                 const list = await gapi.client.drive.files.list({ 
                     q: `name = '${FILENAME}' and trashed = false`,
                     spaces: 'drive',
@@ -289,6 +291,7 @@
                 const file = list.result.files[0];
                 if (file) {
                     driveFileId = file.id;
+                    console.log("ManualSync: Arquivo master localizado. Baixando conteúdo...");
                     const resp = await gapi.client.drive.files.get({ 
                         fileId: driveFileId, 
                         alt: 'media'
@@ -298,11 +301,14 @@
                     if (typeof driveData === 'string') driveData = JSON.parse(driveData);
 
                     if (driveData && driveData.questions) {
-                        // Mescla Inteligente para evitar perda de dados local/nuvem
+                        // MESCLAGEM INTELIGENTE (MERGE): Nuvem tem prioridade, mas não deleta novos locais
                         const cloudQuestionsMap = new Map(driveData.questions.map(q => [q.id, q]));
                         const localQuestions = state.questions || [];
                         localQuestions.forEach(q => {
-                            if (!cloudQuestionsMap.has(q.id)) driveData.questions.push(q);
+                            if (!cloudQuestionsMap.has(q.id)) {
+                                console.log("Merge: Adicionando card local não encontrado na nuvem:", q.id);
+                                driveData.questions.push(q);
+                            }
                         });
 
                         const cloudHistoryKeys = new Set(driveData.history.map(h => `${h.cardId}_${h.date}`));
@@ -316,18 +322,24 @@
                         showSyncStatus("✅ Sincronizado", 'success');
                     }
                 } else {
-                    showSyncStatus("☁️ Novo Banco", 'info');
+                    console.log("ManualSync: Nenhum arquivo no Drive. Criando novo no próximo backup.");
+                    showSyncStatus("☁️ Novo Banco Criado", 'info');
                 }
-                hasInitialSync = true;
+                hasInitialSync = true; // LIBERA SALVAMENTO SEGURO
             } catch (e) { 
-                console.error("ManualSync Falhou:", e);
+                console.error("ManualSync Falhou Criticamente:", e);
                 showSyncStatus("❌ Falha Sincronia", 'error');
             }
             updateStats();
         }
 
         async function autoBackup() {
-            if (!accessToken || !hasInitialSync) return;
+            // SEGURANÇA MÁXIMA: Nunca salve dados vazios se o sync inicial não foi confirmado
+            if (!accessToken || !hasInitialSync) {
+                console.warn("AutoBackup: Abortado. Trava de segurança hasInitialSync ativa.");
+                return;
+            }
+            
             showSyncStatus("☁️ Salvando...");
             try {
                 if (!driveFileId) {
@@ -336,7 +348,7 @@
                 }
 
                 const metadata = { name: FILENAME, mimeType: 'application/json' };
-                const boundary = 'medrep_master_v13_4_11';
+                const boundary = 'medrep_master_v13_4_12';
                 const delimiter = "\r\n--" + boundary + "\r\n";
                 const close_delim = "\r\n--" + boundary + "--";
 
@@ -365,9 +377,11 @@
                     }
                     showSyncStatus("✅ Sincronizado", 'success');
                 } else {
+                    console.error("AutoBackup: Erro HTTP Drive:", await response.text());
                     showSyncStatus("❌ Erro Drive", 'error');
                 }
             } catch (e) { 
+                console.error("AutoBackup: Erro Conexão:", e);
                 showSyncStatus("❌ Erro Rede", 'error');
             }
         }
@@ -414,9 +428,9 @@
         const getAI = () => new GoogleGenAI({ apiKey: MASTER_API_KEY });
 
         window.processIA = async () => {
-            if (state.currentFolderId === 'f_all') return alert("⚠️ Escolha uma pasta específica.");
+            if (state.currentFolderId === 'f_all') return alert("⚠️ Selecione uma matéria na Home antes.");
             const userInput = document.getElementById('ia-prompt').value.trim();
-            if (!userInput && !extractedFileText) return alert("⚠️ Sem dados para processar.");
+            if (!userInput && !extractedFileText) return alert("⚠️ Sem dados para extração.");
             
             const loader = document.getElementById('ia-loader');
             const btn = document.getElementById('btn-ia');
@@ -430,7 +444,7 @@
                     model: 'gemini-3-flash-preview',
                     contents: [{ parts: [{ text: source }] }],
                     config: { 
-                        systemInstruction: `Extraia questões médicas em JSON array. Regras: Fidelidade total ao texto original. [{"statement": "...", "options": ["A","B","C","D"], "correctIndex": 0, "explanation": "...", "specialty": "..."}]`
+                        systemInstruction: `Extraia questões médicas integralmente em JSON array. Retorne apenas o array. Formato: [{"statement": "...", "options": ["A","B","C","D"], "correctIndex": 0, "explanation": "...", "specialty": "..."}]`
                     }
                 });
 
@@ -439,9 +453,13 @@
                     tempExtracted = JSON.parse(jsonMatch[0]);
                     renderReviewList();
                 } else {
+                    console.error("Resposta IA sem JSON:", response.text);
                     alert("A IA retornou um formato inesperado.");
                 }
-            } catch (e) { alert("IA Falhou: " + e.message); }
+            } catch (e) { 
+                console.error("Erro IA:", e);
+                alert("IA Gemini Falhou: " + e.message); 
+            }
             finally { loader.classList.add('hidden'); btn.disabled = false; }
         };
 
@@ -518,7 +536,7 @@
             document.getElementById('stat-accuracy').innerText = history.length ? Math.round((hits / history.length) * 100) + "%" : "0%";
             
             const dueText = document.getElementById('home-due-text');
-            if (dueText) dueText.innerText = due > 0 ? `${due} cards pendentes.` : "Tudo em dia!";
+            if (dueText) dueText.innerText = due > 0 ? `${due} cards para revisar.` : "Meta do dia batida!";
             
             const badge = document.getElementById('due-badge');
             if (badge) { badge.innerText = due; badge.classList.toggle('hidden', due === 0); }
@@ -626,7 +644,7 @@
                     </div>
                     <div id="study-feedback" class="hidden pt-6 border-t border-slate-50 space-y-6">
                         <div class="bg-slate-900 text-slate-200 p-6 rounded-[28px] text-[11px] leading-relaxed italic italic">
-                            <b>Notas:</b><br>${q.explanation || 'Nenhuma explicação disponível.'}
+                            <b>Notas de Revisão:</b><br>${q.explanation || 'Nenhuma explicação disponível.'}
                         </div>
                         <div class="grid grid-cols-4 gap-2">
                             <button onclick="window.submitSRS(1)" class="bg-rose-500 py-5 rounded-2xl text-white font-black text-[9px]">ERREI</button>
@@ -650,31 +668,32 @@
             document.getElementById('study-feedback').classList.remove('hidden');
         };
 
-        // --- MOTOR DE INICIALIZAÇÃO E REPARO (v13.4.11) ---
+        // --- MOTOR DE INICIALIZAÇÃO MASTER (v13.4.12) ---
 
-        console.log("MedRep v13.4.11 Bootstrapping...");
+        console.log("MedRep Master Bootstrapping...");
 
-        // Fallback Force-Enable
+        // Ativação Forçada do Botão (Fallback)
         setTimeout(() => { 
             const btn = document.getElementById('login-btn');
             if (btn && btn.disabled) { 
-                console.log("Fallback: Motor manual habilitado após 5s."); 
-                enableLoginButton("Entrar (Acesso Manual)");
+                console.log("Fallback: Ativando botão de login por tempo esgotado."); 
+                unlockLoginButton("Acesso Manual / Drive");
+                if (!tokenClient) setupGoogleCore();
             } 
-        }, 5000);
+        }, 3000);
 
         const initInt = setInterval(() => {
             if (window.gapi && window.google && window.google.accounts) {
-                console.log("Google Libraries Loaded: OK");
-                enableLoginButton("Entrar com Google Drive");
+                console.log("Google Libraries detectadas com sucesso.");
+                unlockLoginButton("Entrar com Google Drive");
                 setupGoogleCore();
                 clearInterval(initInt);
             }
-        }, 800);
+        }, 500);
 
-        function enableLoginButton(text) {
+        function unlockLoginButton(text) {
             const btn = document.getElementById('login-btn');
-            if (btn) {
+            if (btn && btn.disabled) {
                 btn.disabled = false;
                 btn.classList.replace('bg-slate-200', 'bg-slate-900');
                 btn.classList.replace('text-slate-400', 'text-white');
@@ -689,48 +708,76 @@
         function setupGoogleCore() {
             gapi.load('client', async () => {
                 try {
+                    console.log("Setup: Inicializando GAPI Drive Client...");
                     await gapi.client.init({ discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'] });
+                    
+                    console.log("Setup: Inicializando TokenClient (GSI)...");
                     tokenClient = google.accounts.oauth2.initTokenClient({
-                        client_id: CLIENT_ID, scope: SCOPES, prompt: 'consent',
+                        client_id: CLIENT_ID, 
+                        scope: SCOPES, 
+                        prompt: 'select_account',
                         callback: (r) => { 
                             if (!r.error) { 
+                                console.log("Login: Token capturado via popup.");
                                 accessToken = r.access_token; 
-                                localStorage.setItem(TOKEN_STORAGE, JSON.stringify({ token: accessToken, expiry: Date.now() + 3500 * 1000 }));
+                                localStorage.setItem(TOKEN_STORAGE, JSON.stringify({ 
+                                    token: accessToken, 
+                                    expiry: Date.now() + 3500 * 1000 
+                                }));
                                 onLoginSuccess(); 
-                            } else { console.error("Token Error:", r.error); }
+                            } else { 
+                                console.error("Login Error:", r.error); 
+                                alert("Erro no Login: " + (r.error_description || r.error));
+                            }
                         }
                     });
+
+                    // Auto-restauração de sessão persistente
                     const saved = JSON.parse(localStorage.getItem(TOKEN_STORAGE));
-                    if (saved && saved.expiry > Date.now()) { accessToken = saved.token; onLoginSuccess(); }
-                    else { document.getElementById('login-loader').classList.add('hidden'); }
-                } catch (err) { console.error("Setup Erro:", err); }
+                    if (saved && saved.expiry > Date.now()) { 
+                        accessToken = saved.token; 
+                        console.log("Auto-Login: Restaurando sessão salva.");
+                        onLoginSuccess(); 
+                    } else { 
+                        document.getElementById('login-loader').classList.add('hidden'); 
+                    }
+                } catch (err) { 
+                    console.error("Setup Erro Crítico:", err); 
+                    alert("Falha ao inicializar serviços Google: " + err.message);
+                }
             });
         }
 
         async function onLoginSuccess() {
             document.getElementById('login-loader').classList.remove('hidden');
-            document.getElementById('login-status-msg').innerText = "Sincronizando Banco Master...";
+            document.getElementById('login-status-msg').innerText = "Baixando Banco Master do Drive...";
+            
+            // PRIORIDADE ABSOLUTA: DOWNLOAD ANTES DE QUALQUER SALVAMENTO
             await manualSync();
+            
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('main-app').classList.remove('hidden');
             updateStats();
         }
 
         window.fazerLogin = () => {
-            console.log("FazerLogin: Tentando abrir janela...");
-            if (!window.google) return alert("Biblioteca Google não encontrada. Recarregue a página.");
+            console.log("FazerLogin: Disparando popup de autenticação...");
+            if (!window.google) return alert("Erro: Biblioteca Google GSI não carregada.");
             
             try {
                 if (tokenClient) {
                     tokenClient.requestAccessToken();
                 } else {
-                    console.log("FazerLogin: tokenClient nulo, reinicializando...");
+                    console.warn("FazerLogin: tokenClient inexistente. Tentando reinicialização rápida.");
                     setupGoogleCore();
-                    setTimeout(() => { if (tokenClient) tokenClient.requestAccessToken(); else alert("Erro ao criar cliente de login."); }, 1000);
+                    setTimeout(() => { 
+                        if (tokenClient) tokenClient.requestAccessToken(); 
+                        else alert("Não foi possível abrir o Login. Recarregue a página.");
+                    }, 800);
                 }
             } catch (e) {
-                alert("Falha ao abrir login: " + e.message);
-                console.error(e);
+                alert("Erro ao tentar Login: " + e.message);
+                console.error("FazerLogin Exception:", e);
             }
         };
 
@@ -749,6 +796,7 @@
         function saveLocal(cloud = true) {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
             updateStats();
+            // TRAVA DE SEGURANÇA: Só salva no Drive se o download inicial foi feito com sucesso
             if (cloud && accessToken && hasInitialSync) autoBackup();
         }
 
@@ -758,14 +806,14 @@
             updateStats();
         }
 
-        window.deleteQ = (id) => { if (confirm("Excluir card?")) { state.questions = state.questions.filter(q => q.id !== id); saveLocal(true); renderBank(); } };
-        window.clearAll = () => { if (confirm("Reset local? (Isso apaga cache, mas não o Drive)")) { localStorage.removeItem(STORAGE_KEY); location.reload(); } };
+        window.deleteQ = (id) => { if (confirm("Deseja mesmo excluir este card?")) { state.questions = state.questions.filter(q => q.id !== id); saveLocal(true); renderBank(); } };
+        window.clearAll = () => { if (confirm("Deseja apagar o banco LOCAL? Os dados no Google Drive permanecerão intactos.")) { localStorage.removeItem(STORAGE_KEY); location.reload(); } };
 
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
         document.getElementById('file-reader').addEventListener('change', async (e) => {
             const f = e.target.files[0];
             const s = document.getElementById('file-status');
-            s.innerText = "⏳ Lendo..."; s.classList.remove('hidden');
+            s.innerText = "⏳ Lendo arquivo..."; s.classList.remove('hidden');
             try {
                 const ab = await f.arrayBuffer();
                 if (f.name.endsWith('.pdf')) {
@@ -782,7 +830,7 @@
                     extractedFileText = res.value;
                 }
                 s.innerText = "✅ " + f.name;
-            } catch (err) { alert(err.message); }
+            } catch (err) { alert("Erro ao ler arquivo: " + err.message); }
         });
 
         loadLocal(); initChart();
