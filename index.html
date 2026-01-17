@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>MedRep Master - Residency SRS v14.3.0</title>
+    <title>MedRep Master - Mobile Premium v14.4.0</title>
     
-    <!-- Meta Tags PWA & Mobile -->
+    <!-- PWA / Mobile Capable -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#4f46e5">
+    <meta name="theme-color" content="#ffffff">
     
-    <!-- Dependências Externas -->
+    <!-- Fontes e Dependências -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -18,11 +18,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     
-    <!-- Google API Infrastructure -->
+    <!-- Google API -->
     <script src="https://apis.google.com/js/api.js"></script>
     <script src="https://accounts.google.com/gsi/client"></script>
 
-    <!-- Import Map para Gemini SDK -->
     <script type="importmap">
     {
       "imports": {
@@ -37,7 +36,7 @@
             --safe-bottom: env(safe-area-inset-bottom);
             --brand-primary: #4f46e5;
             --brand-secondary: #10b981;
-            --bg-canvas: #f8fafc;
+            --bg-canvas: #ffffff;
             --font-main: 'Inter', sans-serif;
         }
 
@@ -51,356 +50,327 @@
             height: 100vh;
         }
 
-        /* Glassmorphism Classes */
-        .glass {
-            background: rgba(255, 255, 255, 0.75);
-            backdrop-filter: blur(25px) saturate(200%);
-            -webkit-backdrop-filter: blur(25px) saturate(200%);
+        /* Tipografia Otimizada para Estudo */
+        .question-text {
+            font-size: 1.125rem; /* 18px para clareza */
+            line-height: 1.6;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        /* Glassmorphism e Sombras Suaves */
+        .glass-header {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(241, 245, 249, 1);
+        }
+
+        .nav-glass {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border-top: 1px solid rgba(241, 245, 249, 1);
+            padding-bottom: calc(var(--safe-bottom) + 0.5rem);
+        }
+
+        .shadow-soft {
+            box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.05);
         }
 
         .shadow-premium {
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 20px 40px -15px rgba(79, 70, 229, 0.1);
         }
 
-        /* Animations */
-        @keyframes slideUpIn {
-            from { opacity: 0; transform: translateY(40px) scale(0.97); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+        /* Animações Fluídas */
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .tab-content { display: none; }
         .tab-content.active { 
             display: block; 
-            animation: slideUpIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; 
+            animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; 
         }
 
-        .btn-press:active { transform: scale(0.94); transition: transform 0.1s; }
-        .btn-press { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        /* Estados de Botões Mobile */
+        .btn-active:active { transform: scale(0.96); opacity: 0.8; }
+        .btn-active { transition: all 0.2s ease; }
 
-        /* Custom Scrollbar Oculta */
-        ::-webkit-scrollbar { width: 0px; height: 0px; display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-        /* Pasta Chips Ativos */
-        .folder-chip.active {
-            background: var(--brand-primary);
-            color: white;
-            box-shadow: 0 15px 30px -10px rgba(79, 70, 229, 0.5);
-            transform: translateY(-4px);
-        }
-
-        /* Nav Icons Ativos */
-        .nav-link.active { color: var(--brand-primary); font-weight: 800; }
-        .nav-link.active svg { 
-            transform: translateY(-8px); 
-            filter: drop-shadow(0 8px 12px rgba(79, 70, 229, 0.4)); 
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        /* Loader Animation */
-        .loader {
-            border: 4px solid rgba(79, 70, 229, 0.1);
-            border-top: 4px solid var(--brand-primary);
-            border-radius: 50%;
-            width: 32px;
-            height: 32px;
-            animation: spin 0.8s cubic-bezier(0.5, 0.1, 0.4, 0.9) infinite;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        /* Estilos SRS Feedback */
+        /* SRS Feedback UI */
         .study-btn-correct { 
-            border-color: var(--brand-secondary) !important; 
-            background: #ecfdf5 !important; 
-            color: #064e3b !important; 
-            box-shadow: 0 0 25px rgba(16, 185, 129, 0.3);
+            background: #f0fdf4 !important;
+            border-color: #22c55e !important;
+            color: #166534 !important;
         }
         .study-btn-wrong { 
-            border-color: #ef4444 !important; 
-            background: #fef2f2 !important; 
-            color: #7f1d1d !important; 
+            background: #fef2f2 !important;
+            border-color: #ef4444 !important;
+            color: #991b1b !important;
         }
 
-        .safe-pb { padding-bottom: calc(env(safe-area-inset-bottom) + 1rem); }
-        input, textarea { font-size: 16px !important; }
+        /* Utilitários iOS Safe Zones */
+        .padding-safe-t { padding-top: var(--safe-top); }
+        .padding-safe-b { padding-bottom: var(--safe-bottom); }
+
+        /* Ocultar Scrollbars */
+        ::-webkit-scrollbar { width: 0; height: 0; display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Thumb-friendly Alternative Layout */
+        .alt-btn {
+            min-height: 72px;
+            display: flex;
+            align-items: center;
+            padding: 1rem 1.25rem;
+            border-radius: 1.25rem;
+            text-align: left;
+            width: 100%;
+            border: 2px solid #f1f5f9;
+            background: #ffffff;
+            font-weight: 500;
+            font-size: 0.95rem;
+            line-height: 1.4;
+            color: #334155;
+        }
+
+        /* Loader */
+        .spinner {
+            border: 3px solid rgba(79, 70, 229, 0.1);
+            border-top: 3px solid var(--brand-primary);
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: rotate 1s linear infinite;
+        }
+        @keyframes rotate { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
-<body class="select-none">
+<body class="bg-slate-50">
 
     <!-- NOTIFICAÇÕES (TOAST) -->
-    <div id="toast" class="fixed top-14 left-1/2 -translate-x-1/2 z-[3500] hidden">
-        <div class="bg-slate-900/95 backdrop-blur-2xl text-white px-10 py-5 rounded-full text-xs font-black uppercase tracking-[0.2em] shadow-2xl flex items-center gap-5 border border-white/10">
-            <span id="toast-icon" class="text-xl">✨</span>
+    <div id="toast" class="fixed top-12 left-1/2 -translate-x-1/2 z-[5000] hidden">
+        <div class="bg-slate-900 text-white px-8 py-4 rounded-full text-xs font-bold uppercase tracking-widest shadow-2xl flex items-center gap-4">
+            <span id="toast-icon">✨</span>
             <span id="toast-msg">Sucesso</span>
         </div>
     </div>
 
     <!-- PAINEL DE CONFIGURAÇÕES -->
-    <div id="settings-modal" class="fixed inset-0 z-[2500] hidden">
-        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-xl" onclick="window.toggleSettings()"></div>
-        <div class="absolute bottom-0 left-0 right-0 max-w-2xl mx-auto bg-white rounded-t-[64px] p-12 shadow-2xl animate-[slideUpIn_0.5s] overflow-y-auto no-scrollbar" style="max-height: 90vh;">
-            <div class="flex justify-between items-center mb-12">
-                <div class="flex flex-col">
-                    <h2 class="text-4xl font-black text-slate-800 tracking-tighter italic">Console</h2>
-                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Sincronização & APIs</p>
-                </div>
-                <button onclick="window.toggleSettings()" class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center font-black text-slate-400">✕</button>
+    <div id="settings-modal" class="fixed inset-0 z-[4000] hidden">
+        <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-md" onclick="window.toggleSettings()"></div>
+        <div class="absolute bottom-0 left-0 right-0 max-w-lg mx-auto bg-white rounded-t-[40px] p-8 shadow-2xl animate-[slideIn_0.3s]">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-2xl font-black text-slate-800 tracking-tight">Configurações</h2>
+                <button onclick="window.toggleSettings()" class="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center font-bold">✕</button>
             </div>
             
-            <div class="space-y-12">
-                <!-- Gemini Key -->
-                <div class="space-y-4">
-                    <label class="text-[11px] font-black text-slate-400 uppercase tracking-[0.3em] px-2">Gemini AI Key</label>
-                    <input type="password" id="cfg-gemini-key" placeholder="Insira sua chave para IA..." class="w-full bg-slate-50 border-2 border-slate-100 rounded-[32px] px-8 py-6 text-sm font-semibold focus:border-indigo-500 outline-none transition-all shadow-inner">
-                    <p class="text-[9px] text-slate-400 italic px-2">A chave é armazenada localmente em seu navegador.</p>
+            <div class="space-y-6">
+                <div>
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Gemini API Key</label>
+                    <input type="password" id="cfg-gemini-key" class="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-5 py-4 text-sm outline-none focus:border-indigo-500">
                 </div>
-
-                <!-- Google Client ID -->
-                <div class="space-y-4">
-                    <label class="text-[11px] font-black text-slate-400 uppercase tracking-[0.3em] px-2">OAuth Client ID</label>
-                    <input type="text" id="cfg-client-id" placeholder="648353..." class="w-full bg-slate-50 border-2 border-slate-100 rounded-[32px] px-8 py-6 text-sm font-semibold outline-none shadow-inner">
-                    <p class="text-[9px] text-slate-400 font-bold px-2 uppercase tracking-widest">ID Master: 648353734848-s9fnmd9tt0i5577grbt3q9oju6h71mpi.apps.googleusercontent.com</p>
+                <div>
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">OAuth Client ID</label>
+                    <input type="text" id="cfg-client-id" class="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-5 py-4 text-sm outline-none">
                 </div>
-
-                <!-- Management Buttons -->
-                <div class="pt-8 space-y-5">
-                    <button onclick="window.saveSettings()" class="w-full bg-slate-900 text-white py-8 rounded-[40px] font-black text-xs uppercase tracking-[0.4em] shadow-2xl btn-press">Salvar e Reiniciar</button>
-                    <div class="grid grid-cols-2 gap-5">
-                        <button onclick="window.clearLocalData()" class="bg-rose-50 text-rose-500 py-5 rounded-[32px] font-black text-[10px] uppercase tracking-widest border border-rose-100">Reset Local</button>
-                        <button onclick="window.clearCloudData()" class="bg-amber-50 text-amber-600 py-5 rounded-[32px] font-black text-[10px] uppercase tracking-widest border border-amber-100">Limpar Cloud</button>
+                
+                <div class="pt-4 space-y-3">
+                    <button onclick="window.saveSettings()" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-black text-xs uppercase tracking-widest btn-active shadow-xl">Salvar e Aplicar</button>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="window.clearLocalData()" class="bg-rose-50 text-rose-500 py-4 rounded-2xl font-bold text-[10px] uppercase border border-rose-100">Reset Local</button>
+                        <button onclick="window.clearCloudData()" class="bg-amber-50 text-amber-600 py-4 rounded-2xl font-bold text-[10px] uppercase border border-amber-100">Reset Cloud</button>
                     </div>
                 </div>
-            </div>
-            <div class="mt-16 text-center pt-10 border-t border-slate-100">
-                <p class="text-[10px] font-black text-slate-300 uppercase tracking-[0.6em]">MedRep Master Engine v14.3.0</p>
             </div>
         </div>
     </div>
 
-    <!-- TELA DE LOGIN / DRIVE AUTH -->
-    <div id="login-screen" class="fixed inset-0 z-[4000] flex flex-col items-center justify-center p-14 bg-white">
-        <div class="mb-28 text-center">
-            <div class="w-40 h-40 bg-indigo-600 rounded-[56px] mx-auto mb-12 flex items-center justify-center shadow-2xl rotate-[-12deg] animate-bounce">
-                <span class="text-white text-8xl font-black italic">M</span>
+    <!-- TELA DE LOGIN / BOOTSTRAP -->
+    <div id="login-screen" class="fixed inset-0 z-[6000] flex flex-col items-center justify-center p-10 bg-white">
+        <div class="mb-20 text-center">
+            <div class="w-24 h-24 bg-indigo-600 rounded-[32px] mx-auto mb-8 flex items-center justify-center shadow-xl rotate-[-6deg]">
+                <span class="text-white text-5xl font-black italic">M</span>
             </div>
-            <h1 class="text-[100px] font-black text-slate-900 tracking-tighter italic leading-none">MedRep</h1>
-            <p class="text-slate-400 font-bold uppercase tracking-[0.6em] text-[12px] mt-10 opacity-70">Study Master Residency</p>
+            <h1 class="text-5xl font-black text-slate-900 tracking-tighter italic">MedRep</h1>
+            <p class="text-slate-400 font-bold uppercase tracking-widest text-[9px] mt-4 opacity-60">Study Master Residency</p>
         </div>
         
-        <div class="w-full max-w-sm space-y-10">
-            <div class="bg-white border-2 border-slate-50 p-14 rounded-[72px] shadow-2xl text-center space-y-12">
-                <p class="text-sm font-semibold text-slate-500 leading-relaxed px-4">Conecte sua conta do Google Drive para gerenciar seu banco de questões em tempo real.</p>
-                <button onclick="window.initAuth()" id="btn-login-google" class="w-full bg-slate-900 text-white font-black py-9 rounded-[44px] shadow-2xl flex items-center justify-center gap-6 btn-press">
-                    <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" class="w-8" alt="G">
-                    <span class="text-xs uppercase tracking-[0.3em]">Conectar Drive</span>
-                </button>
-                <div id="login-loader" class="hidden justify-center"><div class="loader"></div></div>
-            </div>
-            <button onclick="window.toggleSettings()" class="w-full text-[11px] font-black text-indigo-500 uppercase tracking-[0.5em] underline">Configurar APIs Manualmente</button>
+        <div class="w-full max-w-xs space-y-6">
+            <button onclick="window.initAuth()" id="btn-login-google" class="w-full bg-slate-900 text-white font-black py-6 rounded-2xl shadow-xl flex items-center justify-center gap-4 btn-active">
+                <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" class="w-6" alt="G">
+                <span class="text-xs uppercase tracking-widest">Sincronizar Drive</span>
+            </button>
+            <div id="login-loader" class="hidden justify-center"><div class="spinner"></div></div>
+            <button onclick="window.toggleSettings()" class="w-full text-[10px] font-black text-indigo-500 uppercase tracking-widest underline">Configurar Manualmente</button>
         </div>
     </div>
 
     <!-- APP WRAPPER -->
     <div id="app" class="hidden min-h-screen flex flex-col">
         
-        <!-- HEADER SUPERIOR -->
-        <header class="glass fixed top-0 left-0 right-0 z-[1000] border-b border-slate-100 px-12 py-10 flex justify-between items-center rounded-b-[64px] max-w-2xl mx-auto w-full shadow-sm">
-            <div class="flex flex-col">
-                <h1 class="text-4xl font-black text-indigo-600 tracking-tighter italic leading-none">MedRep</h1>
-                <div class="flex items-center gap-3 mt-3">
-                    <span id="current-folder-label" class="text-[11px] font-black text-slate-400 uppercase tracking-widest">Global</span>
-                    <span class="w-1.5 h-1.5 rounded-full bg-slate-200"></span>
-                    <span class="text-[10px] font-black text-slate-300 uppercase tracking-widest">v14.3</span>
+        <!-- HEADER COMPACTO (MOBILE FIRST) -->
+        <header class="glass-header fixed top-0 left-0 right-0 z-[1000] px-6 py-4 flex justify-between items-center padding-safe-t">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-black italic text-lg shadow-lg">M</div>
+                <div class="flex flex-col">
+                    <span id="current-folder-label" class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Global</span>
+                    <span class="text-[8px] font-bold text-slate-300 uppercase">v14.4.0</span>
                 </div>
             </div>
-            <div class="flex items-center gap-6">
-                <div id="sync-indicator" class="relative group cursor-pointer" onclick="window.syncCloud()">
-                    <div class="w-4 h-4 rounded-full bg-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.6)] animate-pulse"></div>
-                </div>
-                <button onclick="window.toggleSettings()" class="w-16 h-16 bg-slate-50 rounded-[28px] flex items-center justify-center text-3xl shadow-inner">⚙️</button>
+            <div class="flex items-center gap-4">
+                <div id="sync-indicator" class="w-3 h-3 rounded-full bg-emerald-500 shadow-lg animate-pulse"></div>
+                <button onclick="window.toggleSettings()" class="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-xl shadow-inner">⚙️</button>
             </div>
         </header>
 
         <!-- MAIN AREA -->
-        <main class="flex-1 mt-44 mb-48 max-w-2xl mx-auto w-full px-10 space-y-16 overflow-y-auto no-scrollbar">
+        <main class="flex-1 mt-20 mb-32 px-5 space-y-8 overflow-y-auto no-scrollbar">
             
-            <!-- DASHBOARD TAB -->
-            <section id="tab-home" class="tab-content active space-y-16">
-                <div class="bg-slate-900 p-16 rounded-[80px] text-white shadow-2xl relative overflow-hidden group">
-                    <div class="absolute -top-32 -right-32 w-80 h-80 bg-indigo-500/30 rounded-full blur-[100px]"></div>
-                    <p class="text-[12px] font-black uppercase tracking-[0.6em] text-slate-400 mb-12 opacity-80">Dashboard de Performance</p>
-                    
-                    <div class="grid grid-cols-2 gap-12 mb-14 relative z-10">
-                        <div class="bg-white/5 backdrop-blur-2xl p-12 rounded-[56px] border border-white/10 shadow-inner">
-                            <p class="text-[11px] font-bold uppercase text-slate-400 tracking-widest mb-3">Total Acervo</p>
-                            <p id="stat-total" class="text-7xl font-black tracking-tighter italic">0</p>
+            <!-- ABA HOME: DASHBOARD -->
+            <section id="tab-home" class="tab-content active space-y-8 pt-4">
+                <!-- Status Card Compacto -->
+                <div class="bg-indigo-600 p-8 rounded-[32px] text-white shadow-premium relative overflow-hidden">
+                    <div class="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
+                    <div class="grid grid-cols-2 gap-6 relative z-10">
+                        <div>
+                            <p class="text-[9px] font-black uppercase opacity-60 tracking-widest mb-1">Total Vault</p>
+                            <p id="stat-total" class="text-4xl font-black italic">0</p>
                         </div>
-                        <div class="bg-white/5 backdrop-blur-2xl p-12 rounded-[56px] border border-white/10 shadow-inner">
-                            <p class="text-[11px] font-bold uppercase text-slate-400 tracking-widest mb-3">Revisar Hoje</p>
-                            <p id="stat-due" class="text-7xl font-black tracking-tighter text-indigo-400 italic">0</p>
+                        <div>
+                            <p class="text-[9px] font-black uppercase opacity-60 tracking-widest mb-1">Due Today</p>
+                            <p id="stat-due" class="text-4xl font-black italic text-indigo-200">0</p>
                         </div>
                     </div>
-                    
-                    <div class="bg-white/5 rounded-[56px] border border-white/10 p-12 h-72">
+                    <div class="mt-8 h-32 bg-white/5 rounded-2xl p-2 border border-white/5">
                         <canvas id="mainChart"></canvas>
                     </div>
                 </div>
 
-                <div class="space-y-8">
-                    <div class="flex justify-between items-center px-8">
-                        <h2 class="text-[14px] font-black text-slate-400 uppercase tracking-[0.5em]">Matérias</h2>
-                        <button onclick="window.createFolder()" class="bg-indigo-50 text-indigo-600 text-[11px] font-black uppercase px-8 py-4 rounded-3xl btn-press">Nova +</button>
+                <!-- Categorias Scroll Horizontal -->
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center px-1">
+                        <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Pastas</h2>
+                        <button onclick="window.createFolder()" class="text-indigo-600 text-[10px] font-bold uppercase tracking-widest">Nova +</button>
                     </div>
-                    <div id="folders-scroll" class="flex gap-6 overflow-x-auto pb-8 px-4 no-scrollbar">
-                        <!-- Categorias via JS -->
+                    <div id="folders-scroll" class="flex gap-3 overflow-x-auto pb-4 no-scrollbar">
+                        <!-- Itens renderizados via JS -->
                     </div>
                 </div>
 
-                <div onclick="window.switchTab('study')" class="group bg-white p-14 rounded-[72px] border-2 border-slate-50 shadow-premium flex items-center justify-between cursor-pointer active:scale-[0.95] transition-all hover:border-indigo-200">
-                    <div class="flex items-center gap-12">
-                        <div class="w-28 h-28 bg-indigo-600 text-white rounded-[44px] flex items-center justify-center text-6xl shadow-2xl group-hover:rotate-12 transition-transform duration-700">⚡</div>
-                        <div>
-                            <h3 class="text-4xl font-black text-slate-900 tracking-tighter italic">Estudar Agora</h3>
-                            <p id="home-due-label" class="text-[16px] font-medium text-slate-400 mt-3">Sessão SRS preparada.</p>
-                        </div>
+                <!-- Botão Master Review -->
+                <button onclick="window.switchTab('study')" class="w-full bg-white p-6 rounded-[32px] shadow-soft border border-slate-50 flex items-center gap-6 btn-active">
+                    <div class="w-16 h-16 bg-indigo-50 rounded-2xl flex items-center justify-center text-3xl shadow-inner">⚡</div>
+                    <div class="text-left">
+                        <h3 class="text-xl font-black text-slate-800 italic">Review Session</h3>
+                        <p id="home-due-label" class="text-xs text-slate-400 font-medium mt-1">Nenhum card pendente.</p>
                     </div>
-                    <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center text-slate-300">
-                        <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M9 5l7 7-7 7"/></svg>
-                    </div>
+                </button>
+            </section>
+
+            <!-- ABA ESTUDO: SRS INTERFACE -->
+            <section id="tab-study" class="tab-content space-y-6 pt-4">
+                <div id="study-container" class="min-h-[70vh] flex flex-col">
+                    <!-- Cards injetados via JS -->
                 </div>
             </section>
 
-            <!-- SESSION TAB -->
-            <section id="tab-study" class="tab-content space-y-10">
-                <div id="study-container" class="min-h-[700px] flex flex-col justify-center">
-                    <!-- Sessão dinâmica -->
-                </div>
-            </section>
-
-            <!-- EXTRACT TAB (RECONFIGURADA) -->
-            <section id="tab-add" class="tab-content space-y-16">
-                <div class="bg-white p-16 rounded-[80px] border-2 border-slate-50 shadow-2xl space-y-16">
-                    <div class="flex items-center gap-10">
-                        <div class="w-24 h-24 bg-emerald-50 text-emerald-600 rounded-[36px] flex items-center justify-center text-5xl shadow-inner">🪄</div>
-                        <div>
-                            <h2 class="text-4xl font-black text-slate-900 tracking-tighter italic">Organizador IA</h2>
-                            <p class="text-[11px] font-black text-slate-400 uppercase tracking-widest mt-2">Transformação Inteligente de Questões</p>
-                        </div>
+            <!-- ABA EXTRACT: IA CONSOLE -->
+            <section id="tab-add" class="tab-content space-y-6 pt-4">
+                <div class="bg-white p-8 rounded-[32px] shadow-soft border border-slate-50 space-y-8">
+                    <div class="flex items-center gap-5">
+                        <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center text-2xl">🪄</div>
+                        <h2 class="text-2xl font-black text-slate-800 tracking-tight italic">IA Extractor</h2>
                     </div>
 
-                    <div id="ia-warn-folder" class="bg-amber-50 border-2 border-amber-100 p-12 rounded-[48px] hidden">
-                        <p class="text-[15px] text-amber-700 font-bold leading-relaxed italic text-center">⚠️ Organize seu estudo: selecione uma matéria na Home para salvar estes novos cards.</p>
+                    <div id="ia-warn-folder" class="bg-amber-50 p-4 rounded-2xl text-[11px] text-amber-700 font-bold hidden border border-amber-100">
+                        ⚠️ Dica: Selecione uma pasta na Home para salvar as questões diretamente.
                     </div>
 
-                    <div class="space-y-6 px-4">
-                        <label class="text-[12px] font-black text-slate-400 uppercase tracking-[0.4em] px-6">Pasta de Destino:</label>
-                        <div class="w-full bg-slate-50 border-2 border-slate-100 p-10 rounded-[48px] text-[14px] font-black text-indigo-600 uppercase tracking-[0.3em] flex justify-between items-center shadow-inner">
-                            <span id="ia-target-folder">GLOBAL ARCHIVE</span>
-                            <div class="w-4 h-4 rounded-full bg-indigo-500 shadow-lg"></div>
-                        </div>
-                    </div>
-
-                    <!-- PDF/Word Support -->
-                    <div class="bg-slate-50 border-4 border-dashed border-slate-200 rounded-[64px] p-20 text-center hover:bg-slate-100 hover:border-indigo-400 transition-all cursor-pointer group shadow-inner">
-                        <label class="cursor-pointer flex flex-col items-center gap-8">
-                            <span class="text-8xl group-hover:scale-110 transition-transform duration-700">📄</span>
-                            <div class="space-y-3">
-                                <span class="block text-[14px] font-black text-slate-400 uppercase tracking-[0.4em] group-hover:text-indigo-600">Scan PDF / DOCX</span>
-                                <p class="text-[12px] text-slate-300 font-bold italic tracking-widest uppercase">O texto do arquivo será processado junto com sua entrada</p>
-                            </div>
+                    <!-- File Dropzone Simplificado -->
+                    <div class="bg-slate-50 border-2 border-dashed border-slate-200 rounded-3xl p-8 text-center active:bg-slate-100 transition-all cursor-pointer">
+                        <label class="cursor-pointer flex flex-col items-center gap-3">
+                            <span class="text-4xl">📄</span>
+                            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Scan PDF / DOCX</span>
                             <input type="file" id="ia-file-input" class="hidden" accept=".pdf,.docx">
-                            <span id="ia-file-status" class="text-sm text-indigo-600 font-black mt-6 hidden animate-pulse bg-indigo-50 px-8 py-3 rounded-full border border-indigo-100">Documento Atachado</span>
+                            <span id="ia-file-status" class="text-[10px] text-indigo-600 font-bold hidden bg-indigo-50 px-3 py-1 rounded-full">Arquivo Pronto</span>
                         </label>
                     </div>
 
-                    <div class="space-y-6 px-4">
-                        <label class="text-[12px] font-black text-slate-400 uppercase tracking-[0.4em] px-6">Área de Colagem (Enunciado + Gabarito + Comentários):</label>
-                        <textarea id="ia-prompt-input" placeholder="Cole aqui o texto bruto da questão, alternativas e comentários. A IA irá organizar tudo para você..." class="w-full h-80 bg-slate-50 border-2 border-slate-100 rounded-[56px] p-12 text-[15px] font-medium leading-relaxed resize-none focus:bg-white focus:border-indigo-500 transition-all outline-none shadow-inner"></textarea>
-                    </div>
+                    <!-- Text Area Mobile Friendly -->
+                    <textarea id="ia-prompt-input" placeholder="Cole aqui o enunciado, alternativas e gabarito misturados..." class="w-full min-h-[12rem] bg-slate-50 border-2 border-slate-100 rounded-2xl p-6 text-sm outline-none focus:border-indigo-500 transition-all resize-none shadow-inner"></textarea>
                     
-                    <button onclick="window.runGeminiIA()" id="ia-btn-run" class="w-full bg-slate-900 text-white py-10 rounded-[48px] uppercase text-xs font-black tracking-[0.5em] flex items-center justify-center gap-8 shadow-2xl btn-press">
-                        <span>Lançar Extração Inteligente</span>
-                        <div id="ia-spinner" class="hidden loader" style="border-top-color: white;"></div>
+                    <button onclick="window.runGeminiIA()" id="ia-btn-run" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-4 btn-active shadow-xl shadow-slate-200">
+                        <span>Iniciar Extração IA</span>
+                        <div id="ia-spinner" class="hidden spinner" style="border-top-color: white; width: 16px; height: 16px;"></div>
                     </button>
                 </div>
 
-                <!-- PREVIEW AREA -->
-                <div id="ia-review-area" class="hidden space-y-12 pb-48">
-                    <div class="flex justify-between items-center bg-white/95 glass p-12 rounded-[56px] border-2 border-white shadow-premium sticky top-[150px] z-[1100]">
-                        <div class="flex flex-col">
-                            <span class="text-[12px] font-black text-slate-400 uppercase tracking-[0.5em]">Prévia Técnica</span>
-                            <span id="ia-batch-count" class="text-3xl font-black text-slate-900 italic tracking-tighter">0 Itens</span>
-                        </div>
-                        <button onclick="window.commitBatch()" class="bg-emerald-600 text-white text-[12px] font-black uppercase tracking-[0.3em] px-14 py-8 rounded-[40px] shadow-2xl btn-press">Confirmar & Salvar</button>
+                <!-- Revisão Preview -->
+                <div id="ia-review-area" class="hidden space-y-6 pb-20">
+                    <div class="flex justify-between items-center bg-white p-6 rounded-3xl shadow-xl sticky top-24 z-[900] border border-slate-50">
+                        <span id="ia-batch-count" class="text-sm font-black text-slate-900 italic">0 Questões</span>
+                        <button onclick="window.commitBatch()" class="bg-emerald-600 text-white text-[10px] font-black uppercase px-6 py-3 rounded-xl btn-active">Salvar Tudo</button>
                     </div>
-                    <div id="ia-review-list" class="space-y-8"></div>
+                    <div id="ia-review-list" class="space-y-4"></div>
                 </div>
             </section>
 
-            <!-- VAULT TAB -->
-            <section id="tab-bank" class="tab-content space-y-12">
-                <div class="flex justify-between items-center px-8">
-                    <h2 class="text-5xl font-black text-slate-900 tracking-tighter italic">Vault</h2>
-                    <span id="vault-count-label" class="bg-indigo-50 text-indigo-500 text-[11px] font-black px-5 py-2 rounded-full uppercase tracking-widest">0 Cards</span>
+            <!-- ABA VAULT: ARQUIVO -->
+            <section id="tab-bank" class="tab-content space-y-6 pt-4">
+                <div class="flex justify-between items-center px-2">
+                    <h2 class="text-3xl font-black text-slate-900 tracking-tighter italic">Vault</h2>
+                    <span id="vault-count-label" class="bg-slate-100 text-slate-400 text-[9px] font-black px-3 py-1 rounded-full uppercase">0 Cards</span>
                 </div>
-                <div class="px-4">
-                    <input type="text" id="bank-search" oninput="window.renderBank()" placeholder="Pesquisar por tema, enunciado ou matéria..." class="w-full bg-white border-2 border-slate-50 rounded-[48px] px-14 py-9 text-[16px] font-semibold shadow-premium focus:ring-[15px] ring-indigo-50 outline-none transition-all">
+                <div class="px-1">
+                    <input type="text" id="bank-search" oninput="window.renderBank()" placeholder="Filtrar por enunciado ou matéria..." class="w-full bg-white border-2 border-slate-50 rounded-2xl px-6 py-4 text-sm font-semibold shadow-soft outline-none focus:ring-4 ring-indigo-50">
                 </div>
-                <div id="bank-list" class="space-y-6 pb-48">
-                    <!-- Itens via JS -->
+                <div id="bank-list" class="space-y-4 pb-20">
+                    <!-- Cards renderizados no Vault -->
                 </div>
             </section>
 
         </main>
 
-        <!-- FOOTER STATUS -->
-        <div class="fixed bottom-[145px] left-0 right-0 text-center pointer-events-none z-40">
-            <span id="footer-sync-msg" class="bg-slate-900/95 backdrop-blur-3xl px-12 py-5 rounded-full text-[11px] font-black text-white/50 border border-white/10 shadow-2xl uppercase tracking-[0.5em] select-none">Drive Ready</span>
-        </div>
-
-        <!-- NAVIGATION -->
-        <nav class="fixed bottom-0 left-0 right-0 max-w-2xl mx-auto glass border-t border-slate-100 flex justify-around py-14 px-14 z-[1500] rounded-t-[72px] shadow-[0_-40px_100px_rgba(0,0,0,0.12)] safe-pb">
-            <button onclick="window.switchTab('home')" class="nav-link flex flex-col items-center gap-4 active" id="nav-home">
-                <svg class="w-10 h-10" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3L4 9V21H9V15H15V21H20V9L12 3Z"/></svg>
-                <span class="text-[11px] font-black uppercase tracking-[0.4em]">Home</span>
+        <!-- NAVEGAÇÃO INFERIOR OTIMIZADA -->
+        <nav class="nav-glass fixed bottom-0 left-0 right-0 max-w-lg mx-auto flex justify-around py-4 px-6 z-[2000] rounded-t-[32px] shadow-2xl">
+            <button onclick="window.switchTab('home')" class="nav-link flex flex-col items-center gap-2 active" id="nav-home">
+                <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3L4 9V21H9V15H15V21H20V9L12 3Z"/></svg>
+                <span class="text-[9px] font-black uppercase tracking-widest">Home</span>
             </button>
-            <button onclick="window.switchTab('study')" class="nav-link flex flex-col items-center gap-4 text-slate-300" id="nav-study">
-                <svg class="w-10 h-10" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L4.5 20.29L5.21 21L12 18L18.79 21L19.5 20.29L12 2Z"/></svg>
-                <span class="text-[11px] font-black uppercase tracking-[0.4em]">Review</span>
+            <button onclick="window.switchTab('study')" class="nav-link flex flex-col items-center gap-2 text-slate-300" id="nav-study">
+                <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L4.5 20.29L5.21 21L12 18L18.79 21L19.5 20.29L12 2Z"/></svg>
+                <span class="text-[9px] font-black uppercase tracking-widest">Review</span>
             </button>
-            <button onclick="window.switchTab('add')" class="nav-link flex flex-col items-center gap-4 text-slate-300" id="nav-add">
-                <svg class="w-10 h-10" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L14.5 8.5L21 11L14.5 13.5L12 20L9.5 13.5L3 11L9.5 8.5L12 2Z"/></svg>
-                <span class="text-[11px] font-black uppercase tracking-[0.4em]">Extract</span>
+            <button onclick="window.switchTab('add')" class="nav-link flex flex-col items-center gap-2 text-slate-300" id="nav-add">
+                <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L14.5 8.5L21 11L14.5 13.5L12 20L9.5 13.5L3 11L9.5 8.5L12 2Z"/></svg>
+                <span class="text-[9px] font-black uppercase tracking-widest">Extract</span>
             </button>
-            <button onclick="window.switchTab('bank')" class="nav-link flex flex-col items-center gap-4 text-slate-300" id="nav-bank">
-                <svg class="w-10 h-10" fill="currentColor" viewBox="0 0 24 24"><path d="M4 4H20V20H4V4ZM6 6V18H18V6H6ZM8 8H16V10H8V8ZM8 12H16V14H8V12ZM8 16H13V18H8V16Z"/></svg>
-                <span class="text-[11px] font-black uppercase tracking-[0.4em]">Vault</span>
+            <button onclick="window.switchTab('bank')" class="nav-link flex flex-col items-center gap-2 text-slate-300" id="nav-bank">
+                <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M4 4H20V20H4V4ZM6 6V18H18V6H6ZM8 8H16V10H8V8ZM8 12H16V14H8V12ZM8 16H13V18H8V16Z"/></svg>
+                <span class="text-[9px] font-black uppercase tracking-widest">Vault</span>
             </button>
         </nav>
     </div>
 
-    <!-- NÚCLEO MASTER UNIFICADO -->
+    <!-- NÚCLEO MASTER UNIFICADO (V14.4.0) -->
     <script type="module">
         import { GoogleGenAI, Type } from "@google/genai";
 
-        // APP CONSTANTS
+        // CONSTANTES E CONFIGS
         const CLOUD_FILENAME = 'medrep_database_production_v14.json';
         const KEY_DATABASE = 'medrep_local_db_v14_2';
         const KEY_AUTH_TOKEN = 'medrep_auth_session_v14';
         const KEY_SETTINGS_STORE = 'medrep_settings_v14_2';
         const DEFAULT_CLIENT_ID = '648353734848-s9fnmd9tt0i5577grbt3q9oju6h71mpi.apps.googleusercontent.com';
 
-        // GLOBAL STATE
+        // ESTADO GLOBAL
         let state = {
             questions: [],
-            srs: {}, // qId -> { interval, easeFactor, reps, nextReview }
+            srs: {},
             folders: [
-                { id: 'f_all', name: 'Global Archive' },
+                { id: 'f_all', name: 'Global' },
                 { id: 'f_geral', name: 'Geral' }
             ],
             history: [],
@@ -408,6 +378,7 @@
             lastSync: null
         };
 
+        // VARIÁVEIS DE SESSÃO
         let accessToken = null, tokenClient = null, driveFileId = null;
         let studyQueue = [], studyIndex = 0, chartInstance = null;
         let extractedFileText = "", tempBatchArray = [];
@@ -419,14 +390,13 @@
             el('toast-msg').innerText = msg;
             el('toast-icon').innerText = icon;
             toast.classList.remove('hidden');
-            setTimeout(() => toast.classList.add('hidden'), 4500);
-            if (el('footer-sync-msg')) el('footer-sync-msg').innerText = msg;
+            setTimeout(() => toast.classList.add('hidden'), 4000);
         }
 
-        // 1. SYNC & PERSISTENCE
+        // 1. SINCRONIZAÇÃO E PERSISTÊNCIA (GOOGLE DRIVE MULTIPART)
         async function syncCloud() {
             if (!accessToken) return;
-            showToast('Cloud: Sincronizando...', '☁️');
+            showToast('Sincronizando...', '☁️');
             
             try {
                 const list = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='${CLOUD_FILENAME}' and trashed=false`, {
@@ -439,10 +409,10 @@
                         headers: { 'Authorization': `Bearer ${accessToken}` }
                     }).then(r => r.json());
 
-                    if (content && Array.isArray(content.questions)) {
+                    if (content && content.questions) {
                         state = content;
                         persistLocal();
-                        showToast('Base Atualizada', '✅');
+                        showToast('Banco Atualizado', '✅');
                     }
                 } else {
                     await backupToCloud();
@@ -456,7 +426,6 @@
 
         async function backupToCloud() {
             if (!accessToken) return;
-            showToast('Cloud: Salvando...', '☁️');
             try {
                 const boundary = 'medrep_master_bound_v14';
                 const metadata = { name: CLOUD_FILENAME, mimeType: 'application/json' };
@@ -482,7 +451,6 @@
                 if (response.ok) {
                     const result = await response.json();
                     if (!driveFileId) driveFileId = result.id;
-                    showToast('Cloud: Sincronizado', '💎');
                 }
             } catch (e) { showToast('Sync Offline', '📶'); }
         }
@@ -497,10 +465,10 @@
             if (sync && accessToken) backupToCloud();
         }
 
-        // 2. IA EXTRACTION (MASTER ENGINE)
+        // 2. MOTOR IA: GEMINI 3 FLASH (EXTRAÇÃO ESTRUTURADA)
         window.runGeminiIA = async () => {
             const userInput = el('ia-prompt-input').value.trim();
-            if (!userInput && !extractedFileText) return alert("Forneça texto ou anexo para organizar.");
+            if (!userInput && !extractedFileText) return alert("Forneça texto para organizar.");
             
             const spinner = el('ia-spinner'), btn = el('ia-btn-run');
             spinner.classList.remove('hidden');
@@ -511,33 +479,26 @@
                 const safeKey = settings.geminiKey;
 
                 if (!safeKey) {
-                    alert("Configure sua Gemini API Key em Settings para usar a IA.");
+                    alert("Configure sua Gemini API Key em Settings.");
                     throw new Error("Key Missing");
                 }
 
-                const aiGateway = new GoogleGenAI({ apiKey: safeKey });
+                const ai = new GoogleGenAI({ apiKey: safeKey });
+                const source = `${extractedFileText}\n\n${userInput}`;
                 
-                // MASTER INSTRUCTION PROMPT
-                const fullSource = `${extractedFileText}\n\n${userInput}`;
-                const masterPrompt = `Analise o texto fornecido abaixo (extraído de provas de residência médica) e organize rigorosamente em formato estruturado.
+                const prompt = `Organize o texto médico em questões estruturadas JSON.
+                1. Enunciado (statement): Texto completo da pergunta.
+                2. Alternativas (options): Lista de A até E.
+                3. Resposta (correctIndex): Índice (0=A, 1=B, etc).
+                4. Comentário (explanation): Justificativa técnica.
+                
+                TEXTO: ${source}
+                
+                Retorne apenas JSON: [{"statement":"","options":[],"correctIndex":0,"explanation":""}]`;
 
-                INSTRUÇÕES:
-                1. Enunciado: Capture o texto da pergunta completo, mantendo termos técnicos médicos.
-                2. Alternativas: Crie uma lista limpa de A até E.
-                3. Resposta: Identifique qual alternativa é a correta (use 0 para A, 1 para B, 2 para C, 3 para D, 4 para E).
-                4. Comentário: Extraia a explicação técnica ou gabarito comentado que estiver presente no texto original. Se não houver, crie um resumo técnico breve sobre o tema.
-
-                TEXTO BRUTO PARA ANALISAR:
-                ---
-                ${fullSource}
-                ---
-
-                Retorne APENAS o JSON puro seguindo este schema exato:
-                [{"statement":"...","options":["...","..."],"correctIndex":0,"explanation":"..."}]`;
-
-                const response = await aiGateway.models.generateContent({
+                const response = await ai.models.generateContent({
                     model: 'gemini-3-flash-preview',
-                    contents: [{ parts: [{ text: masterPrompt }] }],
+                    contents: [{ parts: [{ text: prompt }] }],
                     config: {
                         responseMimeType: "application/json",
                         responseSchema: {
@@ -561,11 +522,11 @@
                     tempBatchArray = data;
                     renderIAReview();
                     el('ia-review-area').classList.remove('hidden');
-                    window.scrollTo({ top: el('ia-review-area').offsetTop - 180, behavior: 'smooth' });
+                    window.scrollTo({ top: el('ia-review-area').offsetTop - 100, behavior: 'smooth' });
                 }
             } catch (err) {
                 console.error(err);
-                if (err.message !== "Key Missing") alert("Falha na IA. Verifique sua chave ou conexão.");
+                if (err.message !== "Key Missing") alert("Falha na IA. Verifique sua chave.");
             } finally {
                 spinner.classList.add('hidden');
                 btn.disabled = false;
@@ -574,36 +535,20 @@
 
         function renderIAReview() {
             const list = el('ia-review-list');
-            el('ia-batch-count').innerText = `${tempBatchArray.length} Cards Gerados`;
+            el('ia-batch-count').innerText = `${tempBatchArray.length} Itens Prontos`;
             list.innerHTML = tempBatchArray.map((q, i) => `
-                <div class="bg-white p-12 rounded-[56px] border border-slate-100 shadow-xl space-y-8 animate-fadeIn">
-                    <div class="flex justify-between items-center border-b border-slate-50 pb-6">
-                        <div class="flex items-center gap-4">
-                            <span class="w-12 h-12 bg-indigo-600 text-white rounded-2xl flex items-center justify-center font-black">${i+1}</span>
-                            <span class="text-[12px] font-black text-slate-400 uppercase tracking-widest">Prévia Estruturada</span>
-                        </div>
-                        <button onclick="window.removeIAItem(${i})" class="text-rose-500 font-black text-[10px] uppercase bg-rose-50 px-6 py-2 rounded-2xl">Descartar</button>
+                <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-soft space-y-4">
+                    <div class="flex justify-between items-center">
+                        <span class="text-[9px] font-black text-slate-300 uppercase tracking-widest">Card ${i+1}</span>
+                        <button onclick="window.removeIAItem(${i})" class="text-rose-500 font-bold text-[9px] uppercase">Ignorar</button>
                     </div>
-                    
-                    <div class="space-y-4">
-                        <p class="text-[11px] font-black text-indigo-400 uppercase tracking-widest">Enunciado:</p>
-                        <p class="text-[16px] font-black text-slate-800 leading-relaxed italic">"${q.statement}"</p>
-                    </div>
-
-                    <div class="space-y-4">
-                        <p class="text-[11px] font-black text-indigo-400 uppercase tracking-widest">Gabarito:</p>
-                        <div class="grid grid-cols-1 gap-3">
-                            ${q.options.map((opt, oi) => `
-                                <div class="text-[12px] font-bold p-5 rounded-[28px] ${oi === q.correctIndex ? 'bg-emerald-50 text-emerald-700 border-2 border-emerald-100' : 'bg-slate-50 text-slate-400 border border-slate-100'}">
-                                    <span class="opacity-50 mr-2">${String.fromCharCode(65 + oi)})</span> ${opt}
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-
-                    <div class="bg-indigo-50/40 p-10 rounded-[44px] border border-indigo-100/50">
-                        <p class="text-[11px] font-black text-indigo-400 uppercase mb-4 tracking-widest">Comentário Técnico:</p>
-                        <p class="text-xs text-slate-600 leading-relaxed font-medium">${q.explanation}</p>
+                    <p class="text-sm font-bold text-slate-800 leading-relaxed italic">"${q.statement}"</p>
+                    <div class="space-y-2">
+                        ${q.options.map((opt, oi) => `
+                            <div class="text-[10px] font-bold p-3 rounded-xl ${oi === q.correctIndex ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-50 text-slate-400'}">
+                                ${String.fromCharCode(65 + oi)}) ${opt}
+                            </div>
+                        `).join('')}
                     </div>
                 </div>
             `).join('');
@@ -636,11 +581,11 @@
             
             saveState(true);
             switchTab('home');
-            confetti({ particleCount: 200, spread: 80, origin: { y: 0.6 } });
-            showToast('Banco Atualizado!', '💎');
+            confetti({ particleCount: 150, spread: 60 });
+            showToast('Banco Atualizado!', '🪄');
         };
 
-        // 3. SRS ENGINE (SM-2)
+        // 3. SRS MOTOR: ALGORITMO SM-2
         function getStudyQueue() {
             const now = Date.now();
             const pool = state.currentFolderId === 'f_all' 
@@ -657,47 +602,47 @@
             const container = el('study-container');
             if (studyQueue.length === 0 || studyIndex >= studyQueue.length) {
                 container.innerHTML = `
-                    <div class="text-center space-y-12 animate-fadeIn">
-                        <div class="w-48 h-48 bg-emerald-50 text-emerald-500 rounded-[64px] mx-auto flex items-center justify-center text-8xl shadow-inner rotate-6">🏆</div>
-                        <div class="space-y-4">
-                            <h2 class="text-6xl font-black text-slate-900 tracking-tighter italic leading-none">Sessão Concluída!</h2>
-                            <p class="text-slate-400 font-bold uppercase tracking-widest text-[11px]">Você está em dia com seus cards.</p>
+                    <div class="text-center space-y-8 py-10 animate-slideIn">
+                        <div class="w-32 h-32 bg-emerald-50 text-emerald-500 rounded-[40px] mx-auto flex items-center justify-center text-6xl shadow-inner">🏆</div>
+                        <div class="space-y-2">
+                            <h2 class="text-3xl font-black text-slate-900 tracking-tighter italic">Tudo pronto!</h2>
+                            <p class="text-slate-400 font-bold uppercase tracking-widest text-[9px]">Sessão de estudos concluída.</p>
                         </div>
-                        <button onclick="window.switchTab('home')" class="bg-slate-900 text-white font-black px-16 py-9 rounded-[48px] shadow-2xl btn-press">Dashboard</button>
+                        <button onclick="window.switchTab('home')" class="bg-slate-900 text-white font-black px-10 py-5 rounded-2xl text-[10px] tracking-widest uppercase btn-active">Ir para Dashboard</button>
                     </div>`;
                 return;
             }
 
             const q = studyQueue[studyIndex];
             container.innerHTML = `
-                <div class="bg-white p-16 rounded-[80px] border-2 border-slate-50 shadow-premium space-y-12 animate-fadeIn relative">
-                    <div class="flex justify-between items-center px-4">
-                        <span class="text-[12px] font-black text-slate-400 uppercase tracking-widest">${q.specialty}</span>
-                        <span class="text-[12px] font-black text-indigo-400 uppercase tracking-widest">Card ${studyIndex + 1}/${studyQueue.length}</span>
+                <div class="space-y-8 animate-slideIn">
+                    <div class="flex justify-between items-center px-1">
+                        <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">${q.specialty}</span>
+                        <span class="text-[10px] font-black text-indigo-400 uppercase tracking-widest">${studyIndex + 1}/${studyQueue.length}</span>
                     </div>
                     
-                    <h3 class="text-4xl font-bold text-slate-800 leading-snug">${q.statement}</h3>
+                    <h3 class="question-text">${q.statement}</h3>
 
-                    <div id="options-stack" class="space-y-5">
+                    <div id="options-stack" class="space-y-3">
                         ${q.options.map((opt, i) => `
-                            <button onclick="window.revealStudy(${i})" class="study-opt w-full text-left p-10 rounded-[44px] border-2 border-slate-50 bg-slate-50 text-slate-600 text-lg font-bold transition-all flex gap-8 active:scale-[0.98]">
-                                <span class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm text-sm font-black text-indigo-400">${String.fromCharCode(65 + i)}</span>
-                                <span class="flex-1 pt-2.5">${opt}</span>
+                            <button onclick="window.revealStudy(${i})" class="alt-btn btn-active shadow-soft group">
+                                <span class="w-8 h-8 bg-slate-50 rounded-lg flex items-center justify-center text-[10px] font-black mr-4 group-hover:bg-indigo-600 group-hover:text-white transition-colors">${String.fromCharCode(65 + i)}</span>
+                                <span class="flex-1">${opt}</span>
                             </button>
                         `).join('')}
                     </div>
 
-                    <div id="study-feedback" class="hidden animate-fadeIn space-y-12 border-t-8 border-slate-50 pt-16">
-                        <div class="bg-slate-900 text-slate-300 p-14 rounded-[64px] text-sm italic leading-relaxed border border-white/5 shadow-inner">
-                            <p class="font-black text-white uppercase text-[10px] mb-8 tracking-widest opacity-40">Justificativa Técnica:</p>
-                            ${q.explanation || 'Comentário em processamento...'}
+                    <div id="study-feedback" class="hidden animate-slideIn space-y-6 pt-6 border-t border-slate-100">
+                        <div class="bg-slate-900 text-slate-300 p-6 rounded-3xl text-xs leading-relaxed shadow-xl border border-white/5">
+                            <p class="font-black text-white uppercase text-[8px] mb-4 tracking-widest opacity-40">Resumo Técnico:</p>
+                            ${q.explanation || 'Comentário técnico ausente.'}
                         </div>
                         
-                        <div class="grid grid-cols-4 gap-6">
-                            <button onclick="window.handleSRS(1)" class="bg-rose-500 py-8 rounded-[36px] text-white font-black text-[12px] uppercase btn-press">Errei</button>
-                            <button onclick="window.handleSRS(3)" class="bg-slate-800 py-8 rounded-[36px] text-white font-black text-[12px] uppercase btn-press">Difícil</button>
-                            <button onclick="window.handleSRS(4)" class="bg-indigo-600 py-8 rounded-[36px] text-white font-black text-[12px] uppercase btn-press">Bom</button>
-                            <button onclick="window.handleSRS(5)" class="bg-emerald-500 py-8 rounded-[36px] text-white font-black text-[12px] uppercase btn-press">Fácil</button>
+                        <div class="grid grid-cols-4 gap-2">
+                            <button onclick="window.handleSRS(1)" class="bg-rose-500 py-5 rounded-2xl text-white font-black text-[9px] uppercase btn-active shadow-lg shadow-rose-100">Errei</button>
+                            <button onclick="window.handleSRS(3)" class="bg-slate-800 py-5 rounded-2xl text-white font-black text-[9px] uppercase btn-active shadow-lg">Difícil</button>
+                            <button onclick="window.handleSRS(4)" class="bg-indigo-600 py-5 rounded-2xl text-white font-black text-[9px] uppercase btn-active shadow-lg shadow-indigo-100">Bom</button>
+                            <button onclick="window.handleSRS(5)" class="bg-emerald-500 py-5 rounded-2xl text-white font-black text-[9px] uppercase btn-active shadow-lg shadow-emerald-100">Fácil</button>
                         </div>
                     </div>
                 </div>`;
@@ -705,7 +650,7 @@
 
         window.revealStudy = (idx) => {
             const q = studyQueue[studyIndex];
-            const btns = document.querySelectorAll('.study-opt');
+            const btns = document.querySelectorAll('.alt-btn');
             btns.forEach((btn, i) => {
                 btn.disabled = true;
                 if (i === q.correctIndex) btn.classList.add('study-btn-correct');
@@ -737,7 +682,7 @@
             renderStudyCard();
         };
 
-        // 4. UI HANDLERS
+        // 4. UI HANDLERS MOBILE
         window.switchTab = (tabId) => {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.nav-link').forEach(b => b.classList.remove('active', 'text-indigo-600'));
@@ -753,10 +698,9 @@
             if (tabId === 'study') { studyQueue = getStudyQueue(); studyIndex = 0; renderStudyCard(); }
             if (tabId === 'bank') renderBank();
             if (tabId === 'add') {
-                const isRoot = state.currentFolderId === 'f_all';
-                el('ia-warn-folder').classList.toggle('hidden', !isRoot);
                 const f = state.folders.find(folder => folder.id === state.currentFolderId);
-                el('ia-target-folder').innerText = f ? f.name.toUpperCase() : 'GLOBAL ARCHIVE';
+                el('ia-warn-folder').classList.toggle('hidden', state.currentFolderId !== 'f_all');
+                el('ia-target-folder').innerText = f ? f.name.toUpperCase() : 'GLOBAL';
             }
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
@@ -767,7 +711,7 @@
             
             if (el('stat-total')) el('stat-total').innerText = filtered.length;
             if (el('stat-due')) el('stat-due').innerText = dueCount;
-            if (el('home-due-label')) el('home-due-label').innerText = dueCount > 0 ? `${dueCount} cards pendentes.` : "Nenhum card pendente.";
+            if (el('home-due-label')) el('home-due-label').innerText = dueCount > 0 ? `${dueCount} cards para revisar hoje.` : "Tudo em dia!";
             if (el('vault-count-label')) el('vault-count-label').innerText = `${filtered.length} Cards`;
             
             renderFolderChips();
@@ -777,7 +721,7 @@
         function renderFolderChips() {
             const container = el('folders-scroll');
             container.innerHTML = state.folders.map(f => `
-                <div onclick="window.setFolder('${f.id}')" class="folder-chip px-14 py-6 rounded-[36px] text-[12px] font-black uppercase tracking-[0.3em] border-2 border-slate-50 bg-white shadow-sm cursor-pointer whitespace-nowrap btn-press ${state.currentFolderId === f.id ? 'active' : 'text-slate-400'}">
+                <div onclick="window.setFolder('${f.id}')" class="px-8 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest border-2 border-slate-100 bg-white shadow-sm cursor-pointer whitespace-nowrap btn-active ${state.currentFolderId === f.id ? 'bg-indigo-600 text-white border-indigo-600' : 'text-slate-400'}">
                     ${f.name}
                 </div>
             `).join('');
@@ -786,12 +730,12 @@
         window.setFolder = (id) => {
             state.currentFolderId = id;
             const f = state.folders.find(folder => folder.id === id);
-            el('current-folder-label').innerText = f ? f.name : 'Global Archive';
+            el('current-folder-label').innerText = f ? f.name : 'Global';
             refreshAll();
         };
 
         window.createFolder = () => {
-            const n = prompt("Nome da Nova Categoria Médica:");
+            const n = prompt("Nome da Matéria:");
             if (n && n.trim()) {
                 const id = 'f_' + Date.now();
                 state.folders.push({ id, name: n.trim() });
@@ -807,18 +751,18 @@
             if (s) pool = pool.filter(q => q.statement.toLowerCase().includes(s));
 
             list.innerHTML = pool.slice().reverse().map(q => `
-                <div class="bg-white p-12 rounded-[56px] border-2 border-slate-50 flex justify-between items-center shadow-premium group transition-all duration-500">
-                    <div class="truncate mr-10 flex-1">
-                        <p class="text-[11px] font-black text-indigo-400 uppercase tracking-widest mb-3">${q.specialty}</p>
-                        <p class="text-[16px] font-bold text-slate-800 truncate italic">"${q.statement}"</p>
+                <div class="bg-white p-5 rounded-3xl border border-slate-50 flex justify-between items-center shadow-soft active:scale-[0.98] transition-all">
+                    <div class="truncate mr-4 flex-1">
+                        <p class="text-[8px] font-black text-indigo-400 uppercase mb-1">${q.specialty}</p>
+                        <p class="text-xs font-bold text-slate-800 truncate italic">"${q.statement}"</p>
                     </div>
-                    <button onclick="window.removeCard('${q.id}')" class="w-16 h-16 bg-rose-50 text-rose-500 rounded-[28px] opacity-0 group-hover:opacity-100 transition-all active:scale-90">✕</button>
+                    <button onclick="window.removeCard('${q.id}')" class="w-10 h-10 bg-rose-50 text-rose-500 rounded-xl flex items-center justify-center font-bold">✕</button>
                 </div>
-            `).join('') || '<div class="py-32 text-center text-slate-300 font-black uppercase tracking-[0.6em] text-[13px] opacity-40">Vault Empty</div>';
+            `).join('') || '<div class="py-20 text-center text-slate-300 font-black uppercase text-[10px] opacity-40">Acervo Vazio</div>';
         }
 
         window.removeCard = (id) => {
-            if (confirm("Deletar permanentemente?")) {
+            if (confirm("Apagar?")) {
                 state.questions = state.questions.filter(q => q.id !== id);
                 delete state.srs[id];
                 saveState(true);
@@ -826,11 +770,11 @@
             }
         };
 
-        // 5. CHART JS
+        // 5. DATA VIS: CHART.JS
         function initChart() {
             const ctx = el('mainChart').getContext('2d');
             if (chartInstance) chartInstance.destroy();
-            const days = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab'];
+            const days = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
             const stats = [0, 0, 0, 0, 0, 0, 0];
             const now = new Date();
             state.history.forEach(h => {
@@ -844,14 +788,13 @@
                     labels: days,
                     datasets: [{
                         data: stats,
-                        borderColor: '#6366f1',
-                        backgroundColor: 'rgba(99, 102, 241, 0.15)',
+                        borderColor: 'rgba(255,255,255,0.4)',
+                        backgroundColor: 'rgba(255,255,255,0.05)',
                         fill: true,
-                        tension: 0.5,
-                        borderWidth: 8,
-                        pointRadius: 8,
-                        pointBackgroundColor: '#fff',
-                        pointBorderColor: '#6366f1'
+                        tension: 0.4,
+                        borderWidth: 4,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#fff'
                     }]
                 },
                 options: {
@@ -859,14 +802,14 @@
                     maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
                     scales: {
-                        x: { display: true, ticks: { color: 'rgba(255,255,255,0.4)', font: { size: 12, weight: '900' } }, grid: { display: false } },
+                        x: { display: true, ticks: { color: 'rgba(255,255,255,0.4)', font: { size: 10, weight: '900' } }, grid: { display: false } },
                         y: { display: false }
                     }
                 }
             });
         }
 
-        // 6. MANAGEMENT
+        // 6. MANAGEMENT E AUTH
         window.toggleSettings = () => el('settings-modal').classList.toggle('hidden');
         window.saveSettings = () => {
             const geminiKey = el('cfg-gemini-key').value.trim();
@@ -874,10 +817,10 @@
             localStorage.setItem(KEY_SETTINGS_STORE, JSON.stringify({ geminiKey, clientId }));
             location.reload();
         };
-        window.clearLocalData = () => { if (confirm("Reset local?")) { localStorage.removeItem(KEY_DATABASE); location.reload(); } };
+        window.clearLocalData = () => { if (confirm("Limpar?")) { localStorage.removeItem(KEY_DATABASE); location.reload(); } };
         window.clearCloudData = async () => {
-            if (confirm("Deletar Drive permanentemente?")) {
-                if (!driveFileId || !accessToken) return alert("Drive não conectado.");
+            if (confirm("Apagar Drive?")) {
+                if (!driveFileId || !accessToken) return alert("Drive off.");
                 await fetch(`https://www.googleapis.com/drive/v3/files/${driveFileId}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${accessToken}` } });
                 location.reload();
             }
@@ -918,12 +861,12 @@
             });
         }
 
-        // 7. FILE ENGINE
+        // 7. FILE ENGINE MOBILE
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
         el('ia-file-input').addEventListener('change', async (e) => {
             const f = e.target.files[0]; if (!f) return;
             el('ia-file-status').classList.remove('hidden');
-            el('ia-file-status').innerText = "⏳ Decodificando...";
+            el('ia-file-status').innerText = "⏳ Extraindo...";
             try {
                 if (f.name.endsWith('.pdf')) {
                     const ab = await f.arrayBuffer();
@@ -940,11 +883,11 @@
                     const res = await mammoth.extractRawText({ arrayBuffer: ab });
                     extractedFileText = res.value;
                 }
-                el('ia-file-status').innerText = "✅ Documento: " + f.name;
+                el('ia-file-status').innerText = "✅ " + f.name;
             } catch (err) { el('ia-file-status').innerText = "❌ Falha no arquivo."; }
         });
 
-        // INIT
+        // INIT BOOTSTRAP
         const local = localStorage.getItem(KEY_DATABASE);
         if (local) state = JSON.parse(local);
         const sets = localStorage.getItem(KEY_SETTINGS_STORE);
@@ -959,7 +902,6 @@
     </script>
 </body>
 </html>
-
 
 
 
