@@ -3,21 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>MedRep - Sincronização Master v13.4.17</title>
+    <title>MedRep - Sincronização Master v13.4.2</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     
-    <!-- Scripts de Terceiros -->
+    <!-- Bibliotecas de Suporte -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
     
     <!-- Google Identity Services -->
-    <script src="https://apis.google.com/js/api.js"></script>
-    <script src="https://accounts.google.com/gsi/client"></script>
+    <script src="https://apis.google.com/js/api.js" async defer></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
 
     <script type="importmap">
     {
@@ -28,20 +28,10 @@
     </script>
 
     <style>
-        :root { 
-            --ion-safe-area-top: env(safe-area-inset-top); 
-            --ion-safe-area-bottom: env(safe-area-inset-bottom); 
-        }
-        body { 
-            font-family: 'Inter', sans-serif; 
-            background-color: #f1f5f9; 
-            color: #0f172a; 
-            -webkit-tap-highlight-color: transparent; 
-            overflow-x: hidden;
-            -webkit-user-select: none;
-            user-select: none;
-        }
+        :root { --ion-safe-area-top: env(safe-area-inset-top); --ion-safe-area-bottom: env(safe-area-inset-bottom); }
+        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; color: #0f172a; -webkit-tap-highlight-color: transparent; }
         
+        #api-key-bar { z-index: 1000; }
         .tab-content { display: none; }
         .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -53,7 +43,7 @@
         .loading-spinner { border: 2px solid #e2e8f0; border-top: 2px solid #4f46e5; border-radius: 50%; width: 18px; height: 18px; animation: spin 0.8s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
-        #login-screen { display: flex; overflow-y: auto; padding: 2rem 0; }
+        #login-screen { display: flex; }
         #main-app { display: none; }
         canvas { width: 100% !important; height: 160px !important; }
         
@@ -71,45 +61,45 @@
         .case-text { line-height: 1.6; word-break: break-word; }
         .case-text b { color: #4338ca; font-weight: 800; }
 
-        #sync-toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 2000; padding: 8px 16px; border-radius: 12px; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; display: none; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+        #sync-toast { position: fixed; top: 70px; left: 50%; transform: translateX(-50%); z-index: 2000; padding: 8px 16px; border-radius: 12px; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; display: none; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
         
         #sync-footer { position: fixed; bottom: 100px; left: 0; right: 0; text-align: center; pointer-events: none; z-index: 40; }
         #sync-footer span { background: rgba(255,255,255,0.8); backdrop-filter: blur(4px); padding: 4px 12px; border-radius: 20px; font-size: 9px; font-weight: 800; color: #64748b; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
-
-        .opt-btn { transition: all 0.15s; }
-        .opt-btn:active { transform: scale(0.97); }
-
-        .settings-card { background: white; border-radius: 32px; border: 1px solid #f1f5f9; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
-        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px; }
-        .modal.active { display: flex; }
     </style>
 </head>
-<body class="antialiased">
+<body class="antialiased overflow-x-hidden">
 
     <div id="sync-toast"></div>
 
-    <!-- TELA DE LOGIN MASTER -->
-    <div id="login-screen" class="fixed inset-0 z-[200] bg-white flex flex-col items-center justify-start p-8 text-center">
-        <div class="mb-12 mt-12">
+    <!-- BARRA DE CONFIGURAÇÃO DE CHAVE -->
+    <div id="api-key-bar" class="fixed top-0 left-0 right-0 bg-slate-900 text-white p-3 shadow-2xl flex flex-col md:flex-row items-center justify-center gap-3 border-b border-white/10">
+        <div class="flex items-center gap-2">
+            <span class="text-[10px] font-black uppercase tracking-widest text-indigo-400">Gemini Key:</span>
+            <input type="password" id="gemini-key-input" placeholder="AIza..." class="bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 text-xs focus:ring-2 ring-indigo-500 outline-none w-48 font-mono">
+        </div>
+        <button onclick="window.saveGeminiKey()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-black uppercase px-4 py-1.5 rounded-lg transition-colors">Salvar Chave</button>
+    </div>
+
+    <!-- TELA DE LOGIN -->
+    <div id="login-screen" class="fixed inset-0 z-[200] bg-white flex flex-col items-center justify-center p-8 text-center pt-24">
+        <div class="mb-12">
             <h1 class="text-6xl font-black text-indigo-600 tracking-tighter italic leading-none">MedRep</h1>
-            <p class="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-4">Sincronização Master v13.4.17</p>
+            <p class="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-4">Sincronização Master v13.4.2</p>
         </div>
-        
-        <div class="bg-slate-50 p-10 rounded-[40px] w-full max-w-sm border border-slate-100 mb-8 shadow-sm space-y-6">
-            <p id="login-status-msg" class="text-xs font-semibold text-slate-500 mb-4 italic">Carregando APIs do Google...</p>
-            <button id="login-btn" onclick="window.fazerLogin()" disabled class="w-full bg-slate-200 text-slate-400 font-black py-5 rounded-[22px] shadow-sm flex items-center justify-center gap-4 transition-all opacity-50 cursor-not-allowed">
-                <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" class="w-6 grayscale" alt="Google">
-                <span id="login-btn-text" class="text-xs uppercase tracking-widest">Aguarde...</span>
+        <div class="bg-slate-50 p-10 rounded-[40px] w-full max-w-sm border border-slate-100 mb-8 shadow-sm">
+            <p id="login-status-msg" class="text-xs font-semibold text-slate-500 mb-6">Aguardando Conexão Google Drive...</p>
+            <button onclick="window.fazerLogin()" class="w-full bg-slate-900 text-white font-black py-5 rounded-[22px] shadow-xl flex items-center justify-center gap-4 active:scale-95 transition-transform">
+                <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" class="w-6" alt="Google">
+                <span class="text-xs uppercase tracking-widest">Login via Drive Master</span>
             </button>
-            <div id="login-loader" class="hidden mt-4 flex justify-center"><div class="loading-spinner"></div></div>
+            <div id="login-loader" class="hidden mt-6 flex justify-center"><div class="loading-spinner"></div></div>
         </div>
-        
-        <p class="text-[9px] font-black text-slate-300 uppercase tracking-[0.4em]">SISTEMA SEGURO & PRIVADO</p>
+        <p class="text-[9px] font-black text-slate-300 uppercase tracking-[0.4em]">RESTAURAÇÃO COMPLETA v13.4.2</p>
     </div>
 
     <!-- APLICATIVO PRINCIPAL -->
-    <div id="main-app" class="hidden">
-        <header class="glass border-b border-slate-100 px-6 py-4 sticky top-0 z-50 flex justify-between items-center max-w-xl mx-auto w-full rounded-b-3xl">
+    <div id="main-app" class="pt-24">
+        <header class="glass border-b border-slate-100 px-6 py-4 sticky top-[60px] md:top-[50px] z-50 flex justify-between items-center max-w-xl mx-auto w-full rounded-b-3xl">
             <div class="flex flex-col">
                 <h1 class="text-xl font-black text-indigo-600 tracking-tighter italic leading-none">MedRep</h1>
                 <span id="header-subtitle" class="text-[8px] font-bold text-slate-400 uppercase mt-1 tracking-widest">Global</span>
@@ -122,7 +112,7 @@
             <!-- HOME TAB -->
             <section id="tab-home" class="tab-content active space-y-6">
                 <div class="bg-indigo-600 p-8 rounded-[40px] text-white shadow-xl relative overflow-hidden">
-                    <p class="text-[9px] font-black uppercase tracking-widest opacity-60 mb-2">Painel de Estudo</p>
+                    <p class="text-[9px] font-black uppercase tracking-widest opacity-60 mb-2">Resumo de Desempenho</p>
                     <div class="grid grid-cols-2 gap-4 mb-4">
                         <div class="bg-white/10 p-4 rounded-2xl">
                             <p class="text-[9px] font-bold uppercase opacity-50">Cards Totais</p>
@@ -162,7 +152,7 @@
                 <div id="study-container" class="space-y-6 min-h-[400px]"></div>
             </section>
 
-            <!-- ADD TAB (FIEL IA) -->
+            <!-- ADD TAB -->
             <section id="tab-add" class="tab-content space-y-6">
                 <div class="bg-white p-8 rounded-[40px] border border-slate-100 shadow-sm space-y-6">
                     <div class="flex items-center gap-4">
@@ -171,37 +161,37 @@
                     </div>
 
                     <div id="ia-folder-warning" class="bg-amber-50 border border-amber-100 p-4 rounded-2xl hidden">
-                        <p class="text-[10px] text-amber-700 font-bold uppercase leading-tight">⚠️ Escolha uma matéria na Home antes de processar.</p>
+                        <p class="text-[10px] text-amber-700 font-bold uppercase leading-tight">⚠️ Defina a matéria alvo na Home antes de importar.</p>
                     </div>
 
                     <div class="space-y-2">
                         <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Pasta Atual:</label>
-                        <div id="active-folder-display" class="w-full bg-slate-50 p-4 rounded-2xl text-xs font-black text-indigo-600 uppercase border border-slate-100 italic">
-                            Escolha na Home
+                        <div id="active-folder-display" class="w-full bg-slate-50 p-4 rounded-2xl text-xs font-black text-indigo-600 uppercase border border-slate-100">
+                            -
                         </div>
                     </div>
 
                     <div class="bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl p-6 text-center">
                         <label class="cursor-pointer flex flex-col items-center gap-2">
                             <span class="text-2xl">📄</span>
-                            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Anexar PDF ou Docx</span>
+                            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Anexar Documento (PDF/Docx)</span>
                             <input type="file" id="file-reader" class="hidden" accept=".pdf,.docx">
                             <span id="file-status" class="text-[9px] text-indigo-500 font-bold hidden"></span>
                         </label>
                     </div>
 
-                    <textarea id="ia-prompt" placeholder="Cole textos ou enunciados aqui..." class="w-full h-40 bg-slate-50 rounded-[24px] p-6 text-sm border border-slate-100 focus:ring-2 ring-indigo-500 outline-none resize-none"></textarea>
+                    <textarea id="ia-prompt" placeholder="Cole enunciados ou texto livre..." class="w-full h-40 bg-slate-50 rounded-[24px] p-6 text-sm border border-slate-100 focus:ring-2 ring-indigo-500 outline-none resize-none"></textarea>
                     
                     <button onclick="window.processIA()" id="btn-ia" class="w-full bg-slate-900 text-white font-black py-5 rounded-[20px] uppercase text-xs flex items-center justify-center gap-4 shadow-xl active:scale-95 transition-transform">
-                        <span>Extrair com IA Gemini</span>
+                        <span>Reformatar Lote com IA</span>
                         <div id="ia-loader" class="loading-spinner hidden" style="border-top-color: white;"></div>
                     </button>
                 </div>
 
                 <div id="ia-review-area" class="hidden space-y-4">
-                    <div class="flex justify-between items-center bg-white p-6 rounded-[24px] border border-slate-100 shadow-xl sticky top-[80px] z-10">
-                        <span id="review-count" class="text-xs font-black text-slate-800">Cards Prontos</span>
-                        <button onclick="window.confirmBatch()" class="bg-emerald-600 text-white text-[10px] font-black uppercase px-6 py-3 rounded-xl">Salvar Tudo</button>
+                    <div class="flex justify-between items-center bg-white p-6 rounded-[24px] border border-slate-100 shadow-xl sticky top-[130px] z-10">
+                        <span id="review-count" class="text-xs font-black text-slate-800">Mapeamento Concluído</span>
+                        <button onclick="window.confirmBatch()" class="bg-emerald-600 text-white text-[10px] font-black uppercase px-6 py-3 rounded-xl">Salvar Lote</button>
                     </div>
                     <div id="review-list" class="space-y-4 pb-20"></div>
                 </div>
@@ -210,57 +200,22 @@
             <!-- BANK TAB -->
             <section id="tab-bank" class="tab-content space-y-4">
                 <div class="flex justify-between items-center px-4">
-                    <h2 class="text-lg font-black text-slate-800">Seu Acervo</h2>
-                    <button onclick="window.saveLocal(true)" class="text-[8px] font-black text-indigo-600 uppercase tracking-widest bg-indigo-50 px-3 py-1.5 rounded-lg active:scale-95 transition-all">Sincronizar Drive</button>
+                    <h2 class="text-lg font-black text-slate-800">Acervo</h2>
+                    <button onclick="window.clearAll()" class="text-[8px] font-black text-rose-500 uppercase tracking-widest bg-rose-50 px-3 py-1.5 rounded-lg">Reset Local</button>
                 </div>
                 
                 <div class="px-2">
-                    <input type="text" id="bank-search" oninput="window.renderBank()" placeholder="🔎 Pesquisar questões..." class="search-bar">
+                    <input type="text" id="bank-search" oninput="window.renderBank()" placeholder="🔎 Filtrar banco..." class="search-bar">
                 </div>
 
-                <div id="bank-list" class="space-y-2 px-2"></div>
-
-                <!-- DADOS E BACKUP -->
-                <div class="mt-8 pt-8 border-t border-slate-200 px-2">
-                    <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Dados e Segurança</h3>
-                    <div class="settings-card space-y-6">
-                        <div class="space-y-2">
-                            <p class="text-xs font-bold text-slate-700">Backup Manual</p>
-                            <p class="text-[10px] text-slate-400">Exporte ou importe seus dados em formato JSON para cópias extras.</p>
-                            <div class="grid grid-cols-2 gap-3 pt-2">
-                                <button onclick="window.exportBackup()" class="bg-emerald-50 text-emerald-600 text-[10px] font-black uppercase py-4 rounded-2xl active:scale-95 transition-all">Exportar JSON</button>
-                                <button onclick="window.importBackup()" class="bg-amber-50 text-amber-600 text-[10px] font-black uppercase py-4 rounded-2xl active:scale-95 transition-all">Importar JSON</button>
-                            </div>
-                        </div>
-
-                        <!-- GERENCIAMENTO DE CHAVE GEMINI API -->
-                        <div class="pt-4 border-t border-slate-100">
-                            <p class="text-xs font-bold text-slate-700 mb-1">Configurações de IA</p>
-                            <p class="text-[10px] text-slate-400 mb-3">Insira sua própria chave do Gemini para extrações ilimitadas.</p>
-                            <div class="flex flex-col gap-2">
-                                <input type="password" id="custom-api-key-bank" placeholder="AIzaSy..." class="search-bar py-3">
-                                <div class="flex gap-2">
-                                    <button onclick="window.saveGeminiKey(document.getElementById('custom-api-key-bank').value)" class="flex-1 bg-indigo-600 text-white text-[10px] font-black uppercase py-4 rounded-2xl active:scale-95 transition-all">Salvar Chave</button>
-                                    <button onclick="window.clearGeminiKey()" class="bg-slate-50 text-slate-400 text-[10px] font-black uppercase px-6 rounded-2xl active:scale-95 transition-all">Remover</button>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="pt-4 border-t border-slate-100 flex justify-between items-center">
-                            <span class="text-[10px] font-bold text-slate-400 uppercase">Limpeza Total</span>
-                            <button onclick="window.clearAll()" class="text-[8px] font-black text-rose-500 uppercase tracking-widest bg-rose-50 px-4 py-2 rounded-xl">Reset Local</button>
-                        </div>
-                    </div>
-                </div>
-                <div class="h-24"></div>
+                <div id="bank-list" class="space-y-2 pb-24 px-2"></div>
             </section>
         </main>
 
         <div id="sync-footer">
-            <span id="sync-footer-label">☁️ Offline</span>
+            <span id="sync-footer-label">☁️ Iniciando...</span>
         </div>
 
-        <!-- MENU DE NAVEGAÇÃO -->
         <nav class="fixed bottom-0 left-0 right-0 max-w-xl mx-auto bg-white/95 backdrop-blur-2xl border-t border-slate-100 flex justify-around py-6 px-4 z-50 rounded-t-[32px] shadow-2xl safe-bottom">
             <button onclick="window.switchTab('home')" class="nav-btn flex flex-col items-center gap-1 active text-indigo-600" id="nav-home">
                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3L4 9V21H9V15H15V21H20V9L12 3Z"/></svg>
@@ -281,40 +236,20 @@
         </nav>
     </div>
 
-    <!-- MODAL DE EDIÇÃO -->
-    <div id="edit-modal" class="modal">
-        <div class="bg-white w-full max-w-lg rounded-[40px] p-8 shadow-2xl space-y-6">
-            <div class="flex justify-between items-center">
-                <h3 class="text-lg font-black">Editar Card</h3>
-                <button onclick="window.closeEdit()" class="text-slate-400">✕</button>
-            </div>
-            <div class="space-y-4">
-                <textarea id="edit-statement" class="w-full search-bar h-32 resize-none" placeholder="Enunciado..."></textarea>
-                <div id="edit-options" class="space-y-2"></div>
-                <input type="text" id="edit-explanation" class="w-full search-bar" placeholder="Explicação...">
-            </div>
-            <button onclick="window.saveEdit()" class="w-full bg-indigo-600 text-white font-black py-4 rounded-2xl active:scale-95 transition-all">Salvar Alterações</button>
-        </div>
-    </div>
-
     <script type="module">
         import { GoogleGenAI } from "@google/genai";
 
-        // MASTER API KEY FIXA
-        const MASTER_API_KEY = 'AIzaSyAIJFacEIsyKUY0LLwjsGxFSdniwKfXkIE';
-        const CUSTOM_KEY_STORAGE = 'medrep_custom_gemini_key';
-        
-        // CONFIGURAÇÕES DRIVE
+        // CONFIGURAÇÕES GLOBAIS
         const CLIENT_ID = '648353734848-s9fnmd9tt0i5577grbt3q9oju6h71mpi.apps.googleusercontent.com';
-        const SCOPES = 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email'; 
+        const SCOPES = 'https://www.googleapis.com/auth/drive.file';
         const STORAGE_KEY = 'medrep_data_v13_3_global';
+        const KEY_STORAGE = 'medrep_gemini_key_v11';
         const TOKEN_STORAGE = 'medrep_google_token_persist';
         const FILENAME = 'medrep_data.json';
 
-        // ESTADO GLOBAL
         let state = {
             questions: [],
-            srs: {}, 
+            srs: {},
             history: [],
             folders: [{id: 'f_all', name: 'Global'}, {id: 'f_default', name: 'Geral'}],
             currentFolderId: 'f_all'
@@ -328,500 +263,599 @@
         let tokenClient = null;
         let chartInstance = null;
         let extractedFileText = "";
+        let googleRetries = 0;
         let driveFileId = null;
-        let hasInitialSync = false;
-        let editingCardId = null;
-        
-        // Timer
-        let studyTimer = null;
-        let studySeconds = 0;
 
-        // --- GESTÃO DE CHAVE GEMINI API ---
+        const getAIClient = () => {
+            const key = localStorage.getItem(KEY_STORAGE) || process.env.API_KEY;
+            return new GoogleGenAI({ apiKey: key });
+        };
 
-        window.saveGeminiKey = (key) => {
-            // Validação robusta solicitada: não vazia, string e inicia com 'AIzaSy'
-            if (!key || typeof key !== 'string' || key.trim() === "" || !key.trim().startsWith('AIzaSy')) {
-                alert('API Key inválida. Por favor, insira uma chave válida do Gemini.');
-                return false;
-            }
+        function showSyncStatus(msg, type = 'info') {
+            const toast = document.getElementById('sync-toast');
+            const footerLabel = document.getElementById('sync-footer-label');
             
-            localStorage.setItem(CUSTOM_KEY_STORAGE, key.trim());
-            alert('✅ Chave API salva com sucesso! O MedRep usará sua chave personalizada.');
-            return true;
+            if (footerLabel) footerLabel.innerText = msg;
+            
+            toast.innerText = msg;
+            toast.style.display = 'block';
+            if (type === 'success') {
+                toast.style.backgroundColor = '#10b981';
+                toast.style.color = 'white';
+            } else if (type === 'error') {
+                toast.style.backgroundColor = '#ef4444';
+                toast.style.color = 'white';
+            } else {
+                toast.style.backgroundColor = '#4f46e5';
+                toast.style.color = 'white';
+            }
+            setTimeout(() => { toast.style.display = 'none'; }, 2000);
+        }
+
+        window.saveGeminiKey = () => {
+            const key = document.getElementById('gemini-key-input').value.trim();
+            if (!key.startsWith('AIza')) return alert("Chave Gemini inválida.");
+            localStorage.setItem(KEY_STORAGE, key);
+            alert("✅ Chave Salva.");
+            location.reload();
         };
 
-        window.clearGeminiKey = () => {
-            if (confirm("Deseja remover sua chave personalizada e voltar para a chave padrão?")) {
-                localStorage.removeItem(CUSTOM_KEY_STORAGE);
-                const input = document.getElementById('custom-api-key-bank');
-                if (input) input.value = "";
-                alert("Chave personalizada removida.");
+        window.fazerLogin = () => {
+            document.getElementById('login-loader').classList.remove('hidden');
+            if (tokenClient) {
+                tokenClient.requestAccessToken();
+            } else {
+                setupGoogle();
             }
         };
 
-        const getAI = () => {
-            const custom = localStorage.getItem(CUSTOM_KEY_STORAGE);
-            return new GoogleGenAI({ apiKey: custom || MASTER_API_KEY });
-        };
-
-        // --- MOTOR DE SINCRONIA ---
+        // --- SINCRONIZAÇÃO MASTER ---
 
         async function manualSync() {
             if (!accessToken) return;
-            showSyncStatus("☁️ Sincronizando...");
+            showSyncStatus("☁️ Buscando no Drive...");
             try {
+                // Busca global por nome: q: "name = 'medrep_data.json' and trashed = false"
                 const list = await gapi.client.drive.files.list({ 
                     q: `name = '${FILENAME}' and trashed = false`,
                     spaces: 'drive',
                     fields: 'files(id, name)'
                 });
-                
                 const file = list.result.files[0];
                 if (file) {
                     driveFileId = file.id;
-                    const resp = await gapi.client.drive.files.get({ fileId: driveFileId, alt: 'media' });
+                    const resp = await gapi.client.drive.files.get({ 
+                        fileId: driveFileId, 
+                        alt: 'media'
+                    });
+                    
                     let driveData = resp.result;
                     if (typeof driveData === 'string') driveData = JSON.parse(driveData);
-                    
+
                     if (driveData && driveData.questions) {
-                        // Merge com o local para não perder o que foi feito offline
-                        const cloudQuestionsMap = new Map(driveData.questions.map(q => [q.id, q]));
-                        state.questions.forEach(q => { if (!cloudQuestionsMap.has(q.id)) driveData.questions.push(q); });
-                        
                         state = driveData;
                         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+                        console.log("Sincronização: Dados carregados com sucesso. ID: " + driveFileId);
                         showSyncStatus("✅ Sincronizado", 'success');
                     }
                 } else {
-                    showSyncStatus("☁️ Novo Backup Criado", 'info');
-                    await autoBackup();
+                    showSyncStatus("☁️ Criando novo banco...");
+                    console.log("Sincronização: Nenhum arquivo encontrado. Preparando novo.");
                 }
-                hasInitialSync = true;
             } catch (e) { 
-                console.error("ManualSync Falhou:", e);
-                showSyncStatus("❌ Falha Sincronia", 'error'); 
+                console.error("ManualSync falhou crítico:", e);
+                showSyncStatus("❌ Falha na Sincronia", 'error');
             }
             updateStats();
         }
 
         async function autoBackup() {
-            if (!accessToken || !hasInitialSync) return;
-            showSyncStatus("☁️ Salvando...");
+            if (!accessToken) return;
+            showSyncStatus("☁️ Sincronizando...");
             try {
-                const metadata = { name: FILENAME, mimeType: 'application/json' };
-                const boundary = 'medrep_sync_v13_6';
-                const delimiter = "\r\n--" + boundary + "\r\n";
-                const body = delimiter + 'Content-Type: application/json; charset=UTF-8\r\n\r\n' + JSON.stringify(metadata) +
-                             delimiter + 'Content-Type: application/json\r\n\r\n' + JSON.stringify(state) +
-                             "\r\n--" + boundary + "--";
+                // Se não temos o ID ainda, tenta buscar pelo nome antes de criar um novo
+                if (!driveFileId) {
+                    const list = await gapi.client.drive.files.list({ 
+                        q: `name = '${FILENAME}' and trashed = false`,
+                        spaces: 'drive'
+                    });
+                    if (list.result.files && list.result.files[0]) {
+                        driveFileId = list.result.files[0].id;
+                        console.log("AutoBackup: ID recuperado pelo nome: " + driveFileId);
+                    }
+                }
 
+                const metadata = { name: FILENAME, mimeType: 'application/json' };
+                const boundary = 'medrep_sync_v13_4_2_final';
+                const delimiter = "\r\n--" + boundary + "\r\n";
+                const close_delim = "\r\n--" + boundary + "--";
+
+                const body = 
+                    delimiter + 'Content-Type: application/json; charset=UTF-8\r\n\r\n' + JSON.stringify(metadata) +
+                    delimiter + 'Content-Type: application/json\r\n\r\n' + JSON.stringify(state) +
+                    close_delim;
+
+                // CORREÇÃO: Usar PATCH se existir (atualizar), POST se não (criar)
                 const url = driveFileId 
                     ? `https://www.googleapis.com/upload/drive/v3/files/${driveFileId}?uploadType=multipart`
                     : 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
 
                 const response = await fetch(url, {
                     method: driveFileId ? 'PATCH' : 'POST',
-                    headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'multipart/related; boundary=' + boundary },
+                    headers: { 
+                        'Authorization': 'Bearer ' + accessToken,
+                        'Content-Type': 'multipart/related; boundary=' + boundary
+                    },
                     body: body
                 });
 
-                if (response.ok) {
-                    const resJson = await response.json();
-                    driveFileId = resJson.id;
-                    showSyncStatus("✅ Backup em Dia", 'success');
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error("AutoBackup: ERRO DRIVE - Status:", response.status, "Resposta:", errorText);
+                    showSyncStatus("❌ Erro ao Salvar", 'error');
+                    
+                    // Se erro de autorização (token expirado), tenta renovação
+                    if (response.status === 401 || response.status === 403) {
+                        tokenClient.requestAccessToken();
+                    }
+                } else {
+                    if (!driveFileId) {
+                        const result = await response.json();
+                        driveFileId = result.id;
+                        console.log("Novo arquivo criado no Drive: " + driveFileId);
+                    } else {
+                        console.log("Arquivo atualizado com sucesso no Drive: " + driveFileId);
+                    }
+                    showSyncStatus("✅ Sincronizado", 'success');
                 }
-            } catch (e) { console.error(e); showSyncStatus("❌ Erro Backup", 'error'); }
+            } catch (e) { 
+                console.error("AutoBackup falhou criticamente:", e);
+                showSyncStatus("❌ Erro de Rede Drive", 'error');
+            }
         }
 
-        // --- STUDY ENGINE ---
-
-        function startTimer() {
-            stopTimer();
-            studySeconds = 0;
-            studyTimer = setInterval(() => {
-                studySeconds++;
-                const timerEl = document.getElementById('study-timer-display');
-                if (timerEl) {
-                    const mins = Math.floor(studySeconds / 60).toString().padStart(2, '0');
-                    const secs = (studySeconds % 60).toString().padStart(2, '0');
-                    timerEl.innerText = `${mins}:${secs}`;
-                }
-            }, 1000);
-        }
-
-        function stopTimer() {
-            if (studyTimer) clearInterval(studyTimer);
-            studyTimer = null;
-        }
+        // --- LÓGICA SRS (SM-2) ---
 
         window.submitSRS = (grade) => {
             const q = studyQueue[studyPointer];
-            if (!q) return;
             const srs = state.srs[q.id] || { interval: 0, repetitions: 0, easeFactor: 2.5 };
             let { interval, repetitions, easeFactor } = srs;
-            const score = grade === 1 ? 0 : grade === 2 ? 2 : grade === 3 ? 4 : 5;
-            if (score >= 3) {
-                if (repetitions === 0) interval = 1; else if (repetitions === 1) interval = 6; else interval = Math.round(interval * easeFactor);
-                repetitions++;
-            } else { repetitions = 0; interval = 1; }
-            easeFactor = Math.max(1.3, easeFactor + (0.1 - (5 - score) * (0.08 + (5 - score) * 0.02)));
-            state.srs[q.id] = { interval, repetitions, easeFactor, nextReview: Date.now() + (interval * 24 * 60 * 60 * 1000) };
-            state.history.push({ cardId: q.id, success: score >= 3, date: Date.now(), timeSpent: studySeconds });
             
-            window.saveLocal(true);
+            // Mapeamento de score: 1:Erro(0), 2:Difícil(2), 3:Bom(4), 4:Fácil(5)
+            const score = grade === 1 ? 0 : grade === 2 ? 2 : grade === 3 ? 4 : 5;
+            
+            if (score >= 3) {
+                if (repetitions === 0) interval = 1;
+                else if (repetitions === 1) interval = 6;
+                else interval = Math.round(interval * easeFactor);
+                repetitions++;
+            } else { 
+                repetitions = 0; 
+                interval = 1; 
+            }
+            
+            easeFactor = easeFactor + (0.1 - (5 - score) * (0.08 + (5 - score) * 0.02));
+            if (easeFactor < 1.3) easeFactor = 1.3;
+            
+            state.srs[q.id] = { 
+                interval, 
+                repetitions, 
+                easeFactor, 
+                nextReview: Date.now() + (interval * 24 * 60 * 60 * 1000) 
+            };
+            
+            state.history.push({ cardId: q.id, success: score >= 3, date: Date.now() });
+            
+            // Persistência Mandatória e Backup Automático
+            saveLocal(true);
+            
             studyPointer++;
             renderStudyCard();
         };
 
-        // --- IA PROCESS ---
+        // --- IA E PROCESSAMENTO ---
 
         window.processIA = async () => {
-            if (state.currentFolderId === 'f_all') return alert("⚠️ Escolha uma pasta.");
-            const prompt = document.getElementById('ia-prompt').value.trim();
-            if (!prompt && !extractedFileText) return;
+            if (state.currentFolderId === 'f_all') return alert("Escolha uma pasta específica.");
+            const userInput = document.getElementById('ia-prompt').value.trim();
+            if (!userInput && !extractedFileText) return alert("Nada para processar.");
+            
             const loader = document.getElementById('ia-loader');
+            const btn = document.getElementById('btn-ia');
             loader.classList.remove('hidden');
+            btn.disabled = true;
+
             try {
-                const ai = getAI();
-                const content = extractedFileText ? `DOC: ${extractedFileText}\nUSER: ${prompt}` : prompt;
+                const ai = getAIClient();
+                const sourceData = extractedFileText ? `DOC:\n${extractedFileText}\n\nUSER:\n${userInput}` : userInput;
+                const nextNum = state.questions.length + 1;
+
                 const response = await ai.models.generateContent({
                     model: 'gemini-3-flash-preview',
-                    contents: [{ parts: [{ text: content }] }],
-                    config: { systemInstruction: "Retorne APENAS um array JSON: [{'statement': '...', 'options': ['A','B','C','D'], 'correctIndex': 0, 'explanation': '...'}]" }
+                    contents: [{ parts: [{ text: sourceData }] }],
+                    config: { 
+                        maxOutputTokens: 8192,
+                        systemInstruction: `Você é um REFORMATADOR MÉDICO FIEL. Organize o input em JSON.
+                        Regras: 1. COPIE INTEGRALMENTE (Sem resumos). 2. FIDELIDADE TOTAL PALAVRA POR PALAVRA. 
+                        3. NUMERAÇÃO: O banco tem ${state.questions.length} questões. Comece da "Questão ${nextNum}:" sequencialmente. 
+                        Retorne JSON: [{"statement":"","options":[],"correctIndex":0,"explanation":"","specialty":""}]`
+                    }
                 });
+
                 const match = response.text.match(/\[[\s\S]*\]/);
-                if (match) { tempExtracted = JSON.parse(match[0]); renderReviewList(); }
+                if (match) {
+                    tempExtracted = JSON.parse(match[0]);
+                    renderReviewList();
+                } else {
+                    alert("A IA não retornou um formato válido.");
+                }
             } catch (e) { alert("IA Falhou: " + e.message); }
-            finally { loader.classList.add('hidden'); }
+            finally { loader.classList.add('hidden'); btn.disabled = false; }
         };
 
         function renderReviewList() {
-            const area = document.getElementById('ia-review-area');
-            const list = document.getElementById('review-list');
-            area.classList.remove('hidden');
-            list.innerHTML = tempExtracted.map((q, idx) => `
-                <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
-                    <p class="text-[10px] font-black text-indigo-500 uppercase">EXTRAÍDO ${idx + 1}</p>
-                    <p class="text-xs font-bold text-slate-700">${q.statement}</p>
+            document.getElementById('ia-review-area').classList.remove('hidden');
+            document.getElementById('review-list').innerHTML = tempExtracted.map(q => `
+                <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-2">
+                    <p class="text-[10px] font-black text-indigo-500">PRÉVIA:</p>
+                    <p class="text-xs font-bold text-slate-700 italic truncate leading-relaxed">"${q.statement}"</p>
                 </div>
             `).join('');
-            document.getElementById('review-count').innerText = `${tempExtracted.length} cards extraídos.`;
-            window.scrollTo({ top: area.offsetTop - 100, behavior: 'smooth' });
+            window.scrollTo(0, 0);
         }
 
         window.confirmBatch = () => {
             const folderId = state.currentFolderId;
             const folderName = state.folders.find(f => f.id === folderId).name;
             const news = tempExtracted.map(q => ({ 
-                ...q, id: 'q_' + Math.random().toString(36).substr(2, 9), folderId, specialty: q.specialty || folderName, date: Date.now()
+                ...q, 
+                id: 'q_' + Math.random().toString(36).substr(2, 9),
+                folderId: folderId,
+                specialty: folderName,
+                date: Date.now()
             }));
             state.questions = [...state.questions, ...news];
-            window.saveLocal(true);
+            
+            saveLocal(true);
+            
             document.getElementById('ia-review-area').classList.add('hidden');
-            switchTab('bank');
+            document.getElementById('ia-prompt').value = "";
+            extractedFileText = "";
+            document.getElementById('file-status').classList.add('hidden');
+            alert("✅ Lote sincronizado com sucesso no Drive.");
         };
 
-        // --- BANK & DASHBOARD ---
+        // --- ANALYTICS ---
 
         function initChart() {
-            const canvas = document.getElementById('performanceChart');
-            if (!canvas) return;
-            chartInstance = new Chart(canvas.getContext('2d'), {
+            const ctx = document.getElementById('performanceChart').getContext('2d');
+            chartInstance = new Chart(ctx, {
                 type: 'line',
-                data: { labels: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'], datasets: [{ data: [0,0,0,0,0,0,0], borderColor: '#fff', fill: true, tension: 0.4 }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { display: true, ticks: { color: '#fff' } }, y: { display: false } } }
+                data: {
+                    labels: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'],
+                    datasets: [{
+                        label: 'Hits',
+                        data: [0,0,0,0,0,0,0],
+                        borderColor: '#fff',
+                        backgroundColor: 'rgba(255,255,255,0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 2,
+                        pointRadius: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { display: true, ticks: { color: 'rgba(255,255,255,0.6)', font: { size: 9 } }, grid: { display: false } },
+                        y: { display: false }
+                    }
+                }
             });
         }
 
         function updateStats() {
             const folderId = state.currentFolderId;
-            const qs = folderId === 'f_all' ? state.questions : state.questions.filter(q => q.folderId === folderId);
-            const history = state.history.filter(h => folderId === 'f_all' || qs.find(q => q.id === h.cardId));
-            const due = qs.filter(q => !state.srs[q.id] || state.srs[q.id].nextReview <= Date.now()).length;
+            const now = Date.now();
+            const questions = folderId === 'f_all' ? state.questions : state.questions.filter(q => q.folderId === folderId);
+            const questionIds = new Set(questions.map(q => q.id));
+            const history = state.history.filter(h => folderId === 'f_all' || questionIds.has(h.cardId));
+            const due = questions.filter(q => !state.srs[q.id] || state.srs[q.id].nextReview <= now).length;
             
-            document.getElementById('stat-total').innerText = qs.length;
+            document.getElementById('stat-total').innerText = questions.length;
             const hits = history.filter(h => h.success).length;
             document.getElementById('stat-accuracy').innerText = history.length ? Math.round((hits / history.length) * 100) + "%" : "0%";
-            
-            const dueText = document.getElementById('home-due-text');
-            if (dueText) dueText.innerText = due > 0 ? `${due} cards para revisar.` : "Meta batida!";
+            document.getElementById('home-due-text').innerText = due > 0 ? `${due} cards pendentes.` : "Revisão OK!";
             
             const badge = document.getElementById('due-badge');
-            if (badge) { badge.innerText = due; badge.classList.toggle('hidden', due === 0); }
-            
+            badge.innerText = due;
+            badge.classList.toggle('hidden', due === 0);
+
             if (chartInstance) {
-                const weekly = [0,0,0,0,0,0,0]; 
-                history.forEach(h => { if (h.success) weekly[new Date(h.date).getDay()]++; });
-                chartInstance.data.datasets[0].data = weekly; chartInstance.update();
+                const weeklyData = [0,0,0,0,0,0,0];
+                history.slice(-100).forEach(h => {
+                    const day = new Date(h.date).getDay();
+                    if (h.success) weeklyData[day]++;
+                });
+                chartInstance.data.datasets[0].data = weeklyData;
+                chartInstance.update();
             }
             renderFoldersUI();
         }
 
         function renderFoldersUI() {
             const scroll = document.getElementById('folders-scroll');
-            if (!scroll) return;
             scroll.innerHTML = state.folders.map(f => {
                 const isActive = state.currentFolderId === f.id;
-                return `<div onclick="window.onFolderChange('${f.id}')" class="folder-chip px-6 py-2.5 rounded-full text-[10px] font-black uppercase border border-slate-200 bg-white ${isActive ? 'active' : 'text-slate-500'}">${f.name}</div>`;
+                return `<div onclick="window.onFolderChange('${f.id}')" class="folder-chip px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest border border-slate-200 bg-white ${isActive ? 'active shadow-lg' : 'text-slate-500'}">${f.name}</div>`;
             }).join('');
         }
 
-        window.renderBank = () => {
-            const term = document.getElementById('bank-search').value.toLowerCase();
-            const list = document.getElementById('bank-list');
-            let filtered = state.currentFolderId === 'f_all' ? state.questions : state.questions.filter(q => q.folderId === state.currentFolderId);
-            if (term) filtered = filtered.filter(q => q.statement.toLowerCase().includes(term));
+        // --- NAVEGAÇÃO E UI ---
+
+        window.switchTab = (tabId) => {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(el => {
+                el.classList.remove('active', 'text-indigo-600');
+                el.classList.add('text-slate-400');
+            });
+            document.getElementById('tab-' + tabId).classList.add('active');
+            const btn = document.getElementById('nav-' + tabId);
+            btn.classList.add('active', 'text-indigo-600');
+            btn.classList.remove('text-slate-400');
             
+            if (tabId === 'home') updateStats();
+            if (tabId === 'study') startStudy();
+            if (tabId === 'bank') renderBank();
+            if (tabId === 'add') validateIAFolder();
+
+            window.scrollTo(0, 0);
+        };
+
+        window.onFolderChange = (id) => {
+            state.currentFolderId = id;
+            const folder = state.folders.find(f => f.id === id);
+            document.getElementById('header-subtitle').innerText = folder.name;
+            updateStats();
+            if (document.getElementById('tab-bank').classList.contains('active')) renderBank();
+        };
+
+        window.createNewFolder = () => {
+            const name = prompt("Matéria:");
+            if (name && name.trim()) {
+                const folder = { id: 'f_' + Date.now(), name: name.trim() };
+                state.folders.push(folder);
+                state.currentFolderId = folder.id;
+                saveLocal(true);
+                updateStats();
+            }
+        };
+
+        function validateIAFolder() {
+            const warning = document.getElementById('ia-folder-warning');
+            const display = document.getElementById('active-folder-display');
+            if (state.currentFolderId === 'f_all') {
+                warning.classList.remove('hidden');
+                display.innerText = "ESCOLHA MATÉRIA";
+                display.className = "w-full bg-slate-50 p-4 rounded-2xl text-xs font-black text-rose-500 border border-slate-100";
+            } else {
+                warning.classList.add('hidden');
+                const folder = state.folders.find(f => f.id === state.currentFolderId);
+                display.innerText = folder.name.toUpperCase();
+                display.className = "w-full bg-slate-50 p-4 rounded-2xl text-xs font-black text-indigo-600 border border-slate-100";
+            }
+        }
+
+        window.renderBank = () => {
+            const searchTerm = document.getElementById('bank-search').value.toLowerCase();
+            const list = document.getElementById('bank-list');
+            const folderFilter = state.currentFolderId;
+            let filtered = folderFilter === 'f_all' ? state.questions : state.questions.filter(q => q.folderId === folderFilter);
+            
+            if (searchTerm) {
+                filtered = filtered.filter(q => 
+                    q.statement.toLowerCase().includes(searchTerm) || 
+                    (q.explanation && q.explanation.toLowerCase().includes(searchTerm))
+                );
+            }
+
+            if (filtered.length === 0) {
+                list.innerHTML = `<div class="py-24 text-center text-slate-300 italic text-xs">Vazio.</div>`;
+                return;
+            }
             list.innerHTML = filtered.slice().reverse().map(q => `
                 <div class="bg-white p-5 rounded-3xl border border-slate-100 flex justify-between items-center shadow-sm">
-                    <p class="text-[11px] text-slate-700 font-bold truncate flex-1 mr-4">${q.statement}</p>
-                    <div class="flex gap-2">
-                        <button onclick="window.openEdit('${q.id}')" class="text-indigo-400 p-2">✎</button>
-                        <button onclick="window.deleteQ('${q.id}')" class="text-rose-400 p-2">✕</button>
+                    <div class="truncate mr-4">
+                        <p class="text-[11px] text-slate-700 font-bold truncate">${q.statement}</p>
+                        <p class="text-[8px] text-slate-400 font-black uppercase mt-1 tracking-tighter">${q.specialty || 'Global'}</p>
                     </div>
+                    <button onclick="window.deleteQ('${q.id}')" class="text-rose-400 p-2 active:scale-90 transition-transform">✕</button>
                 </div>
             `).join('');
         };
 
-        // --- NAVIGATION ---
-
-        window.switchTab = (tabId) => {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active', 'text-indigo-600'));
-            document.getElementById('tab-' + tabId).classList.add('active');
-            document.getElementById('nav-' + tabId).classList.add('active', 'text-indigo-600');
-            if (tabId === 'study') { startStudy(); startTimer(); } else { stopTimer(); }
-            if (tabId === 'home') updateStats(); 
-            if (tabId === 'bank') renderBank();
-            window.scrollTo({top: 0, behavior: 'smooth'});
-        };
-
-        window.onFolderChange = (id) => { state.currentFolderId = id; updateStats(); };
-        window.createNewFolder = () => { 
-            const name = prompt("Matéria:"); 
-            if (name) { 
-                const folder = { id: 'f_' + Date.now(), name: name.trim() }; 
-                state.folders.push(folder); state.currentFolderId = folder.id; 
-                window.saveLocal(true); 
-            } 
-        };
-
         function startStudy() {
-            const qs = state.currentFolderId === 'f_all' ? state.questions : state.questions.filter(q => q.folderId === state.currentFolderId);
-            studyQueue = qs.filter(q => !state.srs[q.id] || state.srs[q.id].nextReview <= Date.now()).sort(() => Math.random() - 0.5);
-            studyPointer = 0; renderStudyCard();
+            const now = Date.now();
+            const questions = state.currentFolderId === 'f_all' ? state.questions : state.questions.filter(q => q.folderId === state.currentFolderId);
+            studyQueue = questions.filter(q => !state.srs[q.id] || state.srs[q.id].nextReview <= now);
+            studyQueue.sort(() => Math.random() - 0.5);
+            studyPointer = 0;
+            renderStudyCard();
         }
 
         function renderStudyCard() {
             const container = document.getElementById('study-container');
-            if (!studyQueue.length || studyPointer >= studyQueue.length) {
-                container.innerHTML = `<div class="py-24 text-center"><h2 class="text-xl font-black">Meta Batida!</h2><button onclick="window.switchTab('home')" class="mt-8 bg-indigo-600 text-white font-black px-10 py-4 rounded-2xl">Finalizar</button></div>`;
+            if (studyQueue.length === 0) {
+                container.innerHTML = `<div class="py-24 text-center"><div class="text-6xl mb-6">✅</div><h2 class="text-xl font-black">Meta Batida!</h2><button onclick="window.switchTab('home')" class="mt-8 bg-indigo-600 text-white font-black px-10 py-4 rounded-2xl">Finalizar</button></div>`;
                 return;
             }
-            const q = studyQueue[studyPointer]; isRevealed = false;
+            if (studyPointer >= studyQueue.length) {
+                container.innerHTML = `<div class="py-24 text-center"><div class="text-6xl mb-6">🎯</div><h2 class="text-xl font-black">Concluído</h2><button onclick="window.switchTab('home')" class="mt-8 bg-indigo-600 text-white font-black px-10 py-4 rounded-2xl">Finalizar</button></div>`;
+                return;
+            }
+            const q = studyQueue[studyPointer];
+            isRevealed = false;
             container.innerHTML = `
                 <div class="bg-white p-8 rounded-[40px] border border-slate-100 shadow-xl space-y-6">
-                    <div class="flex justify-between items-center">
-                        <span class="text-[10px] font-black text-indigo-500 uppercase">${q.specialty || 'Geral'}</span>
-                        <div class="flex gap-3 items-center">
-                            <span id="study-timer-display" class="text-[10px] font-mono text-slate-400">00:00</span>
-                            <span class="text-[10px] font-bold text-slate-300">${studyPointer+1}/${studyQueue.length}</span>
-                        </div>
-                    </div>
-                    <h3 class="text-lg font-bold text-slate-800 leading-relaxed">${q.statement}</h3>
+                    <div class="flex justify-between items-center"><span class="text-[10px] font-black text-indigo-500 uppercase tracking-widest">${q.specialty || 'Global'}</span><span class="text-[10px] font-bold text-slate-400">${studyPointer+1}/${studyQueue.length}</span></div>
+                    <h3 class="text-lg font-bold text-slate-800 leading-relaxed case-text">${q.statement.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')}</h3>
                     <div class="space-y-3">
-                        ${q.options.map((opt, i) => `<button onclick="window.reveal(${i})" class="opt-btn w-full text-left p-5 rounded-3xl border-2 border-slate-50 bg-slate-50 text-sm font-semibold">${opt}</button>`).join('')}
+                        ${q.options.map((opt, i) => `<button onclick="window.reveal(${i})" class="opt-btn w-full text-left p-5 rounded-3xl border-2 border-slate-50 bg-slate-50 text-slate-600 text-sm font-semibold active:scale-95 transition-all">${opt}</button>`).join('')}
                     </div>
                     <div id="study-feedback" class="hidden pt-6 border-t border-slate-50 space-y-6">
-                        <div class="bg-slate-900 text-slate-200 p-6 rounded-[28px] text-[11px] italic">${q.explanation || 'Sem explicação.'}</div>
+                        <div class="bg-slate-900 text-slate-300 p-6 rounded-[28px] text-[11px] leading-relaxed italic">
+                            ${q.explanation || 'Sem notas.'}
+                        </div>
                         <div class="grid grid-cols-4 gap-2">
-                            <button onclick="window.submitSRS(1)" class="bg-rose-500 py-5 rounded-2xl text-white text-[9px] font-black uppercase">Errei</button>
-                            <button onclick="window.submitSRS(2)" class="bg-orange-400 py-5 rounded-2xl text-white text-[9px] font-black uppercase">Difícil</button>
-                            <button onclick="window.submitSRS(3)" class="bg-indigo-500 py-5 rounded-2xl text-white text-[9px] font-black uppercase">Bom</button>
-                            <button onclick="window.submitSRS(4)" class="bg-emerald-500 py-5 rounded-2xl text-white text-[9px] font-black uppercase">Fácil</button>
+                            <button onclick="window.submitSRS(1)" class="bg-rose-500 py-5 rounded-2xl text-white font-black text-[9px] uppercase">Errei</button>
+                            <button onclick="window.submitSRS(2)" class="bg-orange-400 py-5 rounded-2xl text-white font-black text-[9px] uppercase">Difícil</button>
+                            <button onclick="window.submitSRS(3)" class="bg-indigo-500 py-5 rounded-2xl text-white font-black text-[9px] uppercase">Bom</button>
+                            <button onclick="window.submitSRS(4)" class="bg-emerald-500 py-5 rounded-2xl text-white font-black text-[9px] uppercase">Fácil</button>
                         </div>
                     </div>
                 </div>`;
-            startTimer();
         }
 
         window.reveal = (idx) => {
-            if (isRevealed) return; isRevealed = true;
+            if (isRevealed) return;
+            isRevealed = true;
             const q = studyQueue[studyPointer];
             document.querySelectorAll('.opt-btn').forEach((btn, i) => { 
-                if (i === q.correctIndex) btn.classList.add('option-btn-correct'); else if (i === idx) btn.classList.add('option-btn-wrong');
+                if (i === q.correctIndex) btn.classList.add('option-btn-correct');
+                else if (i === idx) btn.classList.add('option-btn-wrong');
                 btn.disabled = true;
             });
             document.getElementById('study-feedback').classList.remove('hidden');
         };
 
-        // --- CRUD MODAL ---
+        // --- INICIALIZAÇÃO ---
 
-        window.openEdit = (id) => {
-            const q = state.questions.find(x => x.id === id);
-            if (!q) return;
-            editingCardId = id;
-            document.getElementById('edit-statement').value = q.statement;
-            document.getElementById('edit-explanation').value = q.explanation || "";
-            const optsDiv = document.getElementById('edit-options');
-            optsDiv.innerHTML = q.options.map((opt, i) => `
-                <div class="flex gap-2">
-                    <input type="radio" name="edit-correct" value="${i}" ${i === q.correctIndex ? 'checked' : ''}>
-                    <input type="text" class="flex-1 search-bar py-2" value="${opt}">
-                </div>
-            `).join('');
-            document.getElementById('edit-modal').classList.add('active');
-        };
-
-        window.saveEdit = () => {
-            const q = state.questions.find(x => x.id === editingCardId);
-            q.statement = document.getElementById('edit-statement').value;
-            q.explanation = document.getElementById('edit-explanation').value;
-            const optInputs = document.querySelectorAll('#edit-options input[type="text"]');
-            q.options = Array.from(optInputs).map(i => i.value);
-            q.correctIndex = parseInt(document.querySelector('input[name="edit-correct"]:checked').value);
-            window.saveLocal(true);
-            window.closeEdit();
-            renderBank();
-        };
-
-        window.closeEdit = () => {
-            document.getElementById('edit-modal').classList.remove('active');
-            editingCardId = null;
-        };
-
-        // --- BOOT ENGINE ---
-
-        window.checkGoogleReady = () => {
-            if (window.gapi && window.gapi.client && window.google) {
-                unlockLoginButton("Entrar com Google Drive");
-                setupGoogleCore();
-                return true;
-            }
-            return false;
-        };
-
-        const initInt = setInterval(() => { if (window.checkGoogleReady()) clearInterval(initInt); }, 500);
-
-        function unlockLoginButton(text) {
-            const btn = document.getElementById('login-btn');
-            if (btn && btn.disabled) {
-                btn.disabled = false;
-                btn.classList.replace('bg-slate-200', 'bg-slate-900'); btn.classList.replace('text-slate-400', 'text-white');
-                btn.classList.replace('opacity-50', 'opacity-100'); btn.classList.replace('cursor-not-allowed', 'cursor-pointer');
-                btn.querySelector('img').classList.remove('grayscale');
-                document.getElementById('login-btn-text').innerText = text;
-                document.getElementById('login-status-msg').innerText = "Google Drive pronto para acesso.";
+        function initGoogleWithRetry() {
+            if (window.gapi && window.google && window.google.accounts) {
+                setupGoogle();
+            } else if (googleRetries < 15) {
+                googleRetries++;
+                document.getElementById('login-status-msg').innerText = `Iniciando Google Identity... (${googleRetries}/15)`;
+                setTimeout(initGoogleWithRetry, 1000);
+            } else {
+                document.getElementById('login-status-msg').innerText = "Erro ao carregar APIs. Recarregue a página.";
             }
         }
 
-        function setupGoogleCore() {
-            gapi.load('client', async () => {
-                try {
+        function setupGoogle() {
+            try {
+                gapi.load('client', async () => {
                     await gapi.client.init({ discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'] });
+                    
                     tokenClient = google.accounts.oauth2.initTokenClient({
-                        client_id: CLIENT_ID, scope: SCOPES, prompt: 'select_account',
-                        callback: (r) => { 
-                            if (!r.error) { 
-                                accessToken = r.access_token; 
-                                localStorage.setItem(TOKEN_STORAGE, JSON.stringify({ token: accessToken, expiry: Date.now() + 3500 * 1000 }));
-                                onLoginSuccess(); 
-                            } else { alert("Erro de Login Drive. Tente novamente."); }
+                        client_id: CLIENT_ID,
+                        scope: SCOPES,
+                        prompt: 'consent', // FORÇAR CONSENTIMENTO PARA PERMISSÕES DE ESCRITA (CRÍTICO)
+                        callback: (resp) => {
+                            if (resp.error) {
+                                console.error("Falha no login Google Identity:", resp.error);
+                                return;
+                            }
+                            accessToken = resp.access_token;
+                            localStorage.setItem(TOKEN_STORAGE, JSON.stringify({ token: accessToken, expiry: Date.now() + 3500 * 1000 }));
+                            onLoginSuccess();
                         }
                     });
-                    const savedToken = JSON.parse(localStorage.getItem(TOKEN_STORAGE));
-                    if (savedToken && savedToken.expiry > Date.now()) { 
-                        accessToken = savedToken.token; 
-                        onLoginSuccess(); 
+
+                    const saved = JSON.parse(localStorage.getItem(TOKEN_STORAGE));
+                    if (saved && saved.expiry > Date.now()) {
+                        accessToken = saved.token;
+                        onLoginSuccess();
+                    } else {
+                        document.getElementById('login-status-msg').innerText = "Pronto para Sincronização Master.";
+                        document.getElementById('login-loader').classList.add('hidden');
                     }
-                } catch (err) { console.error("GSI Init Error:", err); }
-            });
+                });
+            } catch (err) {
+                console.error("Falha ao configurar Google GIS:", err);
+                document.getElementById('login-status-msg').innerText = "Falha crítica no login.";
+            }
         }
 
-        async function onLoginSuccess() {
-            document.getElementById('login-loader').classList.remove('hidden');
-            document.getElementById('login-status-msg').innerText = "Sincronizando Banco de Dados...";
-            await manualSync();
-            document.getElementById('login-screen').classList.add('hidden');
-            document.getElementById('main-app').classList.remove('hidden');
+        function onLoginSuccess() {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('main-app').style.display = 'block';
+            manualSync();
+        }
+
+        function saveLocal(cloud = true) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            updateStats();
+            if (cloud && accessToken) autoBackup();
+        }
+
+        function loadLocal() {
+            const data = localStorage.getItem(STORAGE_KEY);
+            if (data) state = JSON.parse(data);
+            const savedKey = localStorage.getItem(KEY_STORAGE);
+            if (savedKey) document.getElementById('gemini-key-input').value = savedKey;
             updateStats();
         }
 
-        window.fazerLogin = () => { if (tokenClient) tokenClient.requestAccessToken(); };
-
-        function showSyncStatus(msg, type = 'info') {
-            const f = document.getElementById('sync-footer-label'); if (f) f.innerText = msg;
-            const toast = document.getElementById('sync-toast');
-            if (toast && type !== 'info') {
-                toast.innerText = msg; toast.style.display = 'block';
-                toast.style.backgroundColor = type === 'success' ? '#10b981' : '#ef4444';
-                setTimeout(() => toast.style.display = 'none', 3000);
-            }
-        }
-
-        window.saveLocal = (cloud = true) => {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-            updateStats(); if (cloud) autoBackup();
+        window.deleteQ = (id) => { 
+            if (confirm("Excluir card permanentemente?")) { 
+                state.questions = state.questions.filter(q => q.id !== id); 
+                delete state.srs[id]; 
+                saveLocal(true); 
+                renderBank(); 
+            } 
         };
 
-        window.deleteQ = (id) => { if (confirm("Excluir?")) { state.questions = state.questions.filter(q => q.id !== id); window.saveLocal(true); renderBank(); } };
-        window.clearAll = () => { if (confirm("Reset total local?")) { localStorage.clear(); location.reload(); } };
-
-        window.exportBackup = () => {
-            const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
-            const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-            a.download = `medrep_local_${new Date().toISOString().split('T')[0]}.json`;
-            a.click();
+        window.clearAll = () => { 
+            if (confirm("Apagar cache local?")) { 
+                localStorage.removeItem(STORAGE_KEY); 
+                location.reload(); 
+            } 
         };
 
-        window.importBackup = () => {
-            const input = document.createElement('input');
-            input.type = 'file'; input.accept = '.json';
-            input.onchange = async (e) => {
-                const f = e.target.files[0]; if (!f) return;
-                try {
-                    state = JSON.parse(await f.text());
-                    window.saveLocal(true); location.reload();
-                } catch { alert("Arquivo inválido."); }
-            };
-            input.click();
-        };
-
-        // File reader IA
+        // Suporte a PDF e Docx
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
         document.getElementById('file-reader').addEventListener('change', async (e) => {
-            const f = e.target.files[0]; if (!f) return;
-            document.getElementById('file-status').innerText = "Lendo..."; document.getElementById('file-status').classList.remove('hidden');
+            const file = e.target.files[0];
+            if (!file) return;
+            const status = document.getElementById('file-status');
+            status.innerText = "⏳ Lendo...";
+            status.classList.remove('hidden');
             try {
-                const ab = await f.arrayBuffer();
-                if (f.name.endsWith('.pdf')) {
-                    const pdf = await pdfjsLib.getDocument({ data: ab }).promise;
-                    let t = ""; for (let i = 1; i <= pdf.numPages; i++) {
-                        const p = await pdf.getPage(i); const c = await p.getTextContent();
-                        t += c.items.map(it => it.str).join(" ") + " ";
+                if (file.name.endsWith('.pdf')) {
+                    const arrayBuffer = await file.arrayBuffer();
+                    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                    let fullText = "";
+                    for (let i = 1; i <= pdf.numPages; i++) {
+                        const page = await pdf.getPage(i);
+                        const content = await page.getTextContent();
+                        fullText += content.items.map(item => item.str).join(" ") + " ";
                     }
-                    extractedFileText = t;
-                } else if (f.name.endsWith('.docx')) {
-                    extractedFileText = (await mammoth.extractRawText({ arrayBuffer: ab })).value;
+                    extractedFileText = fullText;
+                } else if (file.name.endsWith('.docx')) {
+                    const arrayBuffer = await file.arrayBuffer();
+                    const result = await mammoth.extractRawText({ arrayBuffer });
+                    extractedFileText = result.value;
                 }
-                document.getElementById('file-status').innerText = "✅ " + f.name;
-            } catch { alert("Erro ao ler arquivo."); }
+                status.innerText = "✅ " + file.name;
+            } catch (err) { 
+                console.error("Erro na leitura de arquivo:", err);
+                alert("Falha na leitura: " + err.message); 
+                status.innerText = ""; 
+            }
         });
 
-        const storedData = localStorage.getItem(STORAGE_KEY);
-        if (storedData) state = JSON.parse(storedData);
-        
-        // Carrega chave personalizada no campo de input se existir
-        const savedCustomKey = localStorage.getItem(CUSTOM_KEY_STORAGE);
-        if (savedCustomKey) {
-            const bankKeyInput = document.getElementById('custom-api-key-bank');
-            if (bankKeyInput) bankKeyInput.value = savedCustomKey;
-        }
-
-        updateStats(); initChart();
+        // Inicialização Final
+        loadLocal();
+        initChart();
+        initGoogleWithRetry();
     </script>
 </body>
 </html>
+
 
 
 
