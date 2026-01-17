@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>MedRep - Sincronização Master v13.4.12</title>
+    <title>MedRep - Sincronização Master v13.4.16</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -15,7 +15,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
     
-    <!-- Google Identity Services - CARREGAMENTO SÍNCRONO -->
+    <!-- Google Identity Services -->
     <script src="https://apis.google.com/js/api.js"></script>
     <script src="https://accounts.google.com/gsi/client"></script>
 
@@ -53,7 +53,7 @@
         .loading-spinner { border: 2px solid #e2e8f0; border-top: 2px solid #4f46e5; border-radius: 50%; width: 18px; height: 18px; animation: spin 0.8s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
-        #login-screen { display: flex; }
+        #login-screen { display: flex; overflow-y: auto; padding: 2rem 0; }
         #main-app { display: none; }
         canvas { width: 100% !important; height: 160px !important; }
         
@@ -85,19 +85,31 @@
     <div id="sync-toast"></div>
 
     <!-- TELA DE LOGIN MASTER -->
-    <div id="login-screen" class="fixed inset-0 z-[200] bg-white flex flex-col items-center justify-center p-8 text-center">
-        <div class="mb-12">
+    <div id="login-screen" class="fixed inset-0 z-[200] bg-white flex flex-col items-center justify-start p-8 text-center">
+        <div class="mb-8 mt-12">
             <h1 class="text-6xl font-black text-indigo-600 tracking-tighter italic leading-none">MedRep</h1>
-            <p class="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-4">Sincronização Master v13.4.12</p>
+            <p class="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-4">Sincronização Master v13.4.16</p>
         </div>
-        <div class="bg-slate-50 p-10 rounded-[40px] w-full max-w-sm border border-slate-100 mb-8 shadow-sm">
-            <p id="login-status-msg" class="text-xs font-semibold text-slate-500 mb-6 italic">Iniciando serviços...</p>
-            <button id="login-btn" onclick="window.fazerLogin()" disabled class="w-full bg-slate-200 text-slate-400 font-black py-5 rounded-[22px] shadow-sm flex items-center justify-center gap-4 transition-all opacity-50 cursor-not-allowed">
-                <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" class="w-6 grayscale" alt="Google">
-                <span id="login-btn-text" class="text-xs uppercase tracking-widest">Carregando APIs...</span>
-            </button>
-            <div id="login-loader" class="hidden mt-6 flex justify-center"><div class="loading-spinner"></div></div>
+        
+        <div class="bg-slate-50 p-8 rounded-[40px] w-full max-w-sm border border-slate-100 mb-8 shadow-sm space-y-6">
+            <!-- CAMPO API KEY GEMINI -->
+            <div class="text-left space-y-2">
+                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Chave Gemini API (AI Studio)</label>
+                <input type="password" id="init-api-key-input" placeholder="AIzaSy..." class="search-bar">
+                <p class="text-[9px] text-slate-400 px-2 italic leading-tight">Necessária para o funcionamento da IA Fiel.</p>
+            </div>
+
+            <div class="pt-2 border-t border-slate-200">
+                <p id="login-status-msg" class="text-xs font-semibold text-slate-500 mb-4 italic">Carregando APIs...</p>
+                <button id="login-btn" onclick="window.fazerLogin()" disabled class="w-full bg-slate-200 text-slate-400 font-black py-5 rounded-[22px] shadow-sm flex items-center justify-center gap-4 transition-all opacity-50 cursor-not-allowed">
+                    <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" class="w-6 grayscale" alt="Google">
+                    <span id="login-btn-text" class="text-xs uppercase tracking-widest">Aguarde...</span>
+                </button>
+            </div>
+            
+            <div id="login-loader" class="hidden mt-4 flex justify-center"><div class="loading-spinner"></div></div>
         </div>
+        
         <p class="text-[9px] font-black text-slate-300 uppercase tracking-[0.4em]">SINCRONIA TOTAL PC & MOBILE</p>
     </div>
 
@@ -205,14 +217,34 @@
             <section id="tab-bank" class="tab-content space-y-4">
                 <div class="flex justify-between items-center px-4">
                     <h2 class="text-lg font-black text-slate-800">Seu Acervo</h2>
-                    <button onclick="window.clearAll()" class="text-[8px] font-black text-rose-500 uppercase tracking-widest bg-rose-50 px-3 py-1.5 rounded-lg">Reset Local</button>
+                    <div class="flex flex-wrap justify-end gap-2">
+                        <button onclick="window.saveLocal(true)" class="text-[8px] font-black text-indigo-600 uppercase tracking-widest bg-indigo-50 px-3 py-1.5 rounded-lg active:scale-95 transition-all">Backup Drive</button>
+                        <button onclick="window.exportBackup()" class="text-[8px] font-black text-emerald-600 uppercase tracking-widest bg-emerald-50 px-3 py-1.5 rounded-lg active:scale-95 transition-all">Exportar</button>
+                        <button onclick="window.importBackup()" class="text-[8px] font-black text-amber-600 uppercase tracking-widest bg-amber-50 px-3 py-1.5 rounded-lg active:scale-95 transition-all">Importar</button>
+                        <button onclick="window.clearAll()" class="text-[8px] font-black text-rose-500 uppercase tracking-widest bg-rose-50 px-3 py-1.5 rounded-lg active:scale-95 transition-all">Reset</button>
+                    </div>
                 </div>
                 
                 <div class="px-2">
                     <input type="text" id="bank-search" oninput="window.renderBank()" placeholder="🔎 Pesquisar questões..." class="search-bar">
                 </div>
 
-                <div id="bank-list" class="space-y-2 pb-24 px-2"></div>
+                <div id="bank-list" class="space-y-2 pb-12 px-2"></div>
+
+                <!-- CONFIGURAÇÕES DE IA -->
+                <div class="mt-8 pt-8 border-t border-slate-200 px-2 pb-24">
+                    <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Configurações de IA</h3>
+                    <div class="bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm space-y-4">
+                        <p class="text-[10px] text-slate-500 leading-tight">Use sua própria chave do Gemini (AI Studio) para maior estabilidade e limites personalizados.</p>
+                        <div class="flex flex-col gap-3">
+                            <input type="password" id="custom-api-key-input" placeholder="AIzaSy..." class="search-bar">
+                            <div class="flex gap-2">
+                                <button onclick="window.saveGeminiKey(document.getElementById('custom-api-key-input').value)" class="flex-1 bg-indigo-600 text-white text-[10px] font-black uppercase py-4 rounded-2xl shadow-lg shadow-indigo-100 active:scale-95 transition-all">Salvar Chave</button>
+                                <button onclick="window.clearGeminiKey()" class="bg-slate-50 text-slate-400 text-[10px] font-black uppercase px-6 rounded-2xl active:scale-95 transition-all">Limpar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </section>
         </main>
 
@@ -244,10 +276,9 @@
     <script type="module">
         import { GoogleGenAI } from "@google/genai";
 
-        // MASTER API KEY ABSOLUTA - HARDCODED
-        const MASTER_API_KEY = 'AIzaSyAIJFacEIsyKUY0LLwjsGxFSdniwKfXkIE';
-        
-        // CONFIGURAÇÕES DRIVE
+        // CONFIGURAÇÕES GLOBAIS
+        const MASTER_API_KEY_FALLBACK = 'AIzaSyAIJFacEIsyKUY0LLwjsGxFSdniwKfXkIE';
+        const CUSTOM_KEY_STORAGE = 'medrep_custom_gemini_key';
         const CLIENT_ID = '648353734848-s9fnmd9tt0i5577grbt3q9oju6h71mpi.apps.googleusercontent.com';
         const SCOPES = 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email'; 
         const STORAGE_KEY = 'medrep_data_v13_3_global';
@@ -274,192 +305,175 @@
         let driveFileId = null;
         let hasInitialSync = false;
 
-        // --- GOOGLE DRIVE SYNC MASTER (v13.4.12) ---
+        // --- GESTÃO DE CHAVES GEMINI ---
+
+        window.saveGeminiKey = (key, silent = false) => {
+            if (!key || key.trim() === "") {
+                if (!silent) alert("⚠️ A chave API não pode estar vazia.");
+                return false;
+            }
+            const cleanKey = key.trim();
+            if (!cleanKey.startsWith('AIzaSy') || cleanKey.length < 35) {
+                if (!silent) alert("⚠️ Formato de chave inválido! (Deve começar com 'AIzaSy')");
+                return false;
+            }
+            localStorage.setItem(CUSTOM_KEY_STORAGE, cleanKey);
+            if (!silent) alert("✅ Chave API salva com sucesso!");
+            return true;
+        };
+
+        window.clearGeminiKey = () => {
+            if (confirm("🗑️ Remover sua chave personalizada?")) {
+                localStorage.removeItem(CUSTOM_KEY_STORAGE);
+                alert("Chave removida.");
+            }
+        };
+
+        const getAI = () => {
+            const custom = localStorage.getItem(CUSTOM_KEY_STORAGE);
+            const key = custom || MASTER_API_KEY_FALLBACK;
+            return new GoogleGenAI({ apiKey: key });
+        };
+
+        // --- IMPORTAR E EXPORTAR BACKUP ---
+
+        window.exportBackup = () => {
+            try {
+                const data = JSON.stringify(state, null, 2);
+                const blob = new Blob([data], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `medrep_backup_${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                showSyncStatus("✅ Exportado", 'success');
+            } catch (err) { alert("Erro ao exportar: " + err.message); }
+        };
+
+        window.importBackup = () => {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                try {
+                    const text = await file.text();
+                    const imported = JSON.parse(text);
+                    if (!imported.questions) throw new Error("Backup inválido.");
+                    if (confirm("Substituir todos os dados locais?")) {
+                        state = imported;
+                        window.saveLocal(true);
+                        alert("Backup importado!");
+                        location.reload();
+                    }
+                } catch (err) { alert("Erro ao importar: " + err.message); }
+            };
+            input.click();
+        };
+
+        // --- GOOGLE DRIVE SYNC ---
 
         async function manualSync() {
             if (!accessToken) return;
-            console.log("ManualSync: Iniciando download prioritário...");
             showSyncStatus("☁️ Sincronizando...");
             try {
-                // Busca global por NOME (Garante paridade PC/Mobile)
                 const list = await gapi.client.drive.files.list({ 
                     q: `name = '${FILENAME}' and trashed = false`,
                     spaces: 'drive',
                     fields: 'files(id, name)'
                 });
-                
                 const file = list.result.files[0];
                 if (file) {
                     driveFileId = file.id;
-                    console.log("ManualSync: Arquivo master localizado. Baixando conteúdo...");
-                    const resp = await gapi.client.drive.files.get({ 
-                        fileId: driveFileId, 
-                        alt: 'media'
-                    });
-                    
+                    const resp = await gapi.client.drive.files.get({ fileId: driveFileId, alt: 'media' });
                     let driveData = resp.result;
                     if (typeof driveData === 'string') driveData = JSON.parse(driveData);
-
                     if (driveData && driveData.questions) {
-                        // MESCLAGEM INTELIGENTE (MERGE): Nuvem tem prioridade, mas não deleta novos locais
                         const cloudQuestionsMap = new Map(driveData.questions.map(q => [q.id, q]));
                         const localQuestions = state.questions || [];
-                        localQuestions.forEach(q => {
-                            if (!cloudQuestionsMap.has(q.id)) {
-                                console.log("Merge: Adicionando card local não encontrado na nuvem:", q.id);
-                                driveData.questions.push(q);
-                            }
-                        });
-
+                        localQuestions.forEach(q => { if (!cloudQuestionsMap.has(q.id)) driveData.questions.push(q); });
                         const cloudHistoryKeys = new Set(driveData.history.map(h => `${h.cardId}_${h.date}`));
                         const localHistory = state.history || [];
-                        localHistory.forEach(h => {
-                            if (!cloudHistoryKeys.has(`${h.cardId}_${h.date}`)) driveData.history.push(h);
-                        });
-
+                        localHistory.forEach(h => { if (!cloudHistoryKeys.has(`${h.cardId}_${h.date}`)) driveData.history.push(h); });
                         state = driveData;
                         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
                         showSyncStatus("✅ Sincronizado", 'success');
                     }
-                } else {
-                    console.log("ManualSync: Nenhum arquivo no Drive. Criando novo no próximo backup.");
-                    showSyncStatus("☁️ Novo Banco Criado", 'info');
-                }
-                hasInitialSync = true; // LIBERA SALVAMENTO SEGURO
-            } catch (e) { 
-                console.error("ManualSync Falhou Criticamente:", e);
-                showSyncStatus("❌ Falha Sincronia", 'error');
-            }
+                } else { showSyncStatus("☁️ Novo Banco", 'info'); }
+                hasInitialSync = true;
+            } catch (e) { showSyncStatus("❌ Falha Sincronia", 'error'); }
             updateStats();
         }
 
         async function autoBackup() {
-            // SEGURANÇA MÁXIMA: Nunca salve dados vazios se o sync inicial não foi confirmado
-            if (!accessToken || !hasInitialSync) {
-                console.warn("AutoBackup: Abortado. Trava de segurança hasInitialSync ativa.");
-                return;
-            }
-            
+            if (!accessToken || !hasInitialSync) return;
             showSyncStatus("☁️ Salvando...");
             try {
                 if (!driveFileId) {
                     const list = await gapi.client.drive.files.list({ q: `name = '${FILENAME}' and trashed = false` });
                     if (list.result.files && list.result.files[0]) driveFileId = list.result.files[0].id;
                 }
-
                 const metadata = { name: FILENAME, mimeType: 'application/json' };
-                const boundary = 'medrep_master_v13_4_12';
+                const boundary = 'medrep_master_v13_4_16';
                 const delimiter = "\r\n--" + boundary + "\r\n";
-                const close_delim = "\r\n--" + boundary + "--";
-
                 const body = 
                     delimiter + 'Content-Type: application/json; charset=UTF-8\r\n\r\n' + JSON.stringify(metadata) +
                     delimiter + 'Content-Type: application/json\r\n\r\n' + JSON.stringify(state) +
-                    close_delim;
-
-                const url = driveFileId 
-                    ? `https://www.googleapis.com/upload/drive/v3/files/${driveFileId}?uploadType=multipart`
-                    : 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
-
+                    "\r\n--" + boundary + "--";
+                const url = driveFileId ? `https://www.googleapis.com/upload/drive/v3/files/${driveFileId}?uploadType=multipart` : 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
                 const response = await fetch(url, {
                     method: driveFileId ? 'PATCH' : 'POST',
-                    headers: { 
-                        'Authorization': 'Bearer ' + accessToken,
-                        'Content-Type': 'multipart/related; boundary=' + boundary
-                    },
+                    headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'multipart/related; boundary=' + boundary },
                     body: body
                 });
-
-                if (response.ok) {
-                    if (!driveFileId) {
-                        const resJson = await response.json();
-                        driveFileId = resJson.id;
-                    }
-                    showSyncStatus("✅ Sincronizado", 'success');
-                } else {
-                    console.error("AutoBackup: Erro HTTP Drive:", await response.text());
-                    showSyncStatus("❌ Erro Drive", 'error');
-                }
-            } catch (e) { 
-                console.error("AutoBackup: Erro Conexão:", e);
-                showSyncStatus("❌ Erro Rede", 'error');
-            }
+                if (response.ok) showSyncStatus("✅ Sincronizado", 'success');
+            } catch (e) { showSyncStatus("❌ Erro Rede", 'error'); }
         }
 
-        // --- REPETIÇÃO ESPAÇADA (SRS SM-2) ---
+        // --- REPETIÇÃO ESPAÇADA ---
 
         window.submitSRS = (grade) => {
             const q = studyQueue[studyPointer];
             if (!q) return;
-
             const srs = state.srs[q.id] || { interval: 0, repetitions: 0, easeFactor: 2.5 };
             let { interval, repetitions, easeFactor } = srs;
             const score = grade === 1 ? 0 : grade === 2 ? 2 : grade === 3 ? 4 : 5;
-            
             if (score >= 3) {
-                if (repetitions === 0) interval = 1;
-                else if (repetitions === 1) interval = 6;
-                else interval = Math.round(interval * easeFactor);
+                if (repetitions === 0) interval = 1; else if (repetitions === 1) interval = 6; else interval = Math.round(interval * easeFactor);
                 repetitions++;
-            } else { 
-                repetitions = 0; 
-                interval = 1; 
-            }
-            
-            easeFactor = easeFactor + (0.1 - (5 - score) * (0.08 + (5 - score) * 0.02));
-            if (easeFactor < 1.3) easeFactor = 1.3;
-            
-            state.srs[q.id] = { 
-                interval, 
-                repetitions, 
-                easeFactor, 
-                nextReview: Date.now() + (interval * 24 * 60 * 60 * 1000) 
-            };
-            
+            } else { repetitions = 0; interval = 1; }
+            easeFactor = Math.max(1.3, easeFactor + (0.1 - (5 - score) * (0.08 + (5 - score) * 0.02)));
+            state.srs[q.id] = { interval, repetitions, easeFactor, nextReview: Date.now() + (interval * 24 * 60 * 60 * 1000) };
             state.history.push({ cardId: q.id, success: score >= 3, date: Date.now() });
-            saveLocal(true);
-            
+            window.saveLocal(true);
             studyPointer++;
             renderStudyCard();
         };
 
-        // --- IA GEMINI INTEGRATION ---
-
-        const getAI = () => new GoogleGenAI({ apiKey: MASTER_API_KEY });
+        // --- IA GEMINI ---
 
         window.processIA = async () => {
-            if (state.currentFolderId === 'f_all') return alert("⚠️ Selecione uma matéria na Home antes.");
+            if (state.currentFolderId === 'f_all') return alert("⚠️ Escolha uma matéria na Home.");
             const userInput = document.getElementById('ia-prompt').value.trim();
-            if (!userInput && !extractedFileText) return alert("⚠️ Sem dados para extração.");
-            
+            if (!userInput && !extractedFileText) return alert("⚠️ Sem dados.");
             const loader = document.getElementById('ia-loader');
             const btn = document.getElementById('btn-ia');
-            loader.classList.remove('hidden');
-            btn.disabled = true;
-
+            loader.classList.remove('hidden'); btn.disabled = true;
             try {
                 const ai = getAI();
                 const source = extractedFileText ? `DOC:\n${extractedFileText}\n\nUSER:\n${userInput}` : userInput;
                 const response = await ai.models.generateContent({
                     model: 'gemini-3-flash-preview',
                     contents: [{ parts: [{ text: source }] }],
-                    config: { 
-                        systemInstruction: `Extraia questões médicas integralmente em JSON array. Retorne apenas o array. Formato: [{"statement": "...", "options": ["A","B","C","D"], "correctIndex": 0, "explanation": "...", "specialty": "..."}]`
-                    }
+                    config: { systemInstruction: `Extraia questões médicas em JSON array. Formato: [{"statement": "...", "options": ["A","B","C","D"], "correctIndex": 0, "explanation": "...", "specialty": "..."}]` }
                 });
-
                 const jsonMatch = response.text.match(/\[[\s\S]*\]/);
-                if (jsonMatch) {
-                    tempExtracted = JSON.parse(jsonMatch[0]);
-                    renderReviewList();
-                } else {
-                    console.error("Resposta IA sem JSON:", response.text);
-                    alert("A IA retornou um formato inesperado.");
-                }
-            } catch (e) { 
-                console.error("Erro IA:", e);
-                alert("IA Gemini Falhou: " + e.message); 
-            }
+                if (jsonMatch) { tempExtracted = JSON.parse(jsonMatch[0]); renderReviewList(); } else alert("Erro formato IA.");
+            } catch (e) { alert("IA Falhou: " + e.message); }
             finally { loader.classList.add('hidden'); btn.disabled = false; }
         };
 
@@ -470,7 +484,7 @@
             list.innerHTML = tempExtracted.map((q, idx) => `
                 <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-2">
                     <p class="text-[10px] font-black text-indigo-500 uppercase">CARD ${idx + 1}</p>
-                    <p class="text-xs font-bold text-slate-700 italic truncate">"${q.statement}"</p>
+                    <p class="text-xs font-bold text-slate-700 truncate">"${q.statement}"</p>
                 </div>
             `).join('');
             document.getElementById('review-count').innerText = `${tempExtracted.length} cards extraídos.`;
@@ -481,71 +495,41 @@
             const folderId = state.currentFolderId;
             const folderName = state.folders.find(f => f.id === folderId).name;
             const news = tempExtracted.map(q => ({ 
-                ...q, 
-                id: 'q_' + Math.random().toString(36).substr(2, 9),
-                folderId: folderId,
-                specialty: q.specialty || folderName,
-                date: Date.now()
+                ...q, id: 'q_' + Math.random().toString(36).substr(2, 9), folderId, specialty: q.specialty || folderName, date: Date.now()
             }));
             state.questions = [...state.questions, ...news];
-            saveLocal(true);
+            window.saveLocal(true);
             document.getElementById('ia-review-area').classList.add('hidden');
-            document.getElementById('ia-prompt').value = "";
-            extractedFileText = "";
-            switchTab('bank');
+            extractedFileText = ""; switchTab('bank');
         };
 
-        // --- DASHBOARD & ANALYTICS ---
+        // --- DASHBOARD ---
 
         function initChart() {
             const canvas = document.getElementById('performanceChart');
             if (!canvas) return;
-            const ctx = canvas.getContext('2d');
-            chartInstance = new Chart(ctx, {
+            chartInstance = new Chart(canvas.getContext('2d'), {
                 type: 'line',
-                data: {
-                    labels: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'],
-                    datasets: [{
-                        data: [0,0,0,0,0,0,0],
-                        borderColor: '#fff',
-                        backgroundColor: 'rgba(255,255,255,0.1)',
-                        fill: true, tension: 0.4, borderWidth: 2, pointRadius: 2
-                    }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        x: { display: true, ticks: { color: 'rgba(255,255,255,0.6)', font: { size: 9 } }, grid: { display: false } },
-                        y: { display: false }
-                    }
-                }
+                data: { labels: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'], datasets: [{ data: [0,0,0,0,0,0,0], borderColor: '#fff', fill: true, tension: 0.4 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { display: true }, y: { display: false } } }
             });
         }
 
         function updateStats() {
             const folderId = state.currentFolderId;
-            const now = Date.now();
-            const questions = folderId === 'f_all' ? state.questions : state.questions.filter(q => q.folderId === folderId);
-            const questionIds = new Set(questions.map(q => q.id));
-            const history = state.history.filter(h => folderId === 'f_all' || questionIds.has(h.cardId));
-            const due = questions.filter(q => !state.srs[q.id] || state.srs[q.id].nextReview <= now).length;
-            
-            document.getElementById('stat-total').innerText = questions.length;
+            const qs = folderId === 'f_all' ? state.questions : state.questions.filter(q => q.folderId === folderId);
+            const history = state.history.filter(h => folderId === 'f_all' || qs.find(q => q.id === h.cardId));
+            const due = qs.filter(q => !state.srs[q.id] || state.srs[q.id].nextReview <= Date.now()).length;
+            document.getElementById('stat-total').innerText = qs.length;
             const hits = history.filter(h => h.success).length;
             document.getElementById('stat-accuracy').innerText = history.length ? Math.round((hits / history.length) * 100) + "%" : "0%";
-            
             const dueText = document.getElementById('home-due-text');
-            if (dueText) dueText.innerText = due > 0 ? `${due} cards para revisar.` : "Meta do dia batida!";
-            
+            if (dueText) dueText.innerText = due > 0 ? `${due} cards para revisar.` : "Meta batida!";
             const badge = document.getElementById('due-badge');
             if (badge) { badge.innerText = due; badge.classList.toggle('hidden', due === 0); }
-
             if (chartInstance) {
-                const weekly = [0,0,0,0,0,0,0];
-                history.forEach(h => { if (h.success) weekly[new Date(h.date).getDay()]++; });
-                chartInstance.data.datasets[0].data = weekly;
-                chartInstance.update();
+                const weekly = [0,0,0,0,0,0,0]; history.forEach(h => { if (h.success) weekly[new Date(h.date).getDay()]++; });
+                chartInstance.data.datasets[0].data = weekly; chartInstance.update();
             }
             renderFoldersUI();
         }
@@ -555,288 +539,202 @@
             if (!scroll) return;
             scroll.innerHTML = state.folders.map(f => {
                 const isActive = state.currentFolderId === f.id;
-                return `<div onclick="window.onFolderChange('${f.id}')" class="folder-chip px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest border border-slate-200 bg-white ${isActive ? 'active shadow-lg' : 'text-slate-500'}">${f.name}</div>`;
+                return `<div onclick="window.onFolderChange('${f.id}')" class="folder-chip px-6 py-2.5 rounded-full text-[10px] font-black uppercase border border-slate-200 bg-white ${isActive ? 'active' : 'text-slate-500'}">${f.name}</div>`;
             }).join('');
         }
 
-        // --- NAVEGAÇÃO E UI ---
+        // --- NAVEGAÇÃO ---
 
         window.switchTab = (tabId) => {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active', 'text-indigo-600'));
             document.getElementById('tab-' + tabId).classList.add('active');
             document.getElementById('nav-' + tabId).classList.add('active', 'text-indigo-600');
-            if (tabId === 'home') updateStats();
-            if (tabId === 'study') startStudy();
-            if (tabId === 'bank') renderBank();
-            if (tabId === 'add') validateIAFolder();
+            if (tabId === 'home') updateStats(); if (tabId === 'study') startStudy(); if (tabId === 'bank') renderBank();
             window.scrollTo({top: 0, behavior: 'smooth'});
         };
 
-        window.onFolderChange = (id) => {
-            state.currentFolderId = id;
-            const folder = state.folders.find(f => f.id === id);
-            document.getElementById('header-subtitle').innerText = folder ? folder.name : 'Global';
-            updateStats();
-        };
-
-        window.createNewFolder = () => {
-            const name = prompt("Nome da matéria:");
-            if (name) {
-                const folder = { id: 'f_' + Date.now(), name: name.trim() };
-                state.folders.push(folder);
-                state.currentFolderId = folder.id;
-                saveLocal(true);
-            }
-        };
-
-        function validateIAFolder() {
-            const warning = document.getElementById('ia-folder-warning');
-            const display = document.getElementById('active-folder-display');
-            if (state.currentFolderId === 'f_all') {
-                warning.classList.remove('hidden');
-                display.innerText = "ESCOLHA NA HOME";
-            } else {
-                warning.classList.add('hidden');
-                display.innerText = state.folders.find(f => f.id === state.currentFolderId).name.toUpperCase();
-            }
-        }
+        window.onFolderChange = (id) => { state.currentFolderId = id; updateStats(); };
+        window.createNewFolder = () => { const name = prompt("Nome da matéria:"); if (name) { const folder = { id: 'f_' + Date.now(), name: name.trim() }; state.folders.push(folder); state.currentFolderId = folder.id; window.saveLocal(true); } };
 
         window.renderBank = () => {
             const term = document.getElementById('bank-search').value.toLowerCase();
             const list = document.getElementById('bank-list');
             let filtered = state.currentFolderId === 'f_all' ? state.questions : state.questions.filter(q => q.folderId === state.currentFolderId);
             if (term) filtered = filtered.filter(q => q.statement.toLowerCase().includes(term));
-            
             list.innerHTML = filtered.slice().reverse().map(q => `
-                <div class="bg-white p-5 rounded-3xl border border-slate-100 flex justify-between items-center shadow-sm">
-                    <div class="truncate mr-4 flex-1">
-                        <p class="text-[11px] text-slate-700 font-bold truncate">${q.statement}</p>
-                    </div>
+                <div class="bg-white p-5 rounded-3xl border border-slate-100 flex justify-between items-center">
+                    <p class="text-[11px] text-slate-700 font-bold truncate flex-1 mr-4">${q.statement}</p>
                     <button onclick="window.deleteQ('${q.id}')" class="text-rose-400 p-2">✕</button>
                 </div>
             `).join('');
         };
 
         function startStudy() {
-            const now = Date.now();
             const qs = state.currentFolderId === 'f_all' ? state.questions : state.questions.filter(q => q.folderId === state.currentFolderId);
-            studyQueue = qs.filter(q => !state.srs[q.id] || state.srs[q.id].nextReview <= now);
-            studyQueue.sort(() => Math.random() - 0.5);
-            studyPointer = 0;
-            renderStudyCard();
+            studyQueue = qs.filter(q => !state.srs[q.id] || state.srs[q.id].nextReview <= Date.now()).sort(() => Math.random() - 0.5);
+            studyPointer = 0; renderStudyCard();
         }
 
         function renderStudyCard() {
             const container = document.getElementById('study-container');
             if (!studyQueue.length || studyPointer >= studyQueue.length) {
-                container.innerHTML = `<div class="py-24 text-center"><div class="text-6xl mb-6">✅</div><h2 class="text-xl font-black">Meta Batida!</h2><button onclick="window.switchTab('home')" class="mt-8 bg-indigo-600 text-white font-black px-10 py-4 rounded-2xl">Voltar</button></div>`;
+                container.innerHTML = `<div class="py-24 text-center"><h2 class="text-xl font-black">Meta Batida!</h2><button onclick="window.switchTab('home')" class="mt-8 bg-indigo-600 text-white font-black px-10 py-4 rounded-2xl">Voltar</button></div>`;
                 return;
             }
-            const q = studyQueue[studyPointer];
-            isRevealed = false;
+            const q = studyQueue[studyPointer]; isRevealed = false;
             container.innerHTML = `
                 <div class="bg-white p-8 rounded-[40px] border border-slate-100 shadow-xl space-y-6">
-                    <div class="flex justify-between items-center"><span class="text-[10px] font-black text-indigo-500 uppercase tracking-widest">${q.specialty || 'Geral'}</span><span class="text-[10px] font-bold text-slate-400">${studyPointer+1}/${studyQueue.length}</span></div>
-                    <h3 class="text-lg font-bold text-slate-800 leading-relaxed case-text">${q.statement.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')}</h3>
+                    <div class="flex justify-between items-center"><span class="text-[10px] font-black text-indigo-500 uppercase">${q.specialty || 'Geral'}</span><span>${studyPointer+1}/${studyQueue.length}</span></div>
+                    <h3 class="text-lg font-bold text-slate-800 leading-relaxed">${q.statement}</h3>
                     <div class="space-y-3">
-                        ${q.options.map((opt, i) => `<button onclick="window.reveal(${i})" class="opt-btn w-full text-left p-5 rounded-3xl border-2 border-slate-50 bg-slate-50 text-slate-600 text-sm font-semibold">${opt}</button>`).join('')}
+                        ${q.options.map((opt, i) => `<button onclick="window.reveal(${i})" class="opt-btn w-full text-left p-5 rounded-3xl border-2 border-slate-50 bg-slate-50 text-sm font-semibold">${opt}</button>`).join('')}
                     </div>
                     <div id="study-feedback" class="hidden pt-6 border-t border-slate-50 space-y-6">
-                        <div class="bg-slate-900 text-slate-200 p-6 rounded-[28px] text-[11px] leading-relaxed italic italic">
-                            <b>Notas de Revisão:</b><br>${q.explanation || 'Nenhuma explicação disponível.'}
-                        </div>
+                        <div class="bg-slate-900 text-slate-200 p-6 rounded-[28px] text-[11px] italic">${q.explanation || 'Sem explicação.'}</div>
                         <div class="grid grid-cols-4 gap-2">
-                            <button onclick="window.submitSRS(1)" class="bg-rose-500 py-5 rounded-2xl text-white font-black text-[9px]">ERREI</button>
-                            <button onclick="window.submitSRS(2)" class="bg-orange-400 py-5 rounded-2xl text-white font-black text-[9px]">DIFÍCIL</button>
-                            <button onclick="window.submitSRS(3)" class="bg-indigo-500 py-5 rounded-2xl text-white font-black text-[9px]">BOM</button>
-                            <button onclick="window.submitSRS(4)" class="bg-emerald-500 py-5 rounded-2xl text-white font-black text-[9px]">FÁCIL</button>
+                            <button onclick="window.submitSRS(1)" class="bg-rose-500 py-5 rounded-2xl text-white text-[9px]">ERREI</button>
+                            <button onclick="window.submitSRS(2)" class="bg-orange-400 py-5 rounded-2xl text-white text-[9px]">DIFÍCIL</button>
+                            <button onclick="window.submitSRS(3)" class="bg-indigo-500 py-5 rounded-2xl text-white text-[9px]">BOM</button>
+                            <button onclick="window.submitSRS(4)" class="bg-emerald-500 py-5 rounded-2xl text-white text-[9px]">FÁCIL</button>
                         </div>
                     </div>
                 </div>`;
         }
 
         window.reveal = (idx) => {
-            if (isRevealed) return;
-            isRevealed = true;
+            if (isRevealed) return; isRevealed = true;
             const q = studyQueue[studyPointer];
             document.querySelectorAll('.opt-btn').forEach((btn, i) => { 
-                if (i === q.correctIndex) btn.classList.add('option-btn-correct');
-                else if (i === idx) btn.classList.add('option-btn-wrong');
+                if (i === q.correctIndex) btn.classList.add('option-btn-correct'); else if (i === idx) btn.classList.add('option-btn-wrong');
                 btn.disabled = true;
             });
             document.getElementById('study-feedback').classList.remove('hidden');
         };
 
-        // --- MOTOR DE INICIALIZAÇÃO MASTER (v13.4.12) ---
+        // --- MOTOR DE INICIALIZAÇÃO ---
 
-        console.log("MedRep Master Bootstrapping...");
-
-        // Ativação Forçada do Botão (Fallback)
-        setTimeout(() => { 
-            const btn = document.getElementById('login-btn');
-            if (btn && btn.disabled) { 
-                console.log("Fallback: Ativando botão de login por tempo esgotado."); 
-                unlockLoginButton("Acesso Manual / Drive");
-                if (!tokenClient) setupGoogleCore();
-            } 
-        }, 3000);
-
-        const initInt = setInterval(() => {
-            if (window.gapi && window.google && window.google.accounts) {
-                console.log("Google Libraries detectadas com sucesso.");
+        window.checkGoogleReady = () => {
+            if (window.gapi && window.gapi.client && window.google && window.google.accounts && window.google.accounts.oauth2) {
                 unlockLoginButton("Entrar com Google Drive");
                 setupGoogleCore();
-                clearInterval(initInt);
+                return true;
             }
-        }, 500);
+            return false;
+        };
+
+        const initInt = setInterval(() => { if (window.checkGoogleReady()) clearInterval(initInt); }, 500);
 
         function unlockLoginButton(text) {
             const btn = document.getElementById('login-btn');
             if (btn && btn.disabled) {
                 btn.disabled = false;
-                btn.classList.replace('bg-slate-200', 'bg-slate-900');
-                btn.classList.replace('text-slate-400', 'text-white');
-                btn.classList.replace('opacity-50', 'opacity-100');
-                btn.classList.replace('cursor-not-allowed', 'cursor-pointer');
+                btn.classList.replace('bg-slate-200', 'bg-slate-900'); btn.classList.replace('text-slate-400', 'text-white');
+                btn.classList.replace('opacity-50', 'opacity-100'); btn.classList.replace('cursor-not-allowed', 'cursor-pointer');
                 btn.querySelector('img').classList.remove('grayscale');
                 document.getElementById('login-btn-text').innerText = text;
-                document.getElementById('login-status-msg').innerText = "Pronto para Login.";
+                document.getElementById('login-status-msg').innerText = "Serviços Google Carregados.";
             }
         }
 
         function setupGoogleCore() {
             gapi.load('client', async () => {
                 try {
-                    console.log("Setup: Inicializando GAPI Drive Client...");
                     await gapi.client.init({ discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'] });
-                    
-                    console.log("Setup: Inicializando TokenClient (GSI)...");
                     tokenClient = google.accounts.oauth2.initTokenClient({
-                        client_id: CLIENT_ID, 
-                        scope: SCOPES, 
-                        prompt: 'select_account',
+                        client_id: CLIENT_ID, scope: SCOPES, prompt: 'select_account',
                         callback: (r) => { 
                             if (!r.error) { 
-                                console.log("Login: Token capturado via popup.");
                                 accessToken = r.access_token; 
-                                localStorage.setItem(TOKEN_STORAGE, JSON.stringify({ 
-                                    token: accessToken, 
-                                    expiry: Date.now() + 3500 * 1000 
-                                }));
+                                localStorage.setItem(TOKEN_STORAGE, JSON.stringify({ token: accessToken, expiry: Date.now() + 3500 * 1000 }));
                                 onLoginSuccess(); 
-                            } else { 
-                                console.error("Login Error:", r.error); 
-                                alert("Erro no Login: " + (r.error_description || r.error));
-                            }
+                            } 
                         }
                     });
-
-                    // Auto-restauração de sessão persistente
-                    const saved = JSON.parse(localStorage.getItem(TOKEN_STORAGE));
-                    if (saved && saved.expiry > Date.now()) { 
-                        accessToken = saved.token; 
-                        console.log("Auto-Login: Restaurando sessão salva.");
+                    const savedToken = JSON.parse(localStorage.getItem(TOKEN_STORAGE));
+                    if (savedToken && savedToken.expiry > Date.now()) { 
+                        accessToken = savedToken.token; 
                         onLoginSuccess(); 
-                    } else { 
-                        document.getElementById('login-loader').classList.add('hidden'); 
                     }
-                } catch (err) { 
-                    console.error("Setup Erro Crítico:", err); 
-                    alert("Falha ao inicializar serviços Google: " + err.message);
-                }
+                } catch (err) { console.error(err); }
             });
         }
 
         async function onLoginSuccess() {
+            // Verificar se temos chave API Gemini antes de prosseguir
+            const inputKey = document.getElementById('init-api-key-input').value;
+            const savedKey = localStorage.getItem(CUSTOM_KEY_STORAGE);
+            
+            if (!savedKey && !inputKey) {
+                alert("⚠️ Por favor, insira uma Chave API do Gemini para usar a IA Fiel.");
+                return;
+            }
+
+            if (inputKey) {
+                if (!window.saveGeminiKey(inputKey, true)) return;
+            }
+
             document.getElementById('login-loader').classList.remove('hidden');
-            document.getElementById('login-status-msg').innerText = "Baixando Banco Master do Drive...";
-            
-            // PRIORIDADE ABSOLUTA: DOWNLOAD ANTES DE QUALQUER SALVAMENTO
+            document.getElementById('login-status-msg').innerText = "Sincronizando Drive...";
             await manualSync();
-            
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('main-app').classList.remove('hidden');
             updateStats();
         }
 
         window.fazerLogin = () => {
-            console.log("FazerLogin: Disparando popup de autenticação...");
-            if (!window.google) return alert("Erro: Biblioteca Google GSI não carregada.");
-            
-            try {
-                if (tokenClient) {
-                    tokenClient.requestAccessToken();
-                } else {
-                    console.warn("FazerLogin: tokenClient inexistente. Tentando reinicialização rápida.");
-                    setupGoogleCore();
-                    setTimeout(() => { 
-                        if (tokenClient) tokenClient.requestAccessToken(); 
-                        else alert("Não foi possível abrir o Login. Recarregue a página.");
-                    }, 800);
-                }
-            } catch (e) {
-                alert("Erro ao tentar Login: " + e.message);
-                console.error("FazerLogin Exception:", e);
-            }
+            if (!window.google) return alert("Google GSI não carregado.");
+            if (tokenClient) tokenClient.requestAccessToken();
         };
 
         function showSyncStatus(msg, type = 'info') {
-            const f = document.getElementById('sync-footer-label');
-            if (f) f.innerText = msg;
+            const f = document.getElementById('sync-footer-label'); if (f) f.innerText = msg;
             const toast = document.getElementById('sync-toast');
             if (toast && type !== 'info') {
-                toast.innerText = msg;
-                toast.style.display = 'block';
+                toast.innerText = msg; toast.style.display = 'block';
                 toast.style.backgroundColor = type === 'success' ? '#10b981' : '#ef4444';
                 setTimeout(() => toast.style.display = 'none', 3000);
             }
         }
 
-        function saveLocal(cloud = true) {
+        window.saveLocal = (cloud = true) => {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-            updateStats();
-            // TRAVA DE SEGURANÇA: Só salva no Drive se o download inicial foi feito com sucesso
-            if (cloud && accessToken && hasInitialSync) autoBackup();
-        }
+            updateStats(); if (cloud && accessToken && hasInitialSync) autoBackup();
+        };
 
-        function loadLocal() {
-            const data = localStorage.getItem(STORAGE_KEY);
-            if (data) state = JSON.parse(data);
-            updateStats();
-        }
-
-        window.deleteQ = (id) => { if (confirm("Deseja mesmo excluir este card?")) { state.questions = state.questions.filter(q => q.id !== id); saveLocal(true); renderBank(); } };
-        window.clearAll = () => { if (confirm("Deseja apagar o banco LOCAL? Os dados no Google Drive permanecerão intactos.")) { localStorage.removeItem(STORAGE_KEY); location.reload(); } };
+        window.deleteQ = (id) => { if (confirm("Excluir?")) { state.questions = state.questions.filter(q => q.id !== id); window.saveLocal(true); renderBank(); } };
+        window.clearAll = () => { if (confirm("Reset local?")) { localStorage.clear(); location.reload(); } };
 
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
         document.getElementById('file-reader').addEventListener('change', async (e) => {
-            const f = e.target.files[0];
-            const s = document.getElementById('file-status');
-            s.innerText = "⏳ Lendo arquivo..."; s.classList.remove('hidden');
+            const f = e.target.files[0]; document.getElementById('file-status').innerText = "⏳ Lendo...";
             try {
                 const ab = await f.arrayBuffer();
                 if (f.name.endsWith('.pdf')) {
                     const pdf = await pdfjsLib.getDocument({ data: ab }).promise;
-                    let t = "";
-                    for (let i = 1; i <= pdf.numPages; i++) {
-                        const page = await pdf.getPage(i);
-                        const c = await page.getTextContent();
+                    let t = ""; for (let i = 1; i <= pdf.numPages; i++) {
+                        const page = await pdf.getPage(i); const c = await page.getTextContent();
                         t += c.items.map(it => it.str).join(" ") + " ";
                     }
                     extractedFileText = t;
                 } else if (f.name.endsWith('.docx')) {
-                    const res = await mammoth.extractRawText({ arrayBuffer: ab });
-                    extractedFileText = res.value;
+                    extractedFileText = (await mammoth.extractRawText({ arrayBuffer: ab })).value;
                 }
-                s.innerText = "✅ " + f.name;
-            } catch (err) { alert("Erro ao ler arquivo: " + err.message); }
+                document.getElementById('file-status').innerText = "✅ " + f.name;
+            } catch (err) { alert("Erro arquivo."); }
         });
 
-        loadLocal(); initChart();
+        // Tentar carregar chave salva no input se existir
+        const savedKey = localStorage.getItem(CUSTOM_KEY_STORAGE);
+        if (savedKey) document.getElementById('init-api-key-input').value = savedKey;
+
+        const data = localStorage.getItem(STORAGE_KEY);
+        if (data) state = JSON.parse(data);
+        updateStats(); initChart();
     </script>
 </body>
 </html>
+
 
 
 
