@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>MedRep - Sincronização Master v13.6.0</title>
+    <title>MedRep - Sincronização Master v13.4.17</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -80,8 +80,6 @@
         .opt-btn:active { transform: scale(0.97); }
 
         .settings-card { background: white; border-radius: 32px; border: 1px solid #f1f5f9; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
-        
-        /* Modal simple styles */
         .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px; }
         .modal.active { display: flex; }
     </style>
@@ -92,27 +90,17 @@
 
     <!-- TELA DE LOGIN MASTER -->
     <div id="login-screen" class="fixed inset-0 z-[200] bg-white flex flex-col items-center justify-start p-8 text-center">
-        <div class="mb-8 mt-12">
+        <div class="mb-12 mt-12">
             <h1 class="text-6xl font-black text-indigo-600 tracking-tighter italic leading-none">MedRep</h1>
-            <p class="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-4">Sincronização Master v13.6.0</p>
+            <p class="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-4">Sincronização Master v13.4.17</p>
         </div>
         
-        <div class="bg-slate-50 p-8 rounded-[40px] w-full max-w-sm border border-slate-100 mb-8 shadow-sm space-y-6">
-            <!-- CAMPO API KEY GEMINI -->
-            <div class="text-left space-y-2">
-                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Chave Gemini API (AI Studio)</label>
-                <input type="password" id="init-api-key-input" placeholder="AIzaSy..." class="search-bar">
-                <p class="text-[9px] text-slate-400 px-2 italic leading-tight">Coloque sua chave ou use a padrão para habilitar a extração de questões por IA.</p>
-            </div>
-
-            <div class="pt-2 border-t border-slate-200">
-                <p id="login-status-msg" class="text-xs font-semibold text-slate-500 mb-4 italic">Aguardando APIs...</p>
-                <button id="login-btn" onclick="window.fazerLogin()" disabled class="w-full bg-slate-200 text-slate-400 font-black py-5 rounded-[22px] shadow-sm flex items-center justify-center gap-4 transition-all opacity-50 cursor-not-allowed">
-                    <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" class="w-6 grayscale" alt="Google">
-                    <span id="login-btn-text" class="text-xs uppercase tracking-widest">Carregando...</span>
-                </button>
-            </div>
-            
+        <div class="bg-slate-50 p-10 rounded-[40px] w-full max-w-sm border border-slate-100 mb-8 shadow-sm space-y-6">
+            <p id="login-status-msg" class="text-xs font-semibold text-slate-500 mb-4 italic">Carregando APIs do Google...</p>
+            <button id="login-btn" onclick="window.fazerLogin()" disabled class="w-full bg-slate-200 text-slate-400 font-black py-5 rounded-[22px] shadow-sm flex items-center justify-center gap-4 transition-all opacity-50 cursor-not-allowed">
+                <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" class="w-6 grayscale" alt="Google">
+                <span id="login-btn-text" class="text-xs uppercase tracking-widest">Aguarde...</span>
+            </button>
             <div id="login-loader" class="hidden mt-4 flex justify-center"><div class="loading-spinner"></div></div>
         </div>
         
@@ -237,25 +225,14 @@
                     <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Dados e Segurança</h3>
                     <div class="settings-card space-y-6">
                         <div class="space-y-2">
-                            <p class="text-xs font-bold text-slate-700">Backup em Arquivo</p>
-                            <p class="text-[10px] text-slate-400">Exporte ou importe seus dados em formato JSON para cópias físicas.</p>
+                            <p class="text-xs font-bold text-slate-700">Backup Manual</p>
+                            <p class="text-[10px] text-slate-400">Exporte ou importe seus dados em formato JSON para cópias extras.</p>
                             <div class="grid grid-cols-2 gap-3 pt-2">
                                 <button onclick="window.exportBackup()" class="bg-emerald-50 text-emerald-600 text-[10px] font-black uppercase py-4 rounded-2xl active:scale-95 transition-all">Exportar JSON</button>
                                 <button onclick="window.importBackup()" class="bg-amber-50 text-amber-600 text-[10px] font-black uppercase py-4 rounded-2xl active:scale-95 transition-all">Importar JSON</button>
                             </div>
                         </div>
                         
-                        <div class="pt-4 border-t border-slate-100">
-                            <p class="text-xs font-bold text-slate-700 mb-3">Chave Gemini API</p>
-                            <div class="flex flex-col gap-3">
-                                <input type="password" id="custom-api-key-input" placeholder="AIzaSy..." class="search-bar">
-                                <div class="flex gap-2">
-                                    <button onclick="window.saveGeminiKey(document.getElementById('custom-api-key-input').value)" class="flex-1 bg-indigo-600 text-white text-[10px] font-black uppercase py-4 rounded-2xl active:scale-95 transition-all">Salvar Chave</button>
-                                    <button onclick="window.clearGeminiKey()" class="bg-slate-50 text-slate-400 text-[10px] font-black uppercase px-6 rounded-2xl active:scale-95 transition-all">Remover</button>
-                                </div>
-                            </div>
-                        </div>
-
                         <div class="pt-4 border-t border-slate-100 flex justify-between items-center">
                             <span class="text-[10px] font-bold text-slate-400 uppercase">Limpeza Total</span>
                             <button onclick="window.clearAll()" class="text-[8px] font-black text-rose-500 uppercase tracking-widest bg-rose-50 px-4 py-2 rounded-xl">Reset Local</button>
@@ -310,9 +287,8 @@
     <script type="module">
         import { GoogleGenAI } from "@google/genai";
 
-        // MASTER API KEY
+        // MASTER API KEY FIXA
         const MASTER_API_KEY = 'AIzaSyAIJFacEIsyKUY0LLwjsGxFSdniwKfXkIE';
-        const CUSTOM_KEY_STORAGE = 'medrep_custom_gemini_key';
         
         // CONFIGURAÇÕES DRIVE
         const CLIENT_ID = '648353734848-s9fnmd9tt0i5577grbt3q9oju6h71mpi.apps.googleusercontent.com';
@@ -342,40 +318,15 @@
         let hasInitialSync = false;
         let editingCardId = null;
         
-        // Timer variables
+        // Timer
         let studyTimer = null;
         let studySeconds = 0;
 
-        // --- GESTÃO DE CHAVES GEMINI ---
-
-        window.saveGeminiKey = (key, silent = false) => {
-            if (!key || key.trim() === "") {
-                if (!silent) alert("⚠️ Chave vazia.");
-                return false;
-            }
-            const cleanKey = key.trim();
-            if (!cleanKey.startsWith('AIzaSy')) {
-                if (!silent) alert("⚠️ Formato inválido.");
-                return false;
-            }
-            localStorage.setItem(CUSTOM_KEY_STORAGE, cleanKey);
-            if (!silent) alert("✅ Chave salva!");
-            return true;
-        };
-
-        window.clearGeminiKey = () => {
-            localStorage.removeItem(CUSTOM_KEY_STORAGE);
-            document.getElementById('custom-api-key-input').value = "";
-            alert("Chave removida.");
-        };
-
         const getAI = () => {
-            const custom = localStorage.getItem(CUSTOM_KEY_STORAGE);
-            const key = custom || MASTER_API_KEY;
-            return new GoogleGenAI({ apiKey: key });
+            return new GoogleGenAI({ apiKey: MASTER_API_KEY });
         };
 
-        // --- SYNC ENGINE (GSI 2025) ---
+        // --- MOTOR DE SINCRONIA ---
 
         async function manualSync() {
             if (!accessToken) return;
@@ -395,7 +346,7 @@
                     if (typeof driveData === 'string') driveData = JSON.parse(driveData);
                     
                     if (driveData && driveData.questions) {
-                        // Merge Inteligente
+                        // Merge com o local para não perder o que foi feito offline
                         const cloudQuestionsMap = new Map(driveData.questions.map(q => [q.id, q]));
                         state.questions.forEach(q => { if (!cloudQuestionsMap.has(q.id)) driveData.questions.push(q); });
                         
@@ -405,11 +356,11 @@
                     }
                 } else {
                     showSyncStatus("☁️ Novo Backup Criado", 'info');
-                    await autoBackup(); // Cria o arquivo inicial
+                    await autoBackup();
                 }
                 hasInitialSync = true;
             } catch (e) { 
-                console.error("Sync Error:", e);
+                console.error("ManualSync Falhou:", e);
                 showSyncStatus("❌ Falha Sincronia", 'error'); 
             }
             updateStats();
@@ -439,12 +390,12 @@
                 if (response.ok) {
                     const resJson = await response.json();
                     driveFileId = resJson.id;
-                    showSyncStatus("✅ Backup Pronto", 'success');
+                    showSyncStatus("✅ Backup em Dia", 'success');
                 }
-            } catch (e) { showSyncStatus("❌ Erro Backup", 'error'); }
+            } catch (e) { console.error(e); showSyncStatus("❌ Erro Backup", 'error'); }
         }
 
-        // --- STUDY ENGINE + TIMER ---
+        // --- STUDY ENGINE ---
 
         function startTimer() {
             stopTimer();
@@ -477,14 +428,14 @@
             } else { repetitions = 0; interval = 1; }
             easeFactor = Math.max(1.3, easeFactor + (0.1 - (5 - score) * (0.08 + (5 - score) * 0.02)));
             state.srs[q.id] = { interval, repetitions, easeFactor, nextReview: Date.now() + (interval * 24 * 60 * 60 * 1000) };
-            state.history.push({ cardId: q.id, success: score >= 3, date: Date.now(), time: studySeconds });
+            state.history.push({ cardId: q.id, success: score >= 3, date: Date.now(), timeSpent: studySeconds });
             
             window.saveLocal(true);
             studyPointer++;
             renderStudyCard();
         };
 
-        // --- IA + EXPORT ---
+        // --- IA PROCESS ---
 
         window.processIA = async () => {
             if (state.currentFolderId === 'f_all') return alert("⚠️ Escolha uma pasta.");
@@ -498,11 +449,11 @@
                 const response = await ai.models.generateContent({
                     model: 'gemini-3-flash-preview',
                     contents: [{ parts: [{ text: content }] }],
-                    config: { systemInstruction: "Retorne apenas um array JSON: [{'statement': '...', 'options': ['A','B','C','D'], 'correctIndex': 0, 'explanation': '...'}]" }
+                    config: { systemInstruction: "Retorne APENAS um array JSON: [{'statement': '...', 'options': ['A','B','C','D'], 'correctIndex': 0, 'explanation': '...'}]" }
                 });
                 const match = response.text.match(/\[[\s\S]*\]/);
                 if (match) { tempExtracted = JSON.parse(match[0]); renderReviewList(); }
-            } catch (e) { alert("IA Erro: " + e.message); }
+            } catch (e) { alert("IA Falhou: " + e.message); }
             finally { loader.classList.add('hidden'); }
         };
 
@@ -512,7 +463,7 @@
             area.classList.remove('hidden');
             list.innerHTML = tempExtracted.map((q, idx) => `
                 <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
-                    <p class="text-[10px] font-black text-indigo-500 uppercase">CARD ${idx + 1}</p>
+                    <p class="text-[10px] font-black text-indigo-500 uppercase">EXTRAÍDO ${idx + 1}</p>
                     <p class="text-xs font-bold text-slate-700">${q.statement}</p>
                 </div>
             `).join('');
@@ -532,42 +483,7 @@
             switchTab('bank');
         };
 
-        // --- CRUD CARDS ---
-
-        window.openEdit = (id) => {
-            const q = state.questions.find(x => x.id === id);
-            if (!q) return;
-            editingCardId = id;
-            document.getElementById('edit-statement').value = q.statement;
-            document.getElementById('edit-explanation').value = q.explanation || "";
-            const optsDiv = document.getElementById('edit-options');
-            optsDiv.innerHTML = q.options.map((opt, i) => `
-                <div class="flex gap-2">
-                    <input type="radio" name="edit-correct" value="${i}" ${i === q.correctIndex ? 'checked' : ''}>
-                    <input type="text" class="flex-1 search-bar py-2" value="${opt}">
-                </div>
-            `).join('');
-            document.getElementById('edit-modal').classList.add('active');
-        };
-
-        window.saveEdit = () => {
-            const q = state.questions.find(x => x.id === editingCardId);
-            q.statement = document.getElementById('edit-statement').value;
-            q.explanation = document.getElementById('edit-explanation').value;
-            const optInputs = document.querySelectorAll('#edit-options input[type="text"]');
-            q.options = Array.from(optInputs).map(i => i.value);
-            q.correctIndex = parseInt(document.querySelector('input[name="edit-correct"]:checked').value);
-            window.saveLocal(true);
-            window.closeEdit();
-            renderBank();
-        };
-
-        window.closeEdit = () => {
-            document.getElementById('edit-modal').classList.remove('active');
-            editingCardId = null;
-        };
-
-        // --- DASHBOARD ---
+        // --- BANK & DASHBOARD ---
 
         function initChart() {
             const canvas = document.getElementById('performanceChart');
@@ -612,6 +528,23 @@
             }).join('');
         }
 
+        window.renderBank = () => {
+            const term = document.getElementById('bank-search').value.toLowerCase();
+            const list = document.getElementById('bank-list');
+            let filtered = state.currentFolderId === 'f_all' ? state.questions : state.questions.filter(q => q.folderId === state.currentFolderId);
+            if (term) filtered = filtered.filter(q => q.statement.toLowerCase().includes(term));
+            
+            list.innerHTML = filtered.slice().reverse().map(q => `
+                <div class="bg-white p-5 rounded-3xl border border-slate-100 flex justify-between items-center shadow-sm">
+                    <p class="text-[11px] text-slate-700 font-bold truncate flex-1 mr-4">${q.statement}</p>
+                    <div class="flex gap-2">
+                        <button onclick="window.openEdit('${q.id}')" class="text-indigo-400 p-2">✎</button>
+                        <button onclick="window.deleteQ('${q.id}')" class="text-rose-400 p-2">✕</button>
+                    </div>
+                </div>
+            `).join('');
+        };
+
         // --- NAVIGATION ---
 
         window.switchTab = (tabId) => {
@@ -633,23 +566,6 @@
                 state.folders.push(folder); state.currentFolderId = folder.id; 
                 window.saveLocal(true); 
             } 
-        };
-
-        window.renderBank = () => {
-            const term = document.getElementById('bank-search').value.toLowerCase();
-            const list = document.getElementById('bank-list');
-            let filtered = state.currentFolderId === 'f_all' ? state.questions : state.questions.filter(q => q.folderId === state.currentFolderId);
-            if (term) filtered = filtered.filter(q => q.statement.toLowerCase().includes(term));
-            
-            list.innerHTML = filtered.slice().reverse().map(q => `
-                <div class="bg-white p-5 rounded-3xl border border-slate-100 flex justify-between items-center shadow-sm">
-                    <p class="text-[11px] text-slate-700 font-bold truncate flex-1 mr-4">${q.statement}</p>
-                    <div class="flex gap-2">
-                        <button onclick="window.openEdit('${q.id}')" class="text-indigo-400 p-2">✎</button>
-                        <button onclick="window.deleteQ('${q.id}')" class="text-rose-400 p-2">✕</button>
-                    </div>
-                </div>
-            `).join('');
         };
 
         function startStudy() {
@@ -701,6 +617,41 @@
             document.getElementById('study-feedback').classList.remove('hidden');
         };
 
+        // --- CRUD MODAL ---
+
+        window.openEdit = (id) => {
+            const q = state.questions.find(x => x.id === id);
+            if (!q) return;
+            editingCardId = id;
+            document.getElementById('edit-statement').value = q.statement;
+            document.getElementById('edit-explanation').value = q.explanation || "";
+            const optsDiv = document.getElementById('edit-options');
+            optsDiv.innerHTML = q.options.map((opt, i) => `
+                <div class="flex gap-2">
+                    <input type="radio" name="edit-correct" value="${i}" ${i === q.correctIndex ? 'checked' : ''}>
+                    <input type="text" class="flex-1 search-bar py-2" value="${opt}">
+                </div>
+            `).join('');
+            document.getElementById('edit-modal').classList.add('active');
+        };
+
+        window.saveEdit = () => {
+            const q = state.questions.find(x => x.id === editingCardId);
+            q.statement = document.getElementById('edit-statement').value;
+            q.explanation = document.getElementById('edit-explanation').value;
+            const optInputs = document.querySelectorAll('#edit-options input[type="text"]');
+            q.options = Array.from(optInputs).map(i => i.value);
+            q.correctIndex = parseInt(document.querySelector('input[name="edit-correct"]:checked').value);
+            window.saveLocal(true);
+            window.closeEdit();
+            renderBank();
+        };
+
+        window.closeEdit = () => {
+            document.getElementById('edit-modal').classList.remove('active');
+            editingCardId = null;
+        };
+
         // --- BOOT ENGINE ---
 
         window.checkGoogleReady = () => {
@@ -722,7 +673,7 @@
                 btn.classList.replace('opacity-50', 'opacity-100'); btn.classList.replace('cursor-not-allowed', 'cursor-pointer');
                 btn.querySelector('img').classList.remove('grayscale');
                 document.getElementById('login-btn-text').innerText = text;
-                document.getElementById('login-status-msg').innerText = "Google Drive pronto.";
+                document.getElementById('login-status-msg').innerText = "Google Drive pronto para acesso.";
             }
         }
 
@@ -740,18 +691,18 @@
                             } else { alert("Erro de Login Drive. Tente novamente."); }
                         }
                     });
-                    const saved = JSON.parse(localStorage.getItem(TOKEN_STORAGE));
-                    if (saved && saved.expiry > Date.now()) { accessToken = saved.token; onLoginSuccess(); }
+                    const savedToken = JSON.parse(localStorage.getItem(TOKEN_STORAGE));
+                    if (savedToken && savedToken.expiry > Date.now()) { 
+                        accessToken = savedToken.token; 
+                        onLoginSuccess(); 
+                    }
                 } catch (err) { console.error("GSI Init Error:", err); }
             });
         }
 
         async function onLoginSuccess() {
-            const inputKey = document.getElementById('init-api-key-input').value;
-            if (inputKey) window.saveGeminiKey(inputKey, true);
-            
             document.getElementById('login-loader').classList.remove('hidden');
-            document.getElementById('login-status-msg').innerText = "Baixando backup...";
+            document.getElementById('login-status-msg').innerText = "Sincronizando Banco de Dados...";
             await manualSync();
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('main-app').classList.remove('hidden');
@@ -778,7 +729,6 @@
         window.deleteQ = (id) => { if (confirm("Excluir?")) { state.questions = state.questions.filter(q => q.id !== id); window.saveLocal(true); renderBank(); } };
         window.clearAll = () => { if (confirm("Reset total local?")) { localStorage.clear(); location.reload(); } };
 
-        // Export/Import Local
         window.exportBackup = () => {
             const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
             const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
@@ -817,20 +767,15 @@
                     extractedFileText = (await mammoth.extractRawText({ arrayBuffer: ab })).value;
                 }
                 document.getElementById('file-status').innerText = "✅ " + f.name;
-            } catch { alert("Erro ao ler."); }
+            } catch { alert("Erro ao ler arquivo."); }
         });
 
-        // Init UI
-        const data = localStorage.getItem(STORAGE_KEY);
-        if (data) state = JSON.parse(data);
-        const savedKey = localStorage.getItem(CUSTOM_KEY_STORAGE);
-        if (savedKey) {
-            document.getElementById('init-api-key-input').value = savedKey;
-            document.getElementById('custom-api-key-input').value = savedKey;
-        }
+        const storedData = localStorage.getItem(STORAGE_KEY);
+        if (storedData) state = JSON.parse(storedData);
         updateStats(); initChart();
     </script>
 </body>
 </html>
+
 
 
