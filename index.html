@@ -3,19 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>MedRep - Sincronização Master v13.6.5</title>
+    <title>MedRep - Master v13.7.1</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     
-    <!-- Bibliotecas de Suporte -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
     
-    <!-- Google Identity Services -->
     <script src="https://apis.google.com/js/api.js" async defer></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 
@@ -28,223 +26,222 @@
     </script>
 
     <style>
-        :root { 
-            --ion-safe-area-top: env(safe-area-inset-top); 
-            --ion-safe-area-bottom: env(safe-area-inset-bottom); 
-            --primary: #4f46e5;
-            --success: #10b981;
-            --danger: #ef4444;
-        }
-        body { 
-            font-family: 'Inter', sans-serif; 
-            background-color: #f8fafc; 
-            color: #0f172a; 
-            -webkit-tap-highlight-color: transparent; 
-            overflow-x: hidden;
-            user-select: none;
-        }
+        :root { --ion-safe-area-top: env(safe-area-inset-top); --ion-safe-area-bottom: env(safe-area-inset-bottom); }
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #0f172a; -webkit-tap-highlight-color: transparent; }
         
         .tab-content { display: none; }
-        .tab-content.active { display: block; animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
-        .option-btn-correct { border-color: var(--success) !important; background-color: #ecfdf5 !important; color: #064e3b !important; font-weight: 700; }
-        .option-btn-wrong { border-color: var(--danger) !important; background-color: #fef2f2 !important; color: #7f1d1d !important; }
+        .glass { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+        .option-btn-correct { border-color: #10b981 !important; background-color: #ecfdf5 !important; color: #064e3b !important; font-weight: 700; }
+        .option-btn-wrong { border-color: #ef4444 !important; background-color: #fef2f2 !important; color: #7f1d1d !important; }
         
-        .loading-spinner { border: 3px solid #e2e8f0; border-top: 3px solid var(--primary); border-radius: 50%; width: 24px; height: 24px; animation: spin 0.8s linear infinite; }
+        .loading-spinner { border: 2px solid #e2e8f0; border-top: 2px solid #4f46e5; border-radius: 50%; width: 18px; height: 18px; animation: spin 0.8s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
-        #login-screen { position: fixed; inset: 0; z-index: 1000; background: white; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        #login-screen { display: flex; }
         #main-app { display: none; }
+        canvas { width: 100% !important; height: 160px !important; }
         
-        .folder-chip { cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); white-space: nowrap; border-width: 2px; }
-        .folder-chip.active { background-color: var(--primary); color: white; border-color: var(--primary); transform: scale(1.05); box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3); }
+        .folder-chip { cursor: pointer; transition: all 0.2s; white-space: nowrap; border-width: 2px; }
+        .folder-chip.active { background-color: #4f46e5; color: white; border-color: #4f46e5; transform: scale(1.05); }
         
         .no-scrollbar::-webkit-scrollbar { display: none; }
-        .search-bar { background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 18px; padding: 14px 20px; width: 100%; font-size: 15px; transition: all 0.2s; }
-        .search-bar:focus { border-color: var(--primary); background: #fff; box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1); outline: none; }
+        input, select, textarea { font-size: 16px !important; }
+
+        .search-bar { background: rgba(248, 250, 252, 0.8); border: 1px solid #e2e8f0; border-radius: 16px; padding: 12px 16px; width: 100%; font-size: 14px; transition: all 0.2s; }
+        .search-bar:focus { border-color: #4f46e5; background: #fff; outline: none; box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1); }
         
         .safe-bottom { padding-bottom: calc(1.5rem + env(safe-area-inset-bottom)); }
-        
-        .card-shadow { box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -2px rgba(0,0,0,0.05); }
-        .btn-active:active { transform: scale(0.96); }
+        .case-text { line-height: 1.6; word-break: break-word; }
+        .case-text b { color: #4338ca; font-weight: 800; }
 
-        #sync-toast { position: fixed; top: 24px; left: 50%; transform: translateX(-50%); z-index: 2000; padding: 10px 20px; border-radius: 16px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; display: none; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); color: white; }
-        
+        #sync-toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 2000; padding: 8px 16px; border-radius: 12px; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; display: none; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
         #sync-footer { position: fixed; bottom: 100px; left: 0; right: 0; text-align: center; pointer-events: none; z-index: 40; }
-        #sync-footer span { background: rgba(255,255,255,0.9); backdrop-filter: blur(8px); padding: 5px 15px; border-radius: 30px; font-size: 10px; font-weight: 700; color: #64748b; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
-
-        .srs-grade-btn { transition: all 0.2s; flex: 1; padding: 18px 0; border-radius: 20px; color: white; font-weight: 800; font-size: 10px; text-transform: uppercase; }
+        #sync-footer span { background: rgba(255,255,255,0.8); backdrop-filter: blur(4px); padding: 4px 12px; border-radius: 20px; font-size: 9px; font-weight: 800; color: #64748b; border: 1px solid #e2e8f0; }
+        
+        #settings-panel { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(8px); z-index: 300; items-center; justify-center; padding: 20px; }
+        #settings-panel.active { display: flex; }
     </style>
 </head>
 <body class="antialiased overflow-x-hidden">
 
     <div id="sync-toast"></div>
 
-    <!-- TELA DE LOGIN GSI v3 -->
-    <div id="login-screen">
-        <div class="text-center mb-12">
-            <h1 class="text-7xl font-black text-indigo-600 tracking-tighter italic leading-none">MedRep</h1>
-            <p class="text-slate-400 font-bold uppercase tracking-[0.3em] text-[10px] mt-6">Residency Intelligence</p>
-        </div>
-        
-        <div class="bg-slate-50 p-10 rounded-[48px] w-full max-w-sm border border-slate-100 shadow-sm mx-4">
-            <p id="login-status-msg" class="text-sm font-medium text-slate-500 mb-8 text-center italic">Aguardando APIs do Google...</p>
-            <button id="btn-google-login" onclick="window.fazerLogin()" class="w-full bg-slate-900 text-white font-black py-5 rounded-[24px] shadow-2xl flex items-center justify-center gap-4 active:scale-95 transition-all opacity-50 cursor-not-allowed" disabled>
-                <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" class="w-6" alt="Google">
-                <span class="text-xs uppercase tracking-widest">Acessar com Google Drive</span>
-            </button>
-            <div id="login-loader" class="hidden mt-8 flex justify-center"><div class="loading-spinner"></div></div>
-        </div>
-        
-        <div class="mt-12 text-center">
-            <p class="text-[9px] font-black text-slate-300 uppercase tracking-[0.4em]">Sincronização Master v13.6.5</p>
+    <!-- PAINEL DE CONFIGURAÇÕES -->
+    <div id="settings-panel">
+        <div class="bg-white w-full max-w-sm rounded-[40px] p-8 shadow-2xl space-y-6">
+            <div class="flex justify-between items-center">
+                <h2 class="text-xl font-black text-slate-800">Configurações</h2>
+                <button onclick="window.toggleSettings()" class="text-slate-400 font-bold">FECHAR</button>
+            </div>
+            
+            <div class="space-y-4">
+                <div class="space-y-1">
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Gemini API Key</label>
+                    <input type="password" id="cfg-gemini-key" placeholder="AIza..." class="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-xs">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Google Client ID</label>
+                    <input type="text" id="cfg-client-id" placeholder="648353..." class="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-xs">
+                    <p class="text-[9px] text-slate-400 px-1">Se der Erro 400 Compliance, use seu próprio Client ID.</p>
+                </div>
+                <button onclick="window.saveSettings()" class="w-full bg-indigo-600 text-white font-black py-4 rounded-xl text-xs uppercase shadow-lg shadow-indigo-100">Salvar e Reiniciar</button>
+            </div>
         </div>
     </div>
 
-    <!-- APP PRINCIPAL -->
+    <!-- TELA DE LOGIN -->
+    <div id="login-screen" class="fixed inset-0 z-[200] bg-white flex flex-col items-center justify-center p-8 text-center">
+        <div class="mb-12">
+            <h1 class="text-6xl font-black text-indigo-600 tracking-tighter italic leading-none">MedRep</h1>
+            <p class="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-4">Sincronização Master v13.7.1</p>
+        </div>
+        <div class="bg-slate-50 p-10 rounded-[40px] w-full max-w-sm border border-slate-100 mb-8 shadow-sm">
+            <p id="login-status-msg" class="text-xs font-semibold text-slate-500 mb-6">Conecte seu Google Drive para sincronizar questões entre dispositivos.</p>
+            <button onclick="window.fazerLogin()" class="w-full bg-slate-900 text-white font-black py-5 rounded-[22px] shadow-xl flex items-center justify-center gap-4 active:scale-95 transition-transform">
+                <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" class="w-6" alt="Google">
+                <span class="text-xs uppercase tracking-widest">Entrar com Drive</span>
+            </button>
+            <div id="login-loader" class="hidden mt-6 flex justify-center"><div class="loading-spinner"></div></div>
+            <button onclick="window.toggleSettings()" class="mt-4 text-[10px] font-black text-indigo-600 uppercase tracking-widest underline">Configurar Chaves</button>
+        </div>
+        <p class="text-[9px] font-black text-slate-300 uppercase tracking-[0.4em]">Multi-Plataforma v13.7.1</p>
+    </div>
+
+    <!-- APLICATIVO PRINCIPAL -->
     <div id="main-app">
-        <header class="glass border-b border-slate-100 px-6 py-5 sticky top-0 z-50 flex justify-between items-center max-w-xl mx-auto w-full rounded-b-[32px] card-shadow">
+        <header class="glass border-b border-slate-100 px-6 py-4 sticky top-0 z-50 flex justify-between items-center max-w-xl mx-auto w-full rounded-b-3xl">
             <div class="flex flex-col">
-                <h1 class="text-2xl font-black text-indigo-600 tracking-tighter italic leading-none">MedRep</h1>
-                <span id="header-subtitle" class="text-[9px] font-extrabold text-slate-400 uppercase mt-1 tracking-widest">Flashcards SRS</span>
+                <h1 class="text-xl font-black text-indigo-600 tracking-tighter italic leading-none">MedRep</h1>
+                <span id="header-subtitle" class="text-[8px] font-bold text-slate-400 uppercase mt-1 tracking-widest">Global</span>
             </div>
-            <div id="due-badge" class="hidden bg-rose-500 text-white text-[11px] font-black px-2.5 py-1 rounded-full shadow-lg">0</div>
+            <button onclick="window.toggleSettings()" class="text-[10px] font-black text-slate-400">⚙️</button>
         </header>
 
-        <main class="max-w-xl mx-auto p-5 space-y-6 pb-40">
-            
-            <!-- ABA HOME: DASHBOARD -->
+        <main class="max-w-xl mx-auto p-4 space-y-6 pb-32">
+            <!-- HOME TAB -->
             <section id="tab-home" class="tab-content active space-y-6">
-                <div class="bg-indigo-600 p-8 rounded-[40px] text-white shadow-2xl relative overflow-hidden">
-                    <div class="relative z-10">
-                        <p class="text-[10px] font-black uppercase tracking-widest opacity-60 mb-3">Seu Progresso de Estudos</p>
-                        <div class="grid grid-cols-2 gap-4 mb-6">
-                            <div class="bg-white/10 p-5 rounded-3xl border border-white/10 backdrop-blur-md">
-                                <p class="text-[9px] font-bold uppercase opacity-50 mb-1">Total de Cards</p>
-                                <p id="stat-total" class="text-3xl font-black">0</p>
-                            </div>
-                            <div class="bg-white/10 p-5 rounded-3xl border border-white/10 backdrop-blur-md">
-                                <p class="text-[9px] font-bold uppercase opacity-50 mb-1">Aproveitamento</p>
-                                <p id="stat-accuracy" class="text-3xl font-black">0%</p>
-                            </div>
+                <div class="bg-indigo-600 p-8 rounded-[40px] text-white shadow-xl relative overflow-hidden">
+                    <p class="text-[9px] font-black uppercase tracking-widest opacity-60 mb-2">Desempenho Geral</p>
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div class="bg-white/10 p-4 rounded-2xl">
+                            <p class="text-[9px] font-bold uppercase opacity-50">Cards Totais</p>
+                            <p id="stat-total" class="text-2xl font-black">0</p>
                         </div>
-                        <div class="bg-white/5 p-4 rounded-3xl border border-white/10 h-44">
-                            <canvas id="performanceChart"></canvas>
+                        <div class="bg-white/10 p-4 rounded-2xl">
+                            <p class="text-[9px] font-bold uppercase opacity-50">Precisão</p>
+                            <p id="stat-accuracy" class="text-2xl font-black">0%</p>
                         </div>
                     </div>
-                    <div class="absolute -right-20 -top-20 w-64 h-64 bg-white/5 rounded-full blur-3xl"></div>
+                    <div class="bg-white/5 p-4 rounded-3xl border border-white/10 h-44">
+                        <canvas id="performanceChart"></canvas>
+                    </div>
                 </div>
 
                 <div class="space-y-4">
-                    <div class="flex justify-between items-end px-4">
-                        <h2 class="text-[11px] font-black text-slate-400 uppercase tracking-widest">Matérias</h2>
-                        <button onclick="window.createNewFolder()" class="text-[10px] font-black text-indigo-600 uppercase bg-indigo-50 px-3 py-1.5 rounded-xl btn-active">Nova +</button>
+                    <div class="flex justify-between items-center px-4">
+                        <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Matérias</h2>
+                        <button onclick="window.createNewFolder()" class="text-[10px] font-black text-indigo-600 uppercase">Nova +</button>
                     </div>
-                    <div id="folders-scroll" class="flex gap-3 overflow-x-auto pb-4 px-2 no-scrollbar"></div>
+                    <div id="folders-scroll" class="flex gap-2 overflow-x-auto pb-2 px-2 no-scrollbar"></div>
                 </div>
 
-                <div onclick="window.switchTab('study')" class="bg-white p-7 rounded-[32px] border border-slate-100 shadow-sm flex items-center justify-between cursor-pointer btn-active card-shadow transition-all hover:border-indigo-100">
-                    <div class="flex items-center gap-5">
-                        <div class="w-14 h-14 bg-indigo-50 rounded-[22px] flex items-center justify-center text-2xl shadow-inner">⚡</div>
+                <div onclick="window.switchTab('study')" class="bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm flex items-center justify-between cursor-pointer active:scale-98 transition-all">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center text-xl">⚡</div>
                         <div>
-                            <h3 class="text-lg font-black text-slate-800">Revisão Pendente</h3>
-                            <p id="home-due-text" class="text-sm text-slate-500 font-medium">Carregando...</p>
+                            <h3 class="font-black text-slate-800">Sessão de Revisão</h3>
+                            <p id="home-due-text" class="text-xs text-slate-400">Cards pendentes aparecerão aqui.</p>
                         </div>
                     </div>
-                    <svg class="w-6 h-6 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="9 5l7 7-7 7"/></svg>
                 </div>
             </section>
 
-            <!-- ABA ESTUDO: SRS SESSION -->
+            <!-- STUDY TAB -->
             <section id="tab-study" class="tab-content">
-                <div id="study-container" class="space-y-6 min-h-[500px]"></div>
+                <div id="study-container" class="space-y-6 min-h-[400px]"></div>
             </section>
 
-            <!-- ABA FIEL: IA IMPORT -->
+            <!-- ADD TAB -->
             <section id="tab-add" class="tab-content space-y-6">
                 <div class="bg-white p-8 rounded-[40px] border border-slate-100 shadow-sm space-y-6">
                     <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center text-xl shadow-inner">🪄</div>
-                        <h2 class="text-xl font-black text-slate-800 tracking-tight">IA Extrator Fiel</h2>
+                        <div class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-lg">🪄</div>
+                        <h2 class="text-lg font-black text-slate-800">IA Importador</h2>
                     </div>
 
-                    <div id="ia-folder-warning" class="bg-amber-50 border border-amber-100 p-5 rounded-3xl hidden animate-pulse">
-                        <p class="text-xs text-amber-800 font-bold leading-relaxed">⚠️ Selecione uma matéria específica na aba Home antes de prosseguir com a extração.</p>
+                    <div id="ia-folder-warning" class="bg-amber-50 border border-amber-100 p-4 rounded-2xl hidden">
+                        <p class="text-[10px] text-amber-700 font-bold uppercase leading-tight">Selecione uma matéria na Home para organizar os novos cards.</p>
                     </div>
 
                     <div class="space-y-2">
-                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Pasta Selecionada:</label>
-                        <div id="active-folder-display" class="w-full bg-slate-50 p-5 rounded-2xl text-sm font-black text-indigo-600 uppercase border border-slate-100 text-center tracking-wide">
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Pasta Alvo:</label>
+                        <div id="active-folder-display" class="w-full bg-slate-100 p-4 rounded-2xl text-xs font-black text-indigo-600 uppercase">
                             -
                         </div>
                     </div>
 
-                    <div class="bg-slate-50 border-2 border-dashed border-slate-200 rounded-3xl p-8 text-center hover:border-indigo-300 transition-colors cursor-pointer" onclick="document.getElementById('file-reader').click()">
-                        <div class="flex flex-col items-center gap-3">
-                            <span class="text-4xl">📄</span>
-                            <span class="text-[11px] font-black text-slate-400 uppercase tracking-widest">Upload de Apostila (PDF ou DOCX)</span>
+                    <div class="bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl p-6 text-center">
+                        <label class="cursor-pointer flex flex-col items-center gap-2">
+                            <span class="text-2xl">📄</span>
+                            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">PDF ou DOCX</span>
                             <input type="file" id="file-reader" class="hidden" accept=".pdf,.docx">
-                            <span id="file-status" class="text-xs text-indigo-500 font-bold hidden bg-indigo-50 px-4 py-1.5 rounded-full"></span>
-                        </div>
+                            <span id="file-status" class="text-[9px] text-indigo-500 font-bold hidden"></span>
+                        </label>
                     </div>
 
-                    <textarea id="ia-prompt" placeholder="Cole enunciados ou o texto base aqui..." class="w-full h-44 bg-slate-50 rounded-[28px] p-6 text-sm border border-slate-100 focus:ring-4 ring-indigo-50/50 outline-none resize-none transition-all placeholder:text-slate-300 font-medium"></textarea>
+                    <textarea id="ia-prompt" placeholder="Cole enunciados de questões aqui..." class="w-full h-40 bg-slate-50 rounded-[24px] p-6 text-sm border border-slate-100 focus:ring-2 ring-indigo-500 outline-none resize-none"></textarea>
                     
-                    <button onclick="window.processIA()" id="btn-ia" class="w-full bg-slate-900 text-white font-black py-5 rounded-[24px] uppercase text-xs flex items-center justify-center gap-4 shadow-xl active:scale-95 transition-all">
-                        <span>Gerar Cards com Gemini</span>
+                    <button onclick="window.processIA()" id="btn-ia" class="w-full bg-slate-900 text-white font-black py-5 rounded-[20px] uppercase text-xs flex items-center justify-center gap-4 shadow-xl active:scale-95 transition-transform">
+                        <span>Gerar Cards com IA</span>
                         <div id="ia-loader" class="loading-spinner hidden" style="border-top-color: white;"></div>
                     </button>
                 </div>
 
                 <div id="ia-review-area" class="hidden space-y-4">
-                    <div class="flex justify-between items-center bg-white/90 backdrop-blur-xl p-6 rounded-[28px] border border-slate-100 shadow-2xl sticky top-[80px] z-10 border-indigo-100">
-                        <span id="review-count" class="text-xs font-black text-slate-800 uppercase tracking-wider">Processamento IA</span>
-                        <button onclick="window.confirmBatch()" class="bg-emerald-600 text-white text-[10px] font-black uppercase px-6 py-3.5 rounded-2xl shadow-lg shadow-emerald-200">Salvar Cards</button>
+                    <div class="flex justify-between items-center bg-white p-6 rounded-[24px] border border-slate-100 shadow-xl sticky top-[80px] z-10">
+                        <span id="review-count" class="text-xs font-black text-slate-800">Revisar Lote</span>
+                        <button onclick="window.confirmBatch()" class="bg-emerald-600 text-white text-[10px] font-black uppercase px-6 py-3 rounded-xl">Salvar Tudo</button>
                     </div>
                     <div id="review-list" class="space-y-4 pb-20"></div>
                 </div>
             </section>
 
-            <!-- ABA BANCO: GERENCIAMENTO -->
+            <!-- BANK TAB -->
             <section id="tab-bank" class="tab-content space-y-4">
-                <div class="flex justify-between items-center px-4 mb-2">
-                    <h2 class="text-xl font-black text-slate-800 tracking-tight">Banco de Dados</h2>
-                    <div class="flex gap-2">
-                        <button onclick="window.exportBackup()" class="bg-slate-50 text-slate-500 text-[9px] font-black uppercase px-3 py-2 rounded-xl border border-slate-100">Exportar</button>
-                        <button onclick="window.clearAll()" class="bg-rose-50 text-rose-500 text-[9px] font-black uppercase px-3 py-2 rounded-xl border border-rose-100">Limpar</button>
-                    </div>
+                <div class="flex justify-between items-center px-4">
+                    <h2 class="text-lg font-black text-slate-800">Acervo</h2>
+                    <button onclick="window.clearAll()" class="text-[8px] font-black text-rose-500 uppercase tracking-widest bg-rose-50 px-3 py-1.5 rounded-lg">Reset Local</button>
                 </div>
-                
                 <div class="px-2">
-                    <input type="text" id="bank-search" oninput="window.renderBank()" placeholder="🔎 Pesquisar enunciado ou explicação..." class="search-bar">
+                    <input type="text" id="bank-search" oninput="window.renderBank()" placeholder="Filtrar por enunciado..." class="search-bar">
                 </div>
-
-                <div id="bank-list" class="space-y-3 pb-24 px-2"></div>
+                <div id="bank-list" class="space-y-2 pb-24 px-2"></div>
             </section>
         </main>
 
         <div id="sync-footer">
-            <span id="sync-footer-label">☁️ Inicializando...</span>
+            <span id="sync-footer-label">Sincronizando...</span>
         </div>
 
-        <nav class="fixed bottom-0 left-0 right-0 max-w-xl mx-auto bg-white/95 backdrop-blur-2xl border-t border-slate-100 flex justify-around py-7 px-6 z-50 rounded-t-[40px] shadow-2xl safe-bottom">
-            <button onclick="window.switchTab('home')" class="nav-btn flex flex-col items-center gap-1.5 active text-indigo-600" id="nav-home">
-                <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3L4 9V21H9V15H15V21H20V9L12 3Z"/></svg>
-                <span class="text-[9px] font-black uppercase tracking-widest">Painel</span>
+        <nav class="fixed bottom-0 left-0 right-0 max-w-xl mx-auto bg-white/95 backdrop-blur-2xl border-t border-slate-100 flex justify-around py-6 px-4 z-50 rounded-t-[32px] shadow-2xl safe-bottom">
+            <button onclick="window.switchTab('home')" class="nav-btn flex flex-col items-center gap-1 active text-indigo-600" id="nav-home">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3L4 9V21H9V15H15V21H20V9L12 3Z"/></svg>
+                <span class="text-[8px] font-black uppercase">Home</span>
             </button>
-            <button onclick="window.switchTab('study')" class="nav-btn flex flex-col items-center gap-1.5 text-slate-400" id="nav-study">
-                <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L4.5 20.29L5.21 21L12 18L18.79 21L19.5 20.29L12 2Z"/></svg>
-                <span class="text-[9px] font-black uppercase tracking-widest">Estudo</span>
+            <button onclick="window.switchTab('study')" class="nav-btn flex flex-col items-center gap-1 text-slate-400" id="nav-study">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L4.5 20.29L5.21 21L12 18L18.79 21L19.5 20.29L12 2Z"/></svg>
+                <span class="text-[8px] font-black uppercase">Estudar</span>
             </button>
-            <button onclick="window.switchTab('add')" class="nav-btn flex flex-col items-center gap-1.5 text-slate-400" id="nav-add">
-                <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L14.5 8.5L21 11L14.5 13.5L12 20L9.5 13.5L3 11L9.5 8.5L12 2Z"/></svg>
-                <span class="text-[9px] font-black uppercase tracking-widest">Importar</span>
+            <button onclick="window.switchTab('add')" class="nav-btn flex flex-col items-center gap-1 text-slate-400" id="nav-add">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L14.5 8.5L21 11L14.5 13.5L12 20L9.5 13.5L3 11L9.5 8.5L12 2Z"/></svg>
+                <span class="text-[8px] font-black uppercase">Importar</span>
             </button>
-            <button onclick="window.switchTab('bank')" class="nav-btn flex flex-col items-center gap-1.5 text-slate-400" id="nav-bank">
-                <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M4 4H20V20H4V4ZM6 6V18H18V6H6ZM8 8H16V10H8V8ZM8 12H16V14H8V12ZM8 16H13V18H8V16Z"/></svg>
-                <span class="text-[9px] font-black uppercase tracking-widest">Banco</span>
+            <button onclick="window.switchTab('bank')" class="nav-btn flex flex-col items-center gap-1 text-slate-400" id="nav-bank">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M4 4H20V20H4V4ZM6 6V18H18V6H6ZM8 8H16V10H8V8ZM8 12H16V14H8V12ZM8 16H13V18H8V16Z"/></svg>
+                <span class="text-[8px] font-black uppercase">Banco</span>
             </button>
         </nav>
     </div>
@@ -252,19 +249,20 @@
     <script type="module">
         import { GoogleGenAI } from "@google/genai";
 
-        // CONFIGURAÇÕES GLOBAIS DE INTEGRAÇÃO
-        const CLIENT_ID = '648353734848-s9fnmd9tt0i5577grbt3q9oju6h71mpi.apps.googleusercontent.com';
-        const SCOPES = 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email';
-        const STORAGE_KEY = 'medrep_data_v13_6_master';
-        const TOKEN_STORAGE = 'medrep_google_token_persist';
+        // CONFIGS PADRÃO
+        const DEFAULT_CLIENT_ID = '648353734848-s9fnmd9tt0i5577grbt3q9oju6h71mpi.apps.googleusercontent.com';
+        const SCOPES = 'https://www.googleapis.com/auth/drive.file';
+        
+        const STORAGE_KEY = 'medrep_data_v13_7_global';
+        const TOKEN_STORAGE = 'medrep_token_master';
+        const SETTINGS_STORAGE = 'medrep_cfg_v11';
         const FILENAME = 'medrep_data.json';
 
-        // ESTADO DO APLICATIVO
         let state = {
             questions: [],
             srs: {},
             history: [],
-            folders: [{id: 'f_all', name: 'Geral'}, {id: 'f_cl', name: 'Clínica'}, {id: 'f_an', name: 'Anestesia'}],
+            folders: [{id: 'f_all', name: 'Global'}, {id: 'f_default', name: 'Geral'}],
             currentFolderId: 'f_all'
         };
 
@@ -276,62 +274,126 @@
         let tokenClient = null;
         let chartInstance = null;
         let extractedFileText = "";
+        let googleRetries = 0;
         let driveFileId = null;
-        let googleStatus = { ready: false, retries: 0 };
 
-        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+        // Utilitário para segurança DOM
+        const el = (id) => document.getElementById(id);
 
-        // --- MOTOR DE SINCRONIZAÇÃO (GSI v3) ---
+        const getSettings = () => {
+            const saved = localStorage.getItem(SETTINGS_STORAGE);
+            return saved ? JSON.parse(saved) : { geminiKey: '', clientId: DEFAULT_CLIENT_ID };
+        };
+
+        const getAIClient = () => {
+            const cfg = getSettings();
+            const key = cfg.geminiKey || process.env.API_KEY;
+            return new GoogleGenAI({ apiKey: key });
+        };
+
+        window.toggleSettings = () => {
+            const panel = el('settings-panel');
+            if (panel) {
+                panel.classList.toggle('active');
+                if (panel.classList.contains('active')) {
+                    const cfg = getSettings();
+                    const keyInput = el('cfg-gemini-key');
+                    const clientInput = el('cfg-client-id');
+                    if (keyInput) keyInput.value = cfg.geminiKey;
+                    if (clientInput) clientInput.value = cfg.clientId;
+                }
+            }
+        };
+
+        window.saveSettings = () => {
+            const keyInput = el('cfg-gemini-key');
+            const clientInput = el('cfg-client-id');
+            const geminiKey = keyInput ? keyInput.value.trim() : '';
+            const clientId = clientInput ? clientInput.value.trim() : DEFAULT_CLIENT_ID;
+            localStorage.setItem(SETTINGS_STORAGE, JSON.stringify({ geminiKey, clientId: clientId || DEFAULT_CLIENT_ID }));
+            alert("Configurações salvas. Reiniciando...");
+            location.reload();
+        };
+
+        function showSyncStatus(msg, type = 'info') {
+            const toast = el('sync-toast');
+            const footerLabel = el('sync-footer-label');
+            if (footerLabel) footerLabel.innerText = msg;
+            if (toast) {
+                toast.innerText = msg;
+                toast.style.display = 'block';
+                toast.style.backgroundColor = type === 'success' ? '#10b981' : (type === 'error' ? '#ef4444' : '#4f46e5');
+                setTimeout(() => { if (toast) toast.style.display = 'none'; }, 2000);
+            }
+        }
+
+        window.fazerLogin = () => {
+            const loader = el('login-loader');
+            if (loader) loader.classList.remove('hidden');
+            if (tokenClient) {
+                tokenClient.requestAccessToken();
+            } else {
+                setupGoogle();
+            }
+        };
 
         async function manualSync() {
             if (!accessToken) return;
-            showSyncStatus("☁️ Conectando ao Drive...");
+            showSyncStatus("☁️ Sincronizando...");
             try {
                 const list = await gapi.client.drive.files.list({ 
                     q: `name = '${FILENAME}' and trashed = false`,
                     spaces: 'drive',
                     fields: 'files(id, name)'
                 });
-                
                 const file = list.result.files[0];
                 if (file) {
                     driveFileId = file.id;
-                    const resp = await gapi.client.drive.files.get({ 
-                        fileId: driveFileId, 
-                        alt: 'media'
-                    });
-                    
+                    const resp = await gapi.client.drive.files.get({ fileId: driveFileId, alt: 'media' });
                     let driveData = resp.result;
                     if (typeof driveData === 'string') driveData = JSON.parse(driveData);
-
                     if (driveData && driveData.questions) {
                         state = driveData;
                         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-                        showSyncStatus("✅ Banco Sincronizado", 'success');
+                        showSyncStatus("Sincronizado", 'success');
                     }
                 } else {
-                    showSyncStatus("☁️ Iniciando Novo Backup");
-                    await autoBackup(); // Cria o arquivo inicial
+                    showSyncStatus("Novo banco Drive");
                 }
             } catch (e) { 
-                console.error("Erro na sincronização Drive:", e);
-                showSyncStatus("❌ Erro de Conexão", 'error');
+                showSyncStatus("Erro de sincronia", 'error');
             }
             updateStats();
         }
 
         async function autoBackup() {
             if (!accessToken) return;
-            showSyncStatus("☁️ Salvando Alterações...");
+            showSyncStatus("☁️ Salvando...");
             try {
-                const metadata = { name: FILENAME, mimeType: 'application/json' };
-                const boundary = 'medrep_sync_boundary_master';
+                if (!driveFileId) {
+                    const list = await gapi.client.drive.files.list({ 
+                        q: `name = '${FILENAME}' and trashed = false`,
+                        spaces: 'drive'
+                    });
+                    if (list.result.files && list.result.files[0]) {
+                        driveFileId = list.result.files[0].id;
+                    }
+                }
+
+                const boundary = '-------314159265358979323846';
                 const delimiter = "\r\n--" + boundary + "\r\n";
                 const close_delim = "\r\n--" + boundary + "--";
+                
+                const metadata = { name: FILENAME, mimeType: 'application/json' };
+                const data = JSON.stringify(state);
 
-                const body = 
-                    delimiter + 'Content-Type: application/json; charset=UTF-8\r\n\r\n' + JSON.stringify(metadata) +
-                    delimiter + 'Content-Type: application/json\r\n\r\n' + JSON.stringify(state) +
+                const multipartRequestBody =
+                    delimiter +
+                    'Content-Type: application/json; charset=UTF-8\r\n\r\n' +
+                    JSON.stringify(metadata) +
+                    delimiter +
+                    'Content-Type: application/json\r\n\r\n' +
+                    data +
                     close_delim;
 
                 const url = driveFileId 
@@ -341,10 +403,10 @@
                 const response = await fetch(url, {
                     method: driveFileId ? 'PATCH' : 'POST',
                     headers: { 
-                        'Authorization': 'Bearer ' + accessToken,
-                        'Content-Type': 'multipart/related; boundary=' + boundary
+                        'Authorization': `Bearer ${accessToken}`,
+                        'Content-Type': `multipart/related; boundary=${boundary}`
                     },
-                    body: body
+                    body: multipartRequestBody
                 });
 
                 if (response.ok) {
@@ -352,124 +414,93 @@
                         const result = await response.json();
                         driveFileId = result.id;
                     }
-                    showSyncStatus("✅ Backup Atualizado", 'success');
+                    showSyncStatus("Nuvem OK", 'success');
                 } else {
-                    showSyncStatus("❌ Falha no Backup", 'error');
+                    showSyncStatus("Erro Drive", 'error');
                 }
             } catch (e) { 
-                showSyncStatus("❌ Erro de Rede", 'error');
+                showSyncStatus("Erro de rede", 'error');
             }
         }
 
-        // --- MOTOR SRS (ANKI REFINED) ---
-
         window.submitSRS = (grade) => {
             const q = studyQueue[studyPointer];
-            const now = Date.now();
+            if (!q) return;
             const srs = state.srs[q.id] || { interval: 0, repetitions: 0, easeFactor: 2.5 };
             let { interval, repetitions, easeFactor } = srs;
-            
-            // Grades: 1: Errei, 2: Difícil, 3: Bom, 4: Fácil
-            if (grade === 1) { // Errei
-                repetitions = 0;
-                interval = 0; // Revisar hoje mesmo ou amanhã (0.1 dias)
-                easeFactor = Math.max(1.3, easeFactor - 0.2);
-            } else if (grade === 2) { // Difícil
-                interval = Math.max(1, Math.round(interval * 1.2));
-                easeFactor = Math.max(1.3, easeFactor - 0.15);
-                repetitions++;
-            } else if (grade === 3) { // Bom
+            const score = grade === 1 ? 0 : grade === 2 ? 2 : grade === 3 ? 4 : 5;
+            if (score >= 3) {
                 if (repetitions === 0) interval = 1;
-                else if (repetitions === 1) interval = 3;
+                else if (repetitions === 1) interval = 6;
                 else interval = Math.round(interval * easeFactor);
                 repetitions++;
-            } else if (grade === 4) { // Fácil
-                if (repetitions === 0) interval = 4;
-                else interval = Math.round(interval * easeFactor * 1.3);
-                easeFactor += 0.15;
-                repetitions++;
+            } else { 
+                repetitions = 0; 
+                interval = 1; 
             }
-            
-            state.srs[q.id] = { 
-                interval, 
-                repetitions, 
-                easeFactor, 
-                nextReview: now + (interval * 24 * 60 * 60 * 1000) 
-            };
-            
-            state.history.push({ cardId: q.id, success: grade > 1, date: now, grade });
+            easeFactor = Math.max(1.3, easeFactor + (0.1 - (5 - score) * (0.08 + (5 - score) * 0.02)));
+            state.srs[q.id] = { interval, repetitions, easeFactor, nextReview: Date.now() + (interval * 24 * 60 * 60 * 1000) };
+            state.history.push({ cardId: q.id, success: score >= 3, date: Date.now() });
             saveLocal(true);
-            
             studyPointer++;
             renderStudyCard();
         };
 
-        // --- INTEGRAÇÃO IA GEMINI ---
-
         window.processIA = async () => {
-            if (state.currentFolderId === 'f_all') return alert("⚠️ Selecione uma pasta específica primeiro.");
-            const userInput = document.getElementById('ia-prompt').value.trim();
-            if (!userInput && !extractedFileText) return alert("⚠️ Insira algum conteúdo para processar.");
+            if (state.currentFolderId === 'f_all') return alert("Escolha uma matéria na Home.");
+            const promptInput = el('ia-prompt');
+            const userInput = promptInput ? promptInput.value.trim() : '';
+            if (!userInput && !extractedFileText) return alert("Insira um texto.");
             
-            const loader = document.getElementById('ia-loader');
-            const btn = document.getElementById('btn-ia');
-            loader.classList.remove('hidden');
-            btn.disabled = true;
+            const loader = el('ia-loader');
+            const btn = el('btn-ia');
+            if (loader) loader.classList.remove('hidden');
+            if (btn) btn.disabled = true;
 
             try {
-                const prompt = extractedFileText ? `DOCUMENTO BASE:\n${extractedFileText}\n\nINSTRUÇÕES/ENUNCIADOS ADICIONAIS:\n${userInput}` : userInput;
-                const response = await ai.models.generateContent({
+                const aiInstance = getAIClient();
+                const sourceData = extractedFileText ? `DOC:\n${extractedFileText}\n\nUSER:\n${userInput}` : userInput;
+                const response = await aiInstance.models.generateContent({
                     model: 'gemini-3-flash-preview',
-                    contents: [{ parts: [{ text: prompt }] }],
+                    contents: [{ parts: [{ text: sourceData }] }],
                     config: { 
-                        systemInstruction: `Você é um especialista em educação médica. Sua tarefa é transformar o texto fornecido em flashcards de alta qualidade.
-                        Regras:
-                        1. Extraia o máximo de questões objetivas (múltipla escolha) possível.
-                        2. Identifique a alternativa correta e crie uma explicação concisa mas didática.
-                        3. Retorne APENAS um array JSON puro, sem explicações extras, no formato: 
-                        [{"statement":"...","options":["A","B","C","D"],"correctIndex":0,"explanation":"..."}]`
+                        systemInstruction: `Crie cards médicos em JSON. Formato: [{"statement":"","options":[],"correctIndex":0,"explanation":""}]`
                     }
                 });
-
-                const textOutput = response.text;
-                const match = textOutput.match(/\[[\s\S]*\]/);
+                const match = response.text.match(/\[[\s\S]*\]/);
                 if (match) {
                     tempExtracted = JSON.parse(match[0]);
                     renderReviewList();
                 } else {
-                    alert("A IA não conseguiu formatar o JSON corretamente. Tente um texto mais claro.");
+                    alert("A IA não retornou JSON válido.");
                 }
             } catch (e) { 
-                console.error("Erro IA:", e);
-                alert("IA Falhou: " + e.message); 
+                alert("Erro: Verifique sua API Key nas Configurações."); 
             } finally { 
-                loader.classList.add('hidden'); 
-                btn.disabled = false; 
+                if (loader) loader.classList.add('hidden'); 
+                if (btn) btn.disabled = false; 
             }
         };
 
         function renderReviewList() {
-            document.getElementById('ia-review-area').classList.remove('hidden');
-            const list = document.getElementById('review-list');
-            list.innerHTML = tempExtracted.map((q, idx) => `
-                <div class="bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm space-y-3">
-                    <div class="flex justify-between items-start">
-                        <span class="text-[9px] font-black text-indigo-500 uppercase tracking-widest">Card #${idx + 1}</span>
-                        <button onclick="this.parentElement.parentElement.remove()" class="text-rose-400">✕</button>
+            const area = el('ia-review-area');
+            const list = el('review-list');
+            if (area) area.classList.remove('hidden');
+            if (list) {
+                list.innerHTML = tempExtracted.map((q, idx) => `
+                    <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-2">
+                        <p class="text-[10px] font-black text-indigo-500 uppercase">Questão ${idx+1}</p>
+                        <p class="text-xs text-slate-700 leading-relaxed truncate italic">"${q.statement}"</p>
                     </div>
-                    <p class="text-xs font-bold text-slate-700 leading-relaxed">${q.statement}</p>
-                    <div class="flex gap-2">
-                        <div class="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1"></div>
-                        <p class="text-[10px] text-slate-400 font-medium">${q.options[q.correctIndex]}</p>
-                    </div>
-                </div>
-            `).join('');
-            window.scrollTo({ top: document.getElementById('ia-review-area').offsetTop - 100, behavior: 'smooth' });
+                `).join('');
+            }
+            window.scrollTo(0, 0);
         }
 
         window.confirmBatch = () => {
             const folderId = state.currentFolderId;
-            const folderName = state.folders.find(f => f.id === folderId).name;
+            const folder = state.folders.find(f => f.id === folderId);
+            const folderName = folder ? folder.name : 'Geral';
             const news = tempExtracted.map(q => ({ 
                 ...q, 
                 id: 'q_' + Math.random().toString(36).substr(2, 9),
@@ -479,104 +510,87 @@
             }));
             state.questions = [...state.questions, ...news];
             saveLocal(true);
-            document.getElementById('ia-review-area').classList.add('hidden');
-            tempExtracted = [];
+            const area = el('ia-review-area');
+            const promptInput = el('ia-prompt');
+            const status = el('file-status');
+            if (area) area.classList.add('hidden');
+            if (promptInput) promptInput.value = "";
+            extractedFileText = "";
+            if (status) status.classList.add('hidden');
             switchTab('bank');
         };
 
-        // --- DASHBOARD E UI ---
-
         function initChart() {
-            const ctx = document.getElementById('performanceChart').getContext('2d');
+            const canvas = el('performanceChart');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
             chartInstance = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'],
-                    datasets: [{
-                        data: [0,0,0,0,0,0,0],
-                        borderColor: '#fff',
-                        backgroundColor: 'rgba(255,255,255,0.1)',
-                        fill: true,
-                        tension: 0.4,
-                        borderWidth: 3,
-                        pointRadius: 0
-                    }]
+                    labels: ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'],
+                    datasets: [{ data: [0,0,0,0,0,0,0], borderColor: '#fff', backgroundColor: 'rgba(255,255,255,0.1)', fill: true, tension: 0.4, borderWidth: 2, pointRadius: 0 }]
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        x: { display: true, ticks: { color: 'rgba(255,255,255,0.6)', font: { size: 9, weight: '800' } }, grid: { display: false } },
-                        y: { display: false }
-                    }
-                }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { display: true, ticks: { color: 'rgba(255,255,255,0.6)', font: { size: 9 } }, grid: { display: false } }, y: { display: false } } }
             });
         }
 
         function updateStats() {
             const folderId = state.currentFolderId;
-            const now = Date.now();
             const questions = folderId === 'f_all' ? state.questions : state.questions.filter(q => q.folderId === folderId);
-            const questionIds = new Set(questions.map(q => q.id));
-            const history = state.history.filter(h => folderId === 'f_all' || questionIds.has(h.cardId));
-            const due = questions.filter(q => !state.srs[q.id] || state.srs[q.id].nextReview <= now).length;
+            const due = questions.filter(q => !state.srs[q.id] || state.srs[q.id].nextReview <= Date.now()).length;
             
-            document.getElementById('stat-total').innerText = questions.length;
-            const hits = history.filter(h => h.success).length;
-            document.getElementById('stat-accuracy').innerText = history.length ? Math.round((hits / history.length) * 100) + "%" : "0%";
-            document.getElementById('home-due-text').innerText = due > 0 ? `${due} cards para hoje.` : "Tudo pronto por hoje!";
-            
-            const badge = document.getElementById('due-badge');
-            badge.innerText = due;
-            badge.classList.toggle('hidden', due === 0);
+            const totalEl = el('stat-total');
+            const dueTextEl = el('home-due-text');
+            const badge = el('due-badge');
 
-            if (chartInstance) {
-                const weeklyStats = [0,0,0,0,0,0,0];
-                history.slice(-100).forEach(h => {
-                    const day = (new Date(h.date).getDay() + 6) % 7;
-                    if (h.success) weeklyStats[day]++;
-                });
-                chartInstance.data.datasets[0].data = weeklyStats;
-                chartInstance.update();
+            if (totalEl) totalEl.innerText = questions.length;
+            if (dueTextEl) dueTextEl.innerText = due > 0 ? `${due} cards pendentes.` : "Revisão OK!";
+            if (badge) {
+                badge.innerText = due;
+                badge.classList.toggle('hidden', due === 0);
             }
             renderFoldersUI();
         }
 
         function renderFoldersUI() {
-            const scroll = document.getElementById('folders-scroll');
-            scroll.innerHTML = state.folders.map(f => {
-                const isActive = state.currentFolderId === f.id;
-                return `<div onclick="window.onFolderChange('${f.id}')" class="folder-chip px-7 py-3 rounded-[24px] text-[11px] font-black uppercase border border-slate-200 bg-white ${isActive ? 'active' : 'text-slate-500'}">${f.name}</div>`;
-            }).join('');
+            const scroll = el('folders-scroll');
+            if (scroll) {
+                scroll.innerHTML = state.folders.map(f => {
+                    const isActive = state.currentFolderId === f.id;
+                    return `<div onclick="window.onFolderChange('${f.id}')" class="folder-chip px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest border border-slate-200 bg-white ${isActive ? 'active shadow-lg' : 'text-slate-500'}">${f.name}</div>`;
+                }).join('');
+            }
         }
 
         window.switchTab = (tabId) => {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(el => {
-                el.classList.remove('active', 'text-indigo-600');
-                el.classList.add('text-slate-400');
+            document.querySelectorAll('.nav-btn').forEach(btn => { 
+                btn.classList.remove('active', 'text-indigo-600'); 
+                btn.classList.add('text-slate-400'); 
             });
-            document.getElementById('tab-' + tabId).classList.add('active');
-            const btn = document.getElementById('nav-' + tabId);
-            btn.classList.add('active', 'text-indigo-600');
-            btn.classList.remove('text-slate-400');
-            
+            const targetTab = el('tab-' + tabId);
+            if (targetTab) targetTab.classList.add('active');
+            const btn = el('nav-' + tabId);
+            if (btn) {
+                btn.classList.add('active', 'text-indigo-600');
+                btn.classList.remove('text-slate-400');
+            }
             if (tabId === 'home') updateStats();
             if (tabId === 'study') startStudy();
             if (tabId === 'bank') renderBank();
-            if (tabId === 'add') validateIAFolder();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            window.scrollTo(0, 0);
         };
 
         window.onFolderChange = (id) => {
             state.currentFolderId = id;
+            const folder = state.folders.find(f => f.id === id);
+            const subTitle = el('header-subtitle');
+            if (subTitle && folder) subTitle.innerText = folder.name;
             updateStats();
-            if (document.getElementById('tab-bank').classList.contains('active')) renderBank();
         };
 
         window.createNewFolder = () => {
-            const name = prompt("Nome da Matéria:");
+            const name = prompt("Nome da matéria:");
             if (name && name.trim()) {
                 const folder = { id: 'f_' + Date.now(), name: name.trim() };
                 state.folders.push(folder);
@@ -585,20 +599,23 @@
             }
         };
 
-        function validateIAFolder() {
-            const warning = document.getElementById('ia-folder-warning');
-            const display = document.getElementById('active-folder-display');
-            if (state.currentFolderId === 'f_all') {
-                warning.classList.remove('hidden');
-                display.innerText = "SELECIONE NA HOME";
-                display.className = "w-full bg-slate-50 p-5 rounded-2xl text-xs font-black text-rose-500 border border-slate-100 text-center";
-            } else {
-                warning.classList.add('hidden');
-                const folder = state.folders.find(f => f.id === state.currentFolderId);
-                display.innerText = folder.name.toUpperCase();
-                display.className = "w-full bg-slate-50 p-5 rounded-2xl text-sm font-black text-indigo-600 border border-slate-100 text-center";
-            }
-        }
+        window.renderBank = () => {
+            const searchInput = el('bank-search');
+            const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+            const list = el('bank-list');
+            if (!list) return;
+            const folderFilter = state.currentFolderId;
+            let filtered = folderFilter === 'f_all' ? state.questions : state.questions.filter(q => q.folderId === folderFilter);
+            if (searchTerm) filtered = filtered.filter(q => q.statement.toLowerCase().includes(searchTerm));
+            list.innerHTML = filtered.slice().reverse().map(q => `
+                <div class="bg-white p-5 rounded-3xl border border-slate-100 flex justify-between items-center shadow-sm">
+                    <div class="truncate mr-4">
+                        <p class="text-[11px] text-slate-700 font-bold truncate">${q.statement}</p>
+                    </div>
+                    <button onclick="window.deleteQ('${q.id}')" class="text-rose-400 p-2">✕</button>
+                </div>
+            `).join('') || '<div class="py-24 text-center text-slate-300 italic text-xs">Vazio.</div>';
+        };
 
         function startStudy() {
             const now = Date.now();
@@ -610,42 +627,26 @@
         }
 
         function renderStudyCard() {
-            const container = document.getElementById('study-container');
+            const container = el('study-container');
+            if (!container) return;
             if (studyQueue.length === 0 || studyPointer >= studyQueue.length) {
-                container.innerHTML = `
-                    <div class="py-32 text-center animate-bounce">
-                        <div class="text-6xl mb-6">🏆</div>
-                        <h2 class="text-2xl font-black text-slate-800">Cérebro Atualizado!</h2>
-                        <p class="text-slate-400 mt-2 text-sm">Você completou todas as revisões pendentes.</p>
-                        <button onclick="window.switchTab('home')" class="mt-10 bg-indigo-600 text-white font-black px-12 py-5 rounded-[24px] shadow-xl">Continuar</button>
-                    </div>`;
+                container.innerHTML = `<div class="py-24 text-center"><h2 class="text-xl font-black">Concluído!</h2><button onclick="window.switchTab('home')" class="mt-8 bg-indigo-600 text-white font-black px-10 py-4 rounded-2xl">Voltar</button></div>`;
                 return;
             }
             const q = studyQueue[studyPointer];
             isRevealed = false;
             container.innerHTML = `
-                <div class="bg-white p-10 rounded-[48px] border border-slate-100 shadow-2xl space-y-8 animate-fadeIn">
-                    <div class="flex justify-between items-center">
-                        <span class="text-[10px] font-black text-indigo-500 uppercase tracking-widest bg-indigo-50 px-3 py-1 rounded-full">${q.specialty || 'Geral'}</span>
-                        <span class="text-[11px] font-bold text-slate-300 tracking-tighter">${studyPointer+1} de ${studyQueue.length}</span>
+                <div class="bg-white p-8 rounded-[40px] border border-slate-100 shadow-xl space-y-6">
+                    <h3 class="text-lg font-bold text-slate-800 leading-relaxed">${q.statement}</h3>
+                    <div class="space-y-3">
+                        ${q.options.map((opt, i) => `<button onclick="window.reveal(${i})" class="opt-btn w-full text-left p-5 rounded-3xl border-2 border-slate-50 bg-slate-50 text-slate-600 text-sm font-semibold">${opt}</button>`).join('')}
                     </div>
-                    <h3 class="text-xl font-bold text-slate-800 leading-[1.6] tracking-tight">${q.statement.replace(/\*\*(.*?)\*\*/g, '<b class="text-indigo-600">$1</b>')}</h3>
-                    <div class="space-y-4">
-                        ${q.options.map((opt, i) => `
-                            <button onclick="window.reveal(${i})" class="opt-btn w-full text-left p-6 rounded-[28px] border-2 border-slate-50 bg-slate-50 text-sm font-semibold transition-all hover:bg-slate-100 active:scale-[0.98]">
-                                ${opt}
-                            </button>`).join('')}
-                    </div>
-                    <div id="study-feedback" class="hidden pt-8 border-t border-slate-50 space-y-8">
-                        <div class="bg-slate-900 text-slate-300 p-8 rounded-[32px] text-xs leading-relaxed font-medium">
-                            <p class="text-[10px] font-black text-indigo-400 uppercase mb-3 tracking-widest">Explicação Clínica</p>
-                            ${q.explanation || 'Nenhuma nota adicional para este card.'}
-                        </div>
-                        <div class="flex gap-2">
-                            <button onclick="window.submitSRS(1)" class="srs-grade-btn bg-rose-500 btn-active shadow-lg shadow-rose-200">Rever</button>
-                            <button onclick="window.submitSRS(2)" class="srs-grade-btn bg-orange-400 btn-active shadow-lg shadow-orange-200">Difícil</button>
-                            <button onclick="window.submitSRS(3)" class="srs-grade-btn bg-indigo-500 btn-active shadow-lg shadow-indigo-200">Bom</button>
-                            <button onclick="window.submitSRS(4)" class="srs-grade-btn bg-emerald-500 btn-active shadow-lg shadow-emerald-200">Fácil</button>
+                    <div id="study-feedback" class="hidden pt-6 border-t border-slate-50 space-y-6">
+                        <div class="bg-slate-900 text-slate-300 p-6 rounded-[28px] text-[11px]">${q.explanation || 'Sem explicação.'}</div>
+                        <div class="grid grid-cols-4 gap-2">
+                            <button onclick="window.submitSRS(1)" class="bg-rose-500 py-5 rounded-2xl text-white font-black text-[9px]">Errei</button>
+                            <button onclick="window.submitSRS(3)" class="bg-indigo-500 py-5 rounded-2xl text-white font-black text-[9px]">Bom</button>
+                            <button onclick="window.submitSRS(4)" class="bg-emerald-500 py-5 rounded-2xl text-white font-black text-[9px]">Fácil</button>
                         </div>
                     </div>
                 </div>`;
@@ -658,105 +659,47 @@
             document.querySelectorAll('.opt-btn').forEach((btn, i) => { 
                 if (i === q.correctIndex) btn.classList.add('option-btn-correct');
                 else if (i === idx) btn.classList.add('option-btn-wrong');
-                btn.disabled = true;
             });
-            document.getElementById('study-feedback').classList.remove('hidden');
-            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+            const feedback = el('study-feedback');
+            if (feedback) feedback.classList.remove('hidden');
         };
-
-        window.renderBank = () => {
-            const term = document.getElementById('bank-search').value.toLowerCase();
-            const list = document.getElementById('bank-list');
-            const questions = state.currentFolderId === 'f_all' ? state.questions : state.questions.filter(q => q.folderId === state.currentFolderId);
-            const filtered = questions.filter(q => q.statement.toLowerCase().includes(term) || (q.explanation && q.explanation.toLowerCase().includes(term)));
-            
-            list.innerHTML = filtered.slice().reverse().map(q => `
-                <div class="bg-white p-6 rounded-[28px] border border-slate-100 flex justify-between items-center shadow-sm card-shadow hover:border-indigo-100 transition-colors">
-                    <div class="flex-1 mr-4 overflow-hidden">
-                        <p class="text-xs text-slate-700 font-bold truncate mb-1">${q.statement}</p>
-                        <p class="text-[9px] text-slate-300 font-black uppercase tracking-widest">${q.specialty || 'Geral'}</p>
-                    </div>
-                    <button onclick="window.deleteQ('${q.id}')" class="text-rose-300 p-3 hover:text-rose-500 transition-colors">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                    </button>
-                </div>
-            `).join('');
-        };
-
-        // --- CORE GSI v3 (GOOGLE IDENTITY SERVICES) ---
-
-        function initGoogleGSI() {
-            if (window.gapi && window.google) {
-                setupGoogle();
-            } else if (googleStatus.retries < 20) {
-                googleStatus.retries++;
-                setTimeout(initGoogleGSI, 500);
-            } else {
-                alert("Falha ao carregar Google Identity Services. Verifique sua conexão.");
-            }
-        }
 
         function setupGoogle() {
+            const cfg = getSettings();
             gapi.load('client', async () => {
                 try {
                     await gapi.client.init({ discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'] });
-                    
                     tokenClient = google.accounts.oauth2.initTokenClient({
-                        client_id: CLIENT_ID,
+                        client_id: cfg.clientId,
                         scope: SCOPES,
-                        prompt: 'consent',
+                        prompt: 'select_account',
                         callback: (resp) => {
-                            if (resp.access_token) {
-                                accessToken = resp.access_token;
-                                localStorage.setItem(TOKEN_STORAGE, JSON.stringify({
-                                    token: accessToken,
-                                    expiry: Date.now() + (resp.expires_in * 1000)
-                                }));
-                                onLoginSuccess();
-                            }
+                            if (resp.error) return alert("Erro no Login: " + resp.error);
+                            accessToken = resp.access_token;
+                            localStorage.setItem(TOKEN_STORAGE, JSON.stringify({ token: accessToken, expiry: Date.now() + 3500 * 1000 }));
+                            onLoginSuccess();
                         }
                     });
-
-                    const btnLogin = document.getElementById('btn-google-login');
-                    btnLogin.disabled = false;
-                    btnLogin.classList.remove('opacity-50', 'cursor-not-allowed');
-                    document.getElementById('login-status-msg').innerText = "Pronto para Conectar.";
-
                     const saved = JSON.parse(localStorage.getItem(TOKEN_STORAGE));
-                    if (saved && saved.expiry > Date.now()) {
-                        accessToken = saved.token;
-                        onLoginSuccess();
+                    if (saved && saved.expiry > Date.now()) { 
+                        accessToken = saved.token; 
+                        onLoginSuccess(); 
+                    } else { 
+                        const loader = el('login-loader');
+                        if (loader) loader.classList.add('hidden'); 
                     }
-                } catch (err) {
-                    console.error("GSI Core Error:", err);
+                } catch (e) {
+                    console.error("GAPI Init fail:", e);
                 }
             });
         }
 
         async function onLoginSuccess() {
-            document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('main-app').style.display = 'block';
+            const loginScr = el('login-screen');
+            const mainApp = el('main-app');
+            if (loginScr) loginScr.style.display = 'none';
+            if (mainApp) mainApp.style.display = 'block';
             await manualSync();
-        }
-
-        window.fazerLogin = () => {
-            if (tokenClient) {
-                document.getElementById('login-loader').classList.remove('hidden');
-                tokenClient.requestAccessToken();
-            }
-        };
-
-        // --- AUXILIARES E STORAGE ---
-
-        function showSyncStatus(msg, type = 'info') {
-            const toast = document.getElementById('sync-toast');
-            const footerLabel = document.getElementById('sync-footer-label');
-            if (footerLabel) footerLabel.innerText = msg;
-            
-            toast.innerText = msg;
-            toast.style.display = 'block';
-            toast.style.backgroundColor = type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#4f46e5';
-            setTimeout(() => { toast.style.display = 'none'; }, 2000);
         }
 
         function saveLocal(cloud = true) {
@@ -765,72 +708,22 @@
             if (cloud && accessToken) autoBackup();
         }
 
-        window.deleteQ = (id) => { 
-            if (confirm("Deseja realmente excluir este card?")) { 
-                state.questions = state.questions.filter(q => q.id !== id); 
-                saveLocal(true); 
-                renderBank(); 
-            } 
-        };
+        function loadLocal() {
+            const data = localStorage.getItem(STORAGE_KEY);
+            if (data) state = JSON.parse(data);
+            updateStats();
+        }
 
-        window.clearAll = () => { 
-            if (confirm("Isso apagará apenas os dados locais temporários. Continuar?")) { 
-                localStorage.clear(); 
-                location.reload(); 
-            } 
-        };
+        window.deleteQ = (id) => { if (confirm("Excluir?")) { state.questions = state.questions.filter(q => q.id !== id); saveLocal(true); renderBank(); } };
+        window.clearAll = () => { if (confirm("Resetar?")) { localStorage.removeItem(STORAGE_KEY); location.reload(); } };
 
-        window.exportBackup = () => {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state));
-            const downloadAnchorNode = document.createElement('a');
-            downloadAnchorNode.setAttribute("href", dataStr);
-            downloadAnchorNode.setAttribute("download", "medrep_backup.json");
-            document.body.appendChild(downloadAnchorNode);
-            downloadAnchorNode.click();
-            downloadAnchorNode.remove();
-        };
-
-        // --- LEITOR DE DOCUMENTOS (PDF/DOCX) ---
-
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-        document.getElementById('file-reader').addEventListener('change', async (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-            const status = document.getElementById('file-status');
-            status.innerText = "⏳ Lendo conteúdo...";
-            status.classList.remove('hidden');
-            try {
-                if (file.name.endsWith('.pdf')) {
-                    const arrayBuffer = await file.arrayBuffer();
-                    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-                    let fullText = "";
-                    for (let i = 1; i <= pdf.numPages; i++) {
-                        const page = await pdf.getPage(i);
-                        const content = await page.getTextContent();
-                        fullText += content.items.map(item => item.str).join(" ") + " ";
-                    }
-                    extractedFileText = fullText;
-                } else if (file.name.endsWith('.docx')) {
-                    const arrayBuffer = await file.arrayBuffer();
-                    const result = await mammoth.extractRawText({ arrayBuffer });
-                    extractedFileText = result.value;
-                }
-                status.innerText = "✅ " + file.name.slice(0, 15) + "...";
-            } catch (err) { 
-                console.error(err);
-                status.innerText = "❌ Erro na leitura"; 
-            }
-        });
-
-        // INICIALIZAÇÃO FINAL
-        const storedData = localStorage.getItem(STORAGE_KEY);
-        if (storedData) state = JSON.parse(storedData);
+        loadLocal();
         initChart();
-        updateStats();
-        initGoogleGSI();
+        setupGoogle();
     </script>
 </body>
 </html>
+
 
 
 
