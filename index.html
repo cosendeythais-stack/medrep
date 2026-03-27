@@ -3,26 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>MedRep Master - Residency SRS v14.2.0</title>
+    <title>MedRep - Inteligência Médica</title>
     
-    <!-- Meta Tags para Mobile/PWA -->
+    <!-- PWA & Mobile Optimization -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#4f46e5">
-    
-    <!-- Dependências Externas -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Bibliotecas Externas -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     
-    <!-- Google API Infrastructure -->
-    <script src="https://apis.google.com/js/api.js"></script>
-    <script src="https://accounts.google.com/gsi/client"></script>
+    <!-- Google Identity Services -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://apis.google.com/js/api.js" async defer></script>
 
-    <!-- Import Map para Gemini SDK -->
     <script type="importmap">
     {
       "imports": {
@@ -32,1019 +29,666 @@
     </script>
 
     <style>
-        :root {
-            --safe-top: env(safe-area-inset-top);
-            --safe-bottom: env(safe-area-inset-bottom);
-            --brand-primary: #4f46e5;
-            --brand-secondary: #10b981;
-            --bg-canvas: #f8fafc;
-            --card-radius: 48px;
-            --font-main: 'Inter', sans-serif;
-            --ios-safe-bottom: calc(env(safe-area-inset-bottom) + 1rem);
-        }
-
-        body {
-            font-family: var(--font-main);
-            background-color: var(--bg-canvas);
-            color: #0f172a;
-            -webkit-font-smoothing: antialiased;
-            -webkit-tap-highlight-color: transparent;
-            overflow-x: hidden;
-            height: 100vh;
-        }
-
-        /* Estética Glassmorphism */
-        .glass {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(25px) saturate(200%);
-            -webkit-backdrop-filter: blur(25px) saturate(200%);
-        }
-
-        .glass-dark {
-            background: rgba(15, 23, 42, 0.85);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-        }
-
-        /* Ocultar Barras de Rolagem */
-        ::-webkit-scrollbar { width: 0px; height: 0px; display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-        /* Animações de Transição de Abas */
-        .tab-content { display: none; }
-        .tab-content.active { 
-            display: block; 
-            animation: slideUpIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; 
-        }
-
-        @keyframes slideUpIn {
-            from { opacity: 0; transform: translateY(40px) scale(0.97); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        /* Botões Interativos */
-        .btn-press:active { transform: scale(0.94); transition: transform 0.1s; }
-        .btn-press { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
-
-        /* Estilos do SRS Feedback */
-        .study-btn-correct { 
-            border-color: var(--brand-secondary) !important; 
-            background: #ecfdf5 !important; 
-            color: #064e3b !important; 
-            font-weight: 800; 
-            box-shadow: 0 0 25px rgba(16, 185, 129, 0.3);
-        }
-        .study-btn-wrong { 
-            border-color: #ef4444 !important; 
-            background: #fef2f2 !important; 
-            color: #7f1d1d !important; 
-        }
-
-        /* Pasta Chips Estilizados */
-        .folder-chip {
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            border: 2px solid transparent;
-        }
-        .folder-chip.active {
-            background: var(--brand-primary);
-            color: white;
-            box-shadow: 0 15px 30px -10px rgba(79, 70, 229, 0.5);
-            transform: translateY(-6px);
-        }
-
-        /* Navegação Inferior Custom */
-        .nav-link.active { color: var(--brand-primary); font-weight: 800; }
-        .nav-link.active svg { 
-            transform: translateY(-8px); 
-            filter: drop-shadow(0 8px 12px rgba(79, 70, 229, 0.4)); 
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        /* Loader */
-        .loader {
-            border: 4px solid rgba(79, 70, 229, 0.1);
-            border-top: 4px solid var(--brand-primary);
-            border-radius: 50%;
-            width: 32px;
-            height: 32px;
-            animation: spin 0.8s cubic-bezier(0.5, 0.1, 0.4, 0.9) infinite;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        /* Ajustes Mobile e Safe Areas */
-        .safe-pt { padding-top: var(--safe-top); }
-        .safe-pb { padding-bottom: var(--safe-bottom); }
-        input, textarea, select { font-size: 16px !important; }
+        :root { --ion-safe-area-top: env(safe-area-inset-top); --ion-safe-area-bottom: env(safe-area-inset-bottom); }
+        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; color: #0f172a; -webkit-tap-highlight-color: transparent; }
         
-        /* Dashboard Charts Container */
-        .chart-container {
-            position: relative;
-            height: 250px;
-            width: 100%;
-        }
+        #api-key-bar { z-index: 1000; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .glass { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+        .option-btn-correct { border-color: #10b981 !important; background-color: #ecfdf5 !important; color: #064e3b !important; font-weight: 700; }
+        .option-btn-wrong { border-color: #ef4444 !important; background-color: #fef2f2 !important; color: #7f1d1d !important; }
+        
+        .loading-spinner { border: 2px solid #e2e8f0; border-top: 2px solid #4f46e5; border-radius: 50%; width: 18px; height: 18px; animation: spin 0.8s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        #login-screen { display: flex; }
+        #main-app { display: none; }
+        canvas { width: 100% !important; height: 160px !important; }
+        
+        .folder-chip { cursor: pointer; transition: all 0.2s; white-space: nowrap; border-width: 2px; }
+        .folder-chip.active { background-color: #4f46e5; color: white; border-color: #4f46e5; transform: scale(1.05); }
+        
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        input, select, textarea { font-size: 16px !important; }
 
-        /* Card Study Design */
-        .card-study {
-            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        }
+        .search-bar { background: rgba(248, 250, 252, 0.8); border: 1px solid #e2e8f0; border-radius: 16px; padding: 12px 16px; width: 100%; font-size: 14px; transition: all 0.2s; }
+        .search-bar:focus { border-color: #4f46e5; background: #fff; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); outline: none; }
     </style>
 </head>
-<body class="antialiased select-none">
+<body class="antialiased overflow-x-hidden">
 
-    <!-- SISTEMA DE NOTIFICAÇÕES (TOAST) -->
-    <div id="toast" class="fixed top-14 left-1/2 -translate-x-1/2 z-[3500] hidden">
-        <div class="bg-slate-900/95 backdrop-blur-2xl text-white px-10 py-5 rounded-full text-xs font-black uppercase tracking-[0.2em] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.3)] flex items-center gap-5 border border-white/10">
-            <span id="toast-icon" class="text-xl">✨</span>
-            <span id="toast-msg">Sucesso</span>
+    <!-- BARRA DE CONFIGURAÇÃO (FIXA) -->
+    <div id="api-key-bar" class="fixed top-0 left-0 right-0 bg-slate-900 text-white p-3 shadow-2xl flex flex-col md:flex-row items-center justify-center gap-3 border-b border-white/10">
+        <div class="flex items-center gap-2">
+            <span class="text-[10px] font-black uppercase tracking-widest text-indigo-400">Gemini Key:</span>
+            <input type="password" id="gemini-key-input" placeholder="AIza..." class="bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 text-xs focus:ring-2 ring-indigo-500 outline-none w-48 font-mono">
         </div>
+        <button onclick="window.saveGeminiKey()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-black uppercase px-4 py-1.5 rounded-lg transition-colors">Salvar Chave</button>
     </div>
 
-    <!-- PAINEL DE CONFIGURAÇÕES (MODAL) -->
-    <div id="settings-modal" class="fixed inset-0 z-[2500] hidden">
-        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-xl" onclick="window.toggleSettings()"></div>
-        <div class="absolute bottom-0 left-0 right-0 max-w-2xl mx-auto bg-white rounded-t-[64px] p-12 shadow-[0_-30px_100px_rgba(0,0,0,0.2)] animate-[slideUpIn_0.5s] overflow-y-auto no-scrollbar" style="max-height: 90vh;">
-            <div class="flex justify-between items-center mb-12">
-                <div class="flex flex-col">
-                    <h2 class="text-4xl font-black text-slate-800 tracking-tighter italic">Console</h2>
-                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Configuração de Sistema</p>
-                </div>
-                <button onclick="window.toggleSettings()" class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center font-black text-slate-400 hover:bg-slate-200 transition-colors">✕</button>
-            </div>
-            
-            <div class="space-y-12">
-                <!-- Chave Gemini (LocalStorage Security) -->
-                <div class="space-y-4">
-                    <div class="flex justify-between items-center px-2">
-                        <label class="text-[11px] font-black text-slate-400 uppercase tracking-[0.3em]">Gemini AI Gateway</label>
-                        <span class="text-[9px] font-black text-emerald-500 bg-emerald-50 px-3 py-1 rounded-lg">Status: v3 Enabled</span>
-                    </div>
-                    <input type="password" id="cfg-gemini-key" placeholder="AIzaSy..." class="w-full bg-slate-50 border-2 border-slate-100 rounded-[32px] px-8 py-6 text-sm font-semibold focus:border-indigo-500 focus:bg-white transition-all outline-none shadow-inner">
-                    <div class="flex items-center gap-3 px-2">
-                        <div class="w-2.5 h-2.5 rounded-full bg-indigo-500 animate-pulse"></div>
-                        <p class="text-[10px] text-slate-400 font-medium italic">Esta chave é armazenada apenas no seu dispositivo (LocalStorage).</p>
-                    </div>
-                </div>
-
-                <!-- Google OAuth Config -->
-                <div class="space-y-4">
-                    <label class="text-[11px] font-black text-slate-400 uppercase tracking-[0.3em] px-2">Client Identity ID</label>
-                    <input type="text" id="cfg-client-id" placeholder="648353..." class="w-full bg-slate-50 border-2 border-slate-100 rounded-[32px] px-8 py-6 text-sm font-semibold outline-none shadow-inner">
-                    <p class="text-[9px] text-slate-400 font-bold px-2 uppercase tracking-widest">ID Padrão MedRep v14.2 detectado.</p>
-                </div>
-
-                <!-- Painel de Gerenciamento Crítico -->
-                <div class="pt-8 space-y-5">
-                    <button onclick="window.saveSettings()" class="w-full bg-slate-900 text-white py-8 rounded-[40px] font-black text-xs uppercase tracking-[0.4em] shadow-2xl hover:bg-black transition-all btn-press">Salvar e Reiniciar</button>
-                    
-                    <div class="grid grid-cols-2 gap-5">
-                        <button onclick="window.clearLocalData()" class="bg-rose-50 text-rose-500 py-5 rounded-[32px] font-black text-[10px] uppercase tracking-widest border border-rose-100 hover:bg-rose-500 hover:text-white transition-all">Reset Local</button>
-                        <button onclick="window.clearCloudData()" class="bg-amber-50 text-amber-600 py-5 rounded-[32px] font-black text-[10px] uppercase tracking-widest border border-amber-100 hover:bg-amber-600 hover:text-white transition-all">Limpar Cloud</button>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="mt-16 text-center border-t border-slate-100 pt-10">
-                <p class="text-[10px] font-black text-slate-300 uppercase tracking-[0.6em]">MedRep Master Engine v14.2.0 (Stable Production)</p>
-            </div>
+    <!-- TELA DE LOGIN -->
+    <div id="login-screen" class="fixed inset-0 z-[200] bg-white flex flex-col items-center justify-center p-8 text-center pt-24">
+        <div class="mb-12">
+            <h1 class="text-6xl font-black text-indigo-600 tracking-tighter italic leading-none">MedRep</h1>
+            <p class="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-4">Cloud Medicina & SRS</p>
         </div>
+        <div class="bg-slate-50 p-10 rounded-[40px] w-full max-w-sm border border-slate-100 mb-8 shadow-sm">
+            <p id="login-status-msg" class="text-xs font-semibold text-slate-500 mb-6">Iniciando serviços...</p>
+            <button onclick="window.fazerLogin()" class="w-full bg-slate-900 text-white font-black py-5 rounded-[22px] shadow-xl flex items-center justify-center gap-4 active:scale-95 transition-transform">
+                <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" class="w-6" alt="Google">
+                <span class="text-xs uppercase tracking-widest">Entrar com Google</span>
+            </button>
+            <div id="login-loader" class="hidden mt-6 flex justify-center"><div class="loading-spinner"></div></div>
+        </div>
+        <p class="text-[9px] font-black text-slate-300 uppercase tracking-[0.4em]">v12.7 SEARCH & STABILITY</p>
     </div>
 
-    <!-- TELA DE LOGIN / AUTH -->
-    <div id="login-screen" class="fixed inset-0 z-[4000] flex flex-col items-center justify-center p-14 bg-white">
-        <div class="mb-28 text-center animate-fadeIn">
-            <div class="w-40 h-40 bg-indigo-600 rounded-[56px] mx-auto mb-12 flex items-center justify-center shadow-[0_40px_80px_-20px_rgba(79,70,229,0.5)] rotate-[-12deg] animate-bounce">
-                <span class="text-white text-8xl font-black italic select-none">M</span>
-            </div>
-            <h1 class="text-[100px] font-black text-slate-900 tracking-tighter italic leading-none select-none">MedRep</h1>
-            <p class="text-slate-400 font-bold uppercase tracking-[0.6em] text-[12px] mt-10 opacity-70">Study Excellence & SRS</p>
-        </div>
-        
-        <div class="w-full max-w-sm space-y-10">
-            <div class="bg-white border-2 border-slate-50 p-14 rounded-[72px] shadow-2xl text-center space-y-12">
-                <p class="text-sm font-semibold text-slate-500 leading-relaxed px-4">Sincronize seu progresso com o Google Drive para estudar em qualquer dispositivo.</p>
-                <button onclick="window.initAuth()" id="btn-login-google" class="w-full bg-slate-900 text-white font-black py-9 rounded-[44px] shadow-2xl flex items-center justify-center gap-6 btn-press hover:bg-black">
-                    <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" class="w-8" alt="G">
-                    <span class="text-xs uppercase tracking-[0.3em]">Sincronizar Cloud</span>
-                </button>
-                <div id="login-loader" class="hidden justify-center"><div class="loader"></div></div>
-            </div>
-            <button onclick="window.toggleSettings()" class="w-full text-[11px] font-black text-indigo-500 uppercase tracking-[0.5em] underline opacity-80 hover:opacity-100 transition-opacity">Abrir Console de APIs</button>
-        </div>
-    </div>
-
-    <!-- CONTAINER PRINCIPAL DO APP -->
-    <div id="app" class="hidden min-h-screen flex flex-col">
-        
-        <!-- HEADER SUPERIOR DINÂMICO -->
-        <header class="glass fixed top-0 left-0 right-0 z-[1000] border-b border-slate-100 px-12 py-10 flex justify-between items-center rounded-b-[64px] max-w-2xl mx-auto w-full shadow-sm">
+    <!-- MAIN APP -->
+    <div id="main-app" class="pt-24">
+        <header class="glass border-b border-slate-100 px-6 py-4 sticky top-[60px] md:top-[50px] z-50 flex justify-between items-center max-w-xl mx-auto w-full rounded-b-3xl">
             <div class="flex flex-col">
-                <h1 class="text-4xl font-black text-indigo-600 tracking-tighter italic leading-none">MedRep</h1>
-                <div class="flex items-center gap-3 mt-3">
-                    <span id="current-folder-label" class="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Global Archive</span>
-                    <span class="w-1.5 h-1.5 rounded-full bg-slate-200"></span>
-                    <span class="text-[10px] font-black text-slate-300 uppercase tracking-widest">v14.2.0</span>
-                </div>
+                <h1 class="text-xl font-black text-indigo-600 tracking-tighter italic leading-none">MedRep</h1>
+                <span id="header-subtitle" class="text-[8px] font-bold text-slate-400 uppercase mt-1 tracking-widest">Todas as Pastas</span>
             </div>
-            <div class="flex items-center gap-6">
-                <div id="sync-indicator" class="relative group cursor-pointer" onclick="window.syncCloud()">
-                    <div class="w-4 h-4 rounded-full bg-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.6)] animate-pulse"></div>
-                    <div class="absolute right-0 top-full mt-4 hidden group-hover:block bg-slate-900 text-white text-[10px] font-black p-4 rounded-[24px] whitespace-nowrap uppercase tracking-widest z-[1100] border border-white/10 shadow-2xl">Cloud Ativa: Sync OK</div>
-                </div>
-                <button onclick="window.toggleSettings()" class="w-16 h-16 bg-slate-50 rounded-[28px] flex items-center justify-center text-3xl hover:bg-indigo-50 hover:text-indigo-600 transition-all shadow-inner">⚙️</button>
-            </div>
+            <div id="due-badge" class="hidden bg-rose-500 text-white text-[10px] font-black px-2 py-1 rounded-full">0</div>
         </header>
 
-        <!-- ÁREA DE CONTEÚDO SCROLLABLE -->
-        <main class="flex-1 mt-44 mb-48 max-w-2xl mx-auto w-full px-10 space-y-16 overflow-y-auto no-scrollbar">
-            
-            <!-- ABA: DASHBOARD / HOME -->
-            <section id="tab-home" class="tab-content active space-y-16">
-                <!-- Card de Status Master -->
-                <div class="bg-slate-900 p-16 rounded-[80px] text-white shadow-[0_50px_100px_-30px_rgba(79,70,229,0.4)] relative overflow-hidden group">
-                    <div class="absolute -top-32 -right-32 w-80 h-80 bg-indigo-500/30 rounded-full blur-[100px] group-hover:bg-indigo-500/50 transition-all duration-1000"></div>
-                    <p class="text-[12px] font-black uppercase tracking-[0.6em] text-slate-400 mb-12 opacity-80">Intelligence Dashboard</p>
-                    
-                    <div class="grid grid-cols-2 gap-12 mb-14 relative z-10">
-                        <div class="bg-white/5 backdrop-blur-2xl p-12 rounded-[56px] border border-white/10 shadow-inner group/stat hover:bg-white/10 transition-colors">
-                            <p class="text-[11px] font-bold uppercase text-slate-400 tracking-widest mb-3">Total Vault</p>
-                            <p id="stat-total" class="text-7xl font-black tracking-tighter italic">0</p>
+        <main class="max-w-xl mx-auto p-4 space-y-6 pb-32">
+            <!-- DASHBOARD -->
+            <section id="tab-home" class="tab-content active space-y-6">
+                <div class="bg-indigo-600 p-8 rounded-[40px] text-white shadow-xl relative overflow-hidden">
+                    <p class="text-[9px] font-black uppercase tracking-widest opacity-60 mb-2">Desempenho da Seleção</p>
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div class="bg-white/10 p-4 rounded-2xl">
+                            <p class="text-[9px] font-bold uppercase opacity-50">Cards</p>
+                            <p id="stat-total" class="text-2xl font-black">0</p>
                         </div>
-                        <div class="bg-white/5 backdrop-blur-2xl p-12 rounded-[56px] border border-white/10 shadow-inner group/stat hover:bg-white/10 transition-colors">
-                            <p class="text-[11px] font-bold uppercase text-slate-400 tracking-widest mb-3">Today Review</p>
-                            <p id="stat-due" class="text-7xl font-black tracking-tighter text-indigo-400 italic">0</p>
+                        <div class="bg-white/10 p-4 rounded-2xl">
+                            <p class="text-[9px] font-bold uppercase opacity-50">Precisão</p>
+                            <p id="stat-accuracy" class="text-2xl font-black">0%</p>
                         </div>
                     </div>
-                    
-                    <div class="bg-white/5 rounded-[56px] border border-white/10 p-12 h-72 shadow-inner">
-                        <canvas id="mainChart"></canvas>
+                    <div class="bg-white/5 p-4 rounded-3xl border border-white/10 h-44">
+                        <canvas id="performanceChart"></canvas>
                     </div>
                 </div>
 
-                <!-- Lista de Categorias / Matérias -->
-                <div class="space-y-8">
-                    <div class="flex justify-between items-center px-8">
-                        <h2 class="text-[14px] font-black text-slate-400 uppercase tracking-[0.5em]">Categories</h2>
-                        <button onclick="window.createFolder()" class="bg-indigo-50 text-indigo-600 text-[11px] font-black uppercase px-8 py-4 rounded-3xl hover:bg-indigo-600 hover:text-white transition-all shadow-sm active:scale-95">New +</button>
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center px-4">
+                        <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Matérias</h2>
+                        <button onclick="window.createNewFolder()" class="text-[10px] font-black text-indigo-600 uppercase">Nova Pasta +</button>
                     </div>
-                    <div id="folders-scroll" class="flex gap-6 overflow-x-auto pb-8 px-4 no-scrollbar">
-                        <!-- Chips renderizados dinamicamente -->
-                    </div>
+                    <div id="folders-scroll" class="flex gap-2 overflow-x-auto pb-2 px-2 no-scrollbar"></div>
                 </div>
 
-                <!-- Botão Master de Iniciar Sessão -->
-                <div onclick="window.switchTab('study')" class="group bg-white p-14 rounded-[72px] border-2 border-slate-50 shadow-[0_40px_80px_-20px_rgba(0,0,0,0.08)] flex items-center justify-between cursor-pointer active:scale-[0.95] transition-all hover:border-indigo-200 hover:shadow-indigo-100/50">
-                    <div class="flex items-center gap-12">
-                        <div class="w-28 h-28 bg-indigo-600 text-white rounded-[44px] flex items-center justify-center text-6xl shadow-[0_25px_50px_-10px_rgba(79,70,229,0.5)] group-hover:rotate-12 transition-transform duration-700">⚡</div>
+                <div onclick="window.switchTab('study')" class="bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm flex items-center justify-between cursor-pointer active:scale-98 transition-all">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center text-xl">⚡</div>
                         <div>
-                            <h3 class="text-4xl font-black text-slate-900 tracking-tighter italic">Review Now</h3>
-                            <p id="home-due-label" class="text-[16px] font-medium text-slate-400 mt-3">Sua meta diária está pronta.</p>
+                            <h3 class="font-black text-slate-800">Iniciar Revisão</h3>
+                            <p id="home-due-text" class="text-xs text-slate-400">0 cards esperando.</p>
                         </div>
-                    </div>
-                    <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center text-slate-300 group-hover:bg-indigo-50 group-hover:text-indigo-400 transition-all shadow-inner">
-                        <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M9 5l7 7-7 7"/></svg>
                     </div>
                 </div>
             </section>
 
-            <!-- ABA: SESSÃO DE ESTUDO (SRS SM-2) -->
-            <section id="tab-study" class="tab-content space-y-10">
-                <div id="study-container" class="min-h-[700px] flex flex-col justify-center">
-                    <!-- Cards dinâmicos injetados via JS -->
-                </div>
+            <!-- REVISÃO -->
+            <section id="tab-study" class="tab-content">
+                <div id="study-container" class="space-y-6 min-h-[400px]"></div>
             </section>
 
-            <!-- ABA: IMPORTAÇÃO E EXTRAÇÃO IA -->
-            <section id="tab-add" class="tab-content space-y-16">
-                <div class="bg-white p-16 rounded-[80px] border-2 border-slate-50 shadow-2xl space-y-16">
-                    <div class="flex items-center gap-10">
-                        <div class="w-24 h-24 bg-emerald-50 text-emerald-600 rounded-[36px] flex items-center justify-center text-5xl shadow-inner">🪄</div>
-                        <div>
-                            <h2 class="text-4xl font-black text-slate-900 tracking-tighter italic">AI Extractor</h2>
-                            <p class="text-[11px] font-black text-slate-400 uppercase tracking-widest mt-2">Powered by Gemini 3 Flash</p>
+            <!-- GERADOR IA -->
+            <section id="tab-add" class="tab-content space-y-6">
+                <div class="bg-white p-8 rounded-[40px] border border-slate-100 shadow-sm space-y-6">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-lg">🪄</div>
+                        <h2 class="text-lg font-black text-slate-800">Gerador</h2>
+                    </div>
+
+                    <div id="ia-folder-warning" class="bg-amber-50 border border-amber-100 p-4 rounded-2xl hidden">
+                        <p class="text-[10px] text-amber-700 font-bold uppercase leading-tight">⚠️ Por favor, selecione ou crie uma pasta primeiro no menu Dashboard.</p>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Gravando em:</label>
+                        <div id="active-folder-display" class="w-full bg-slate-50 p-4 rounded-2xl text-xs font-black text-indigo-600 uppercase border border-slate-100">
+                            Nenhuma pasta selecionada
                         </div>
                     </div>
 
-                    <div id="ia-warn-folder" class="bg-amber-50 border-2 border-amber-100 p-12 rounded-[48px] hidden animate-fadeIn">
-                        <p class="text-[15px] text-amber-700 font-bold leading-relaxed italic text-center">⚠️ Selecione uma pasta específica no Dashboard para importar as questões diretamente nela.</p>
-                    </div>
-
-                    <div class="space-y-5 px-4">
-                        <label class="text-[12px] font-black text-slate-400 uppercase tracking-[0.4em] px-6">Target Folder:</label>
-                        <div id="ia-active-folder" class="w-full bg-slate-50 border-2 border-slate-100 p-10 rounded-[48px] text-[14px] font-black text-indigo-600 uppercase tracking-[0.3em] flex justify-between items-center shadow-inner">
-                            <span id="ia-target-folder">GLOBAL ARCHIVE</span>
-                            <div class="w-4 h-4 rounded-full bg-indigo-500 shadow-[0_0_12px_rgba(79,70,229,0.4)]"></div>
-                        </div>
-                    </div>
-
-                    <!-- Dropzone Master de Arquivos -->
-                    <div class="bg-slate-50 border-4 border-dashed border-slate-200 rounded-[64px] p-20 text-center hover:bg-slate-100 hover:border-indigo-400 transition-all cursor-pointer group shadow-inner">
-                        <label class="cursor-pointer flex flex-col items-center gap-8">
-                            <span class="text-8xl group-hover:scale-110 transition-transform duration-700">📄</span>
-                            <div class="space-y-3">
-                                <span class="block text-[14px] font-black text-slate-400 uppercase tracking-[0.4em] group-hover:text-indigo-600">Scan PDF / DOCX</span>
-                                <p class="text-[12px] text-slate-300 font-bold italic tracking-widest uppercase">Extração técnica de alta fidelidade</p>
-                            </div>
-                            <input type="file" id="ia-file-input" class="hidden" accept=".pdf,.docx">
-                            <span id="ia-file-status" class="text-sm text-indigo-600 font-black mt-6 hidden animate-pulse bg-indigo-50 px-8 py-3 rounded-full border border-indigo-100">Documento Pronto</span>
+                    <div class="bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl p-6 text-center">
+                        <label class="cursor-pointer flex flex-col items-center gap-2">
+                            <span class="text-2xl">📄</span>
+                            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Anexar PDF/Docx</span>
+                            <input type="file" id="file-reader" class="hidden" accept=".pdf,.docx">
+                            <span id="file-status" class="text-[9px] text-indigo-500 font-bold hidden"></span>
                         </label>
                     </div>
 
-                    <div class="space-y-6 px-4">
-                        <label class="text-[12px] font-black text-slate-400 uppercase tracking-[0.4em] px-6">Manual Prompt / Raw Text:</label>
-                        <textarea id="ia-prompt-input" placeholder="Cole enunciados ou peça temas específicos (ex: 'Gere 5 questões sobre ECG na emergência')..." class="w-full h-72 bg-slate-50 border-2 border-slate-100 rounded-[56px] p-12 text-[15px] font-medium leading-relaxed resize-none focus:bg-white focus:border-indigo-500 transition-all outline-none shadow-inner"></textarea>
-                    </div>
+                    <textarea id="ia-prompt" placeholder="Digite o tema para gerar cards..." class="w-full h-40 bg-slate-50 rounded-[24px] p-6 text-sm border border-slate-100 focus:ring-2 ring-indigo-500 outline-none resize-none"></textarea>
                     
-                    <button onclick="window.runGeminiIA()" id="ia-btn-run" class="w-full bg-slate-900 text-white py-10 rounded-[48px] uppercase text-xs font-black tracking-[0.5em] flex items-center justify-center gap-8 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.3)] btn-press hover:bg-black">
-                        <span>Lançar Extração IA</span>
-                        <div id="ia-spinner" class="hidden loader" style="border-top-color: white;"></div>
+                    <button onclick="window.processIA()" id="btn-ia" class="w-full bg-slate-900 text-white font-black py-5 rounded-[20px] uppercase text-xs flex items-center justify-center gap-4 shadow-xl active:scale-95 transition-transform">
+                        <span>Gerar Cards</span>
+                        <div id="ia-loader" class="loading-spinner hidden" style="border-top-color: white;"></div>
                     </button>
                 </div>
 
-                <!-- Painel de Validação Pré-Escrita -->
-                <div id="ia-review-area" class="hidden space-y-12 pb-48">
-                    <div class="flex justify-between items-center bg-white/95 glass p-12 rounded-[56px] border-2 border-white shadow-[0_40px_80px_-20px_rgba(0,0,0,0.1)] sticky top-[150px] z-[1100]">
-                        <div class="flex flex-col">
-                            <span class="text-[12px] font-black text-slate-400 uppercase tracking-[0.5em]">Validation Queue</span>
-                            <span id="ia-batch-count" class="text-3xl font-black text-slate-900 italic tracking-tighter">0 Items</span>
-                        </div>
-                        <button onclick="window.commitBatch()" class="bg-emerald-600 text-white text-[12px] font-black uppercase tracking-[0.3em] px-14 py-8 rounded-[40px] shadow-2xl btn-press hover:bg-emerald-700 shadow-emerald-200">Commit All</button>
+                <div id="ia-review-area" class="hidden space-y-4">
+                    <div class="flex justify-between items-center bg-white p-6 rounded-[24px] border border-slate-100 shadow-xl sticky top-[130px] z-10">
+                        <span id="review-count" class="text-xs font-black text-slate-800">0 Cards</span>
+                        <button onclick="window.confirmBatch()" class="bg-emerald-600 text-white text-[10px] font-black uppercase px-6 py-3 rounded-xl">Confirmar</button>
                     </div>
-                    <div id="ia-review-list" class="space-y-8"></div>
+                    <div id="review-list" class="space-y-4 pb-20"></div>
                 </div>
             </section>
 
-            <!-- ABA: ACERVO / BANCO DE DADOS -->
-            <section id="tab-bank" class="tab-content space-y-12">
-                <div class="flex justify-between items-center px-8">
-                    <h2 class="text-5xl font-black text-slate-900 tracking-tighter italic">Vault</h2>
-                    <div class="flex flex-col items-end">
-                        <span id="vault-count-label" class="bg-indigo-50 text-indigo-500 text-[11px] font-black px-5 py-2 rounded-full uppercase tracking-widest shadow-sm">0 Cards</span>
-                    </div>
+            <!-- ACERVO COM BUSCA -->
+            <section id="tab-bank" class="tab-content space-y-4">
+                <div class="flex justify-between items-center px-4">
+                    <h2 class="text-lg font-black text-slate-800">Seu Acervo</h2>
+                    <button onclick="window.clearAll()" class="text-[8px] font-black text-rose-500 uppercase tracking-widest bg-rose-50 px-3 py-1.5 rounded-lg">Resetar Banco</button>
                 </div>
-                <div class="px-4">
-                    <input type="text" id="bank-search" oninput="window.renderBank()" placeholder="Search vault by topic, keyword or specialty..." class="w-full bg-white border-2 border-slate-50 rounded-[48px] px-14 py-9 text-[16px] font-semibold shadow-premium focus:ring-[15px] ring-indigo-50 transition-all outline-none">
+                
+                <div class="px-2">
+                    <input type="text" id="bank-search" oninput="window.renderBank()" placeholder="🔎 Buscar por tema (ex: DPOC, Asma)..." class="search-bar">
                 </div>
-                <div id="bank-list" class="space-y-6 pb-48">
-                    <!-- Cards renderizados no Vault -->
-                </div>
-            </section>
 
+                <div id="bank-list" class="space-y-2 pb-24 px-2"></div>
+            </section>
         </main>
 
-        <!-- FOOTER SYNC STATUS -->
-        <div class="fixed bottom-[145px] left-0 right-0 text-center pointer-events-none z-40">
-            <span id="footer-sync-msg" class="bg-slate-900/95 backdrop-blur-3xl px-12 py-5 rounded-full text-[11px] font-black text-white/50 border border-white/10 shadow-[0_20px_40px_rgba(0,0,0,0.2)] uppercase tracking-[0.5em] select-none">Drive Synchronized</span>
-        </div>
-
-        <!-- BARRA DE NAVEGAÇÃO PREMIUM -->
-        <nav class="fixed bottom-0 left-0 right-0 max-w-2xl mx-auto glass border-t border-slate-100 flex justify-around py-14 px-14 z-[1500] rounded-t-[72px] shadow-[0_-40px_100px_rgba(0,0,0,0.12)] safe-pb">
-            <button onclick="window.switchTab('home')" class="nav-link flex flex-col items-center gap-4 active" id="nav-home">
-                <svg class="w-10 h-10" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3L4 9V21H9V15H15V21H20V9L12 3Z"/></svg>
-                <span class="text-[11px] font-black uppercase tracking-[0.4em]">Home</span>
+        <!-- NAV BOTTOM -->
+        <nav class="fixed bottom-0 left-0 right-0 max-w-xl mx-auto bg-white/95 backdrop-blur-2xl border-t border-slate-100 flex justify-around py-6 px-4 z-50 rounded-t-[32px] shadow-2xl safe-bottom">
+            <button onclick="window.switchTab('home')" class="nav-btn flex flex-col items-center gap-1 active text-indigo-600" id="nav-home">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3L4 9V21H9V15H15V21H20V9L12 3Z"/></svg>
+                <span class="text-[8px] font-black uppercase">Home</span>
             </button>
-            <button onclick="window.switchTab('study')" class="nav-link flex flex-col items-center gap-4 text-slate-300" id="nav-study">
-                <svg class="w-10 h-10" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L4.5 20.29L5.21 21L12 18L18.79 21L19.5 20.29L12 2Z"/></svg>
-                <span class="text-[11px] font-black uppercase tracking-[0.4em]">Review</span>
+            <button onclick="window.switchTab('study')" class="nav-btn flex flex-col items-center gap-1 text-slate-400" id="nav-study">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L4.5 20.29L5.21 21L12 18L18.79 21L19.5 20.29L12 2Z"/></svg>
+                <span class="text-[8px] font-black uppercase">Estudar</span>
             </button>
-            <button onclick="window.switchTab('add')" class="nav-link flex flex-col items-center gap-4 text-slate-300" id="nav-add">
-                <svg class="w-10 h-10" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L14.5 8.5L21 11L14.5 13.5L12 20L9.5 13.5L3 11L9.5 8.5L12 2Z"/></svg>
-                <span class="text-[11px] font-black uppercase tracking-[0.4em]">IA Extract</span>
+            <button onclick="window.switchTab('add')" class="nav-btn flex flex-col items-center gap-1 text-slate-400" id="nav-add">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L14.5 8.5L21 11L14.5 13.5L12 20L9.5 13.5L3 11L9.5 8.5L12 2Z"/></svg>
+                <span class="text-[8px] font-black uppercase">Gerar</span>
             </button>
-            <button onclick="window.switchTab('bank')" class="nav-link flex flex-col items-center gap-4 text-slate-300" id="nav-bank">
-                <svg class="w-10 h-10" fill="currentColor" viewBox="0 0 24 24"><path d="M4 4H20V20H4V4ZM6 6V18H18V6H6ZM8 8H16V10H8V8ZM8 12H16V14H8V12ZM8 16H13V18H8V16Z"/></svg>
-                <span class="text-[11px] font-black uppercase tracking-[0.4em]">Vault</span>
+            <button onclick="window.switchTab('bank')" class="nav-btn flex flex-col items-center gap-1 text-slate-400" id="nav-bank">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M4 4H20V20H4V4ZM6 6V18H18V6H6ZM8 8H16V10H8V8ZM8 12H16V14H8V12ZM8 16H13V18H8V16Z"/></svg>
+                <span class="text-[8px] font-black uppercase">Acervo</span>
             </button>
         </nav>
     </div>
 
-    <!-- LOGICA MASTER ENGINE UNIFICADA -->
+    <!-- SCRIPT PRINCIPAL -->
     <script type="module">
-        import { GoogleGenAI, Type } from "@google/genai";
+        import { GoogleGenAI } from "@google/genai";
 
-        // CONFIG & SECURE CONSTANTS
-        const ENGINE_VERSION = '14.2.0';
-        const CLOUD_FILENAME = 'medrep_database_production_v14.json';
-        const KEY_DATABASE = 'medrep_local_db_v14_2';
-        const KEY_AUTH_TOKEN = 'medrep_auth_session_v14';
-        const KEY_SETTINGS_STORE = 'medrep_settings_v14_2'; // Salva ClientID e GeminiKey
-        const DEFAULT_CLIENT_ID = '648353734848-s9fnmd9tt0i5577grbt3q9oju6h71mpi.apps.googleusercontent.com';
+        // CONFIGS IMUTÁVEIS
+        const CLIENT_ID = '648353734848-s9fnmd9tt0i5577grbt3q9oju6h71mpi.apps.googleusercontent.com';
+        const SCOPES = 'https://www.googleapis.com/auth/drive.file';
+        const STORAGE_KEY = 'medrep_data_v12_7';
+        const KEY_STORAGE = 'medrep_gemini_key_v11';
+        const TOKEN_STORAGE = 'medrep_google_token_persist';
+        const FILENAME = 'medrep_data.json';
 
-        // STATE OBJECT (SINGLE SOURCE OF TRUTH)
+        // ESTADO GLOBAL
         let state = {
             questions: [],
-            srs: {}, // qId -> { interval, easeFactor, reps, nextReview }
-            folders: [
-                { id: 'f_all', name: 'Global Archive' },
-                { id: 'f_geral', name: 'Geral' }
-            ],
-            history: [], // { qId, grade, date }
-            currentFolderId: 'f_all',
-            lastSync: null
+            srs: {},
+            history: [],
+            folders: [{id: 'f_all', name: 'Todas as Pastas'}, {id: 'f_default', name: 'Geral'}],
+            currentFolderId: 'f_all'
         };
 
-        // INSTANCIAS DE SESSÃO
-        let accessToken = null, tokenClient = null, driveFileId = null;
-        let studyQueue = [], studyIndex = 0, chartInstance = null;
-        let extractedFileText = "", tempBatchArray = [];
+        let tempExtracted = [];
+        let studyQueue = [];
+        let studyPointer = 0;
+        let isRevealed = false;
+        let accessToken = null;
+        let tokenClient = null;
+        let chartInstance = null;
+        let extractedFileText = "";
+        let googleRetries = 0;
 
-        // DOM UTILS
-        const el = (id) => document.getElementById(id);
-        
-        function showToast(msg, icon = '✨') {
-            const toast = el('toast');
-            el('toast-msg').innerText = msg;
-            el('toast-icon').innerText = icon;
-            toast.classList.remove('hidden');
-            setTimeout(() => toast.classList.add('hidden'), 5000);
-            if (el('footer-sync-msg')) el('footer-sync-msg').innerText = msg;
+        // IA CLIENT
+        const getAIClient = () => {
+            const key = localStorage.getItem(KEY_STORAGE) || process.env.API_KEY;
+            return new GoogleGenAI({ apiKey: key });
+        };
+
+        // EXPOR FUNÇÕES GLOBAIS PARA WINDOW
+        window.saveGeminiKey = () => {
+            const key = document.getElementById('gemini-key-input').value.trim();
+            if (!/^AIza[0-9A-Za-z-_]{35}$/.test(key)) return alert("Chave Inválida!");
+            localStorage.setItem(KEY_STORAGE, key);
+            alert("✅ Chave Salva!");
+            location.reload();
+        };
+
+        window.fazerLogin = () => {
+            document.getElementById('login-loader').classList.remove('hidden');
+            if (tokenClient) {
+                tokenClient.requestAccessToken();
+            } else {
+                alert("Google Services ainda não pronto. Aguarde...");
+                document.getElementById('login-loader').classList.add('hidden');
+            }
+        };
+
+        window.switchTab = (tabId) => {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(el => {
+                el.classList.remove('active', 'text-indigo-600');
+                el.classList.add('text-slate-400');
+            });
+            document.getElementById('tab-' + tabId).classList.add('active');
+            const btn = document.getElementById('nav-' + tabId);
+            btn.classList.add('active', 'text-indigo-600');
+            btn.classList.remove('text-slate-400');
+            
+            if (tabId === 'home') updateStats();
+            if (tabId === 'study') startStudy();
+            if (tabId === 'bank') renderBank();
+            if (tabId === 'add') validateIAFolder();
+
+            window.scrollTo(0, 0);
+        };
+
+        window.onFolderChange = (id) => {
+            state.currentFolderId = id;
+            const folder = state.folders.find(f => f.id === id);
+            document.getElementById('header-subtitle').innerText = folder.name;
+            updateStats();
+            if (document.getElementById('tab-bank').classList.contains('active')) renderBank();
+        };
+
+        window.createNewFolder = () => {
+            const name = prompt("Matéria (ex: Ginecologia):");
+            if (name && name.trim()) {
+                const folder = { id: 'f_' + Date.now(), name: name.trim() };
+                state.folders.push(folder);
+                state.currentFolderId = folder.id;
+                saveLocal();
+                updateStats();
+            }
+        };
+
+        function validateIAFolder() {
+            const warning = document.getElementById('ia-folder-warning');
+            const display = document.getElementById('active-folder-display');
+            if (state.currentFolderId === 'f_all') {
+                warning.classList.remove('hidden');
+                display.innerText = "Nenhuma pasta ativa";
+                display.className = "w-full bg-slate-50 p-4 rounded-2xl text-xs font-black text-rose-500 uppercase border border-slate-100";
+            } else {
+                warning.classList.add('hidden');
+                const folder = state.folders.find(f => f.id === state.currentFolderId);
+                display.innerText = "Gravando em: " + folder.name.toUpperCase();
+                display.className = "w-full bg-slate-50 p-4 rounded-2xl text-xs font-black text-indigo-600 uppercase border border-slate-100";
+            }
         }
 
-        // 1. DATA LAYER: LOCAL PERSISTENCE & CLOUD SYNC
-        async function syncCloud() {
+        // CARREGAMENTO ROBUSTO DO GOOGLE
+        function initGoogleWithRetry() {
+            if (window.google && window.google.accounts && window.gapi) {
+                setupGoogle();
+            } else if (googleRetries < 3) {
+                googleRetries++;
+                document.getElementById('login-status-msg').innerText = `Carregando APIs (${googleRetries}/3)...`;
+                setTimeout(initGoogleWithRetry, 1000);
+            } else {
+                document.getElementById('login-status-msg').innerText = "Erro: Reinicie o app ou verifique sua conexão.";
+                document.getElementById('login-status-msg').className = "text-xs font-bold text-rose-500 mb-6";
+            }
+        }
+
+        function setupGoogle() {
+            gapi.load('client', async () => {
+                await gapi.client.init({ discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'] });
+            });
+
+            tokenClient = google.accounts.oauth2.initTokenClient({
+                client_id: CLIENT_ID,
+                scope: SCOPES,
+                callback: (resp) => {
+                    if (resp.error) return;
+                    accessToken = resp.access_token;
+                    localStorage.setItem(TOKEN_STORAGE, JSON.stringify({ token: accessToken, expiry: Date.now() + 3500 * 1000 }));
+                    onLoginSuccess();
+                }
+            });
+
+            // Auto-Login
+            const saved = JSON.parse(localStorage.getItem(TOKEN_STORAGE));
+            if (saved && saved.expiry > Date.now()) {
+                accessToken = saved.token;
+                document.getElementById('login-status-msg').innerText = "Bem-vindo de volta! Sincronizando...";
+                onLoginSuccess();
+            } else {
+                document.getElementById('login-status-msg').innerText = "Pronto para entrar";
+            }
+        }
+
+        function onLoginSuccess() {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('main-app').style.display = 'block';
+            manualSync();
+        }
+
+        // SYNC & BACKUP
+        async function manualSync() {
             if (!accessToken) return;
-            showToast('Cloud: Sincronizando...', '☁️');
-            
             try {
-                // Pesquisa por arquivo existente
-                const list = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='${CLOUD_FILENAME}' and trashed=false`, {
-                    headers: { 'Authorization': `Bearer ${accessToken}` }
-                }).then(r => r.json());
-
-                if (list.files && list.files[0]) {
-                    driveFileId = list.files[0].id;
-                    const content = await fetch(`https://www.googleapis.com/drive/v3/files/${driveFileId}?alt=media`, {
-                        headers: { 'Authorization': `Bearer ${accessToken}` }
-                    }).then(r => r.json());
-
-                    if (content && Array.isArray(content.questions)) {
-                        state = content;
-                        persistToLocal();
-                        showToast('Base Cloud Atualizada', '✅');
+                const list = await gapi.client.drive.files.list({ q: `name = '${FILENAME}'` });
+                const file = list.result.files[0];
+                if (file) {
+                    const resp = await gapi.client.drive.files.get({ fileId: file.id, alt: 'media' });
+                    if (resp.result && resp.result.questions) {
+                        state = resp.result;
+                        saveLocal(false);
                     }
-                } else {
-                    showToast('Criando Backup Cloud...', '📂');
-                    await backupToCloud();
                 }
-            } catch (err) {
-                console.error("Critical Cloud Error:", err);
-                showToast('Falha na Nuvem', '⚠️');
-            }
-            refreshAllStats();
+            } catch (e) { console.warn(e); }
+            updateStats();
         }
 
-        async function backupToCloud() {
+        async function autoBackup() {
             if (!accessToken) return;
-            showToast('Cloud: Gravando...', '☁️');
-            
             try {
-                const boundary = 'medrep_master_v14_prod_bound';
-                const metadata = { name: CLOUD_FILENAME, mimeType: 'application/json' };
-                const content = JSON.stringify(state);
+                const list = await gapi.client.drive.files.list({ q: `name = '${FILENAME}'` });
+                let file = list.result.files[0];
+                const metadata = { name: FILENAME, mimeType: 'application/json' };
+                const blob = new Blob([JSON.stringify(state)], { type: 'application/json' });
+                const form = new FormData();
+                form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+                form.append('file', blob);
 
-                const bodyParts = [
-                    `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(metadata)}`,
-                    `\r\n--${boundary}\r\nContent-Type: application/json\r\n\r\n${content}`,
-                    `\r\n--${boundary}--`
-                ];
-
-                const blob = new Blob(bodyParts, { type: 'multipart/related; boundary=' + boundary });
-                const url = driveFileId 
-                    ? `https://www.googleapis.com/upload/drive/v3/files/${driveFileId}?uploadType=multipart`
-                    : 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
-
-                const response = await fetch(url, {
-                    method: driveFileId ? 'PATCH' : 'POST',
-                    headers: { 'Authorization': `Bearer ${accessToken}` },
-                    body: blob
+                await fetch(file ? `https://www.googleapis.com/upload/drive/v3/files/${file.id}?uploadType=multipart` : 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+                    method: file ? 'PATCH' : 'POST',
+                    headers: { 'Authorization': 'Bearer ' + accessToken },
+                    body: form
                 });
-
-                if (response.ok) {
-                    const result = await response.json();
-                    if (!driveFileId) driveFileId = result.id;
-                    showToast('Backup Concluído', '💎');
-                } else if (response.status === 401) {
-                    accessToken = null;
-                    localStorage.removeItem(KEY_AUTH_TOKEN);
-                    location.reload();
-                }
-            } catch (err) {
-                showToast('Erro de Sync', '📶');
-            }
+            } catch (e) { console.warn(e); }
         }
 
-        function persistToLocal() {
-            localStorage.setItem(KEY_DATABASE, JSON.stringify(state));
-            refreshAllStats();
-        }
-
-        function saveAppState(cloudSyncRequired = true) {
-            persistToLocal();
-            if (cloudSyncRequired && accessToken) backupToCloud();
-        }
-
-        // 2. IA LAYER: GEMINI 3 FLASH - BROWSER SAFE MODE
-        window.runGeminiIA = async () => {
-            const userInput = el('ia-prompt-input').value.trim();
-            if (!userInput && !extractedFileText) return alert("Forneça texto ou anexo para extração.");
+        // IA GERADOR
+        window.processIA = async () => {
+            if (state.currentFolderId === 'f_all') return alert("Selecione uma pasta no Dashboard!");
+            const prompt = document.getElementById('ia-prompt').value.trim();
+            if (!prompt && !extractedFileText) return alert("Texto ou arquivo necessário!");
             
-            const spinner = el('ia-spinner'), btn = el('ia-btn-run');
-            spinner.classList.remove('hidden');
+            const loader = document.getElementById('ia-loader');
+            const btn = document.getElementById('btn-ia');
+            loader.classList.remove('hidden');
             btn.disabled = true;
 
+            const folderName = state.folders.find(f => f.id === state.currentFolderId).name;
+
             try {
-                // SEGURANÇA: Busca chave do LocalStorage, evitando process.env
-                const settings = JSON.parse(localStorage.getItem(KEY_SETTINGS_STORE)) || {};
-                const safeKey = settings.geminiKey || "";
-
-                if (!safeKey) {
-                    alert("⚠️ Gateway de IA desativado. Configure sua Gemini API Key em Settings.");
-                    throw new Error("Missing API Key");
-                }
-
-                const aiGateway = new GoogleGenAI({ apiKey: safeKey });
-                const promptFinal = `Analise o material médico abaixo e extraia questões objetivas rigorosas (provas de residência).
-                
-                MATERIAL FONTE:
-                ${extractedFileText}
-
-                CONTEXTO ADICIONAL:
-                ${userInput}
-
-                Siga rigorosamente este JSON SCHEMA:
-                [{"statement":"...","options":["..."],"correctIndex":0,"explanation":"..."}]`;
-
-                const response = await aiGateway.models.generateContent({
+                const ai = getAIClient();
+                const context = extractedFileText ? `Contexto extraído: ${extractedFileText}\n\n` : "";
+                const response = await ai.models.generateContent({
                     model: 'gemini-3-flash-preview',
-                    contents: [{ parts: [{ text: promptFinal }] }],
-                    config: {
-                        responseMimeType: "application/json",
-                        responseSchema: {
-                            type: Type.ARRAY,
-                            items: {
-                                type: Type.OBJECT,
-                                properties: {
-                                    statement: { type: Type.STRING },
-                                    options: { type: Type.ARRAY, items: { type: Type.STRING } },
-                                    correctIndex: { type: Type.INTEGER },
-                                    explanation: { type: Type.STRING }
-                                },
-                                required: ["statement", "options", "correctIndex", "explanation"]
-                            }
-                        }
+                    contents: [{ parts: [{ text: `${context}Crie 5 flashcards sobre: ${prompt}. Especialidade: ${folderName}.` }] }],
+                    config: { 
+                        systemInstruction: "Formato JSON: [{\"statement\":\"\",\"options\":[],\"correctIndex\":0,\"explanation\":\"\",\"specialty\":\"\"}]" 
                     }
                 });
-
-                const data = JSON.parse(response.text);
-                if (data && Array.isArray(data)) {
-                    tempBatchArray = data;
-                    renderIAReviewList();
-                    el('ia-review-area').classList.remove('hidden');
-                    window.scrollTo({ top: el('ia-review-area').offsetTop - 180, behavior: 'smooth' });
-                    showToast('Cards Gerados!', '🪄');
+                const match = response.text.match(/\[[\s\S]*\]/);
+                if (match) {
+                    tempExtracted = JSON.parse(match[0]);
+                    renderReviewList();
                 }
-            } catch (err) {
-                console.error("Gemini Failure:", err);
-                if (err.message !== "Missing API Key") alert("Erro na IA: " + err.message);
-            } finally {
-                spinner.classList.add('hidden');
-                btn.disabled = false;
-            }
+            } catch (e) { alert("IA Falhou: " + e.message); }
+            finally { loader.classList.add('hidden'); btn.disabled = false; }
         };
 
-        function renderIAReviewList() {
-            const list = el('ia-review-list');
-            el('ia-batch-count').innerText = `${tempBatchArray.length} Cards Prontos`;
-            list.innerHTML = tempBatchArray.map((q, i) => `
-                <div class="bg-white p-12 rounded-[56px] border border-slate-100 shadow-xl space-y-8 animate-fadeIn">
-                    <div class="flex justify-between items-center">
-                        <div class="flex items-center gap-3">
-                            <span class="w-10 h-10 bg-indigo-50 text-indigo-500 rounded-2xl flex items-center justify-center font-black text-xs">${i+1}</span>
-                            <span class="text-[11px] font-black text-slate-400 uppercase tracking-widest">Extração Gemini</span>
-                        </div>
-                        <button onclick="window.removeIAItem(${i})" class="text-rose-500 font-black text-[10px] uppercase bg-rose-50 px-6 py-2.5 rounded-2xl hover:bg-rose-500 hover:text-white transition-all">Descartar</button>
-                    </div>
-                    <p class="text-[17px] font-black text-slate-800 leading-relaxed italic">"${q.statement}"</p>
-                    <div class="grid grid-cols-1 gap-4">
-                        ${q.options.map((opt, oi) => `
-                            <div class="text-[12px] font-bold p-6 rounded-[32px] ${oi === q.correctIndex ? 'bg-emerald-50 text-emerald-700 border-2 border-emerald-100' : 'bg-slate-50 text-slate-400 border-2 border-slate-100'}">
-                                <span class="opacity-40 mr-2">${String.fromCharCode(65 + oi)})</span> ${opt}
-                            </div>
-                        `).join('')}
-                    </div>
-                    <div class="bg-indigo-50/40 p-8 rounded-[36px] border border-indigo-100/50">
-                        <p class="text-[10px] font-black text-indigo-400 uppercase mb-3 tracking-widest">Gabarito Comentado:</p>
-                        <p class="text-xs text-slate-600 leading-relaxed font-medium">${q.explanation}</p>
-                    </div>
-                </div>
-            `).join('');
+        function renderReviewList() {
+            document.getElementById('ia-review-area').classList.remove('hidden');
+            document.getElementById('review-count').innerText = tempExtracted.length + " Cards";
+            document.getElementById('review-list').innerHTML = tempExtracted.map(q => `<div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm text-xs font-bold leading-relaxed">${q.statement}</div>`).join('');
+            window.scrollTo(0, 0);
         }
 
-        window.removeIAItem = (idx) => {
-            tempBatchArray.splice(idx, 1);
-            if (tempBatchArray.length === 0) el('ia-review-area').classList.add('hidden');
-            renderIAReviewList();
-        };
-
-        window.commitBatch = () => {
-            const folder = state.folders.find(f => f.id === state.currentFolderId);
-            const folderName = folder ? folder.name : 'Geral';
-            
-            const news = tempBatchArray.map(q => ({
-                ...q,
+        window.confirmBatch = () => {
+            const folderId = state.currentFolderId;
+            const news = tempExtracted.map(q => ({ 
+                ...q, 
                 id: 'q_' + Math.random().toString(36).substr(2, 9),
-                folderId: state.currentFolderId,
-                specialty: folderName,
-                createdAt: Date.now()
+                folderId: folderId,
+                date: Date.now()
             }));
-
             state.questions = [...state.questions, ...news];
-            tempBatchArray = [];
-            el('ia-review-area').classList.add('hidden');
-            el('ia-prompt-input').value = "";
-            el('ia-file-status').classList.add('hidden');
+            saveLocal();
+            document.getElementById('ia-review-area').classList.add('hidden');
+            document.getElementById('ia-prompt').value = "";
             extractedFileText = "";
-            
-            saveAppState(true);
-            switchTab('home');
-            confetti({ particleCount: 200, spread: 80, origin: { y: 0.6 } });
-            showToast('Sessão Importada!', '💎');
+            document.getElementById('file-status').classList.add('hidden');
+            alert("Sucesso! Cards adicionados.");
         };
 
-        // 3. LOGIC LAYER: SRS SM-2 (SUPERMEMO ENGINE)
-        function getStudySessionQueue() {
-            const now = Date.now();
-            const pool = state.currentFolderId === 'f_all' 
-                ? state.questions 
-                : state.questions.filter(q => q.folderId === state.currentFolderId);
-            
-            return pool.filter(q => {
-                const data = state.srs[q.id];
-                return !data || data.nextReview <= now;
-            }).sort(() => Math.random() - 0.5);
-        }
-
-        function renderStudyCard() {
-            const container = el('study-container');
-            if (studyQueue.length === 0 || studyIndex >= studyQueue.length) {
-                container.innerHTML = `
-                    <div class="text-center space-y-12 animate-[fadeIn_0.6s]">
-                        <div class="w-48 h-48 bg-emerald-50 text-emerald-500 rounded-[64px] mx-auto flex items-center justify-center text-8xl shadow-inner rotate-6">🏆</div>
-                        <div class="space-y-4">
-                            <h2 class="text-6xl font-black text-slate-900 tracking-tighter italic">Meta Batida!</h2>
-                            <p class="text-slate-400 font-bold uppercase tracking-[0.4em] text-[11px]">Sessão de estudos concluída com sucesso.</p>
-                        </div>
-                        <button onclick="window.switchTab('home')" class="bg-slate-900 text-white font-black px-16 py-9 rounded-[48px] shadow-2xl uppercase text-[11px] tracking-[0.4em] btn-press hover:bg-black">Dashboard</button>
-                    </div>`;
-                return;
-            }
-
-            const q = studyQueue[studyIndex];
-            container.innerHTML = `
-                <div class="card-study bg-white p-16 rounded-[80px] border-2 border-slate-50 shadow-premium space-y-12 animate-fadeIn relative">
-                    <div class="flex justify-between items-center px-4">
-                        <div class="flex items-center gap-4">
-                            <div class="w-4 h-4 rounded-full bg-indigo-500"></div>
-                            <span class="text-[12px] font-black text-slate-400 uppercase tracking-[0.3em]">${q.specialty}</span>
-                        </div>
-                        <span class="text-[12px] font-black text-indigo-400 uppercase tracking-widest">Questão ${studyIndex + 1}/${studyQueue.length}</span>
-                    </div>
-                    
-                    <h3 class="text-4xl font-bold text-slate-800 leading-[1.3]">${q.statement}</h3>
-
-                    <div id="options-stack" class="space-y-5">
-                        ${q.options.map((opt, i) => `
-                            <button onclick="window.revealStudy(${i})" class="study-opt w-full text-left p-10 rounded-[44px] border-2 border-slate-50 bg-slate-50 text-slate-600 text-lg font-bold active:scale-[0.98] transition-all flex gap-8 group hover:border-indigo-100">
-                                <span class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm text-sm font-black text-indigo-400 group-hover:bg-indigo-600 group-hover:text-white transition-all">${String.fromCharCode(65 + i)}</span>
-                                <span class="flex-1 pt-2.5 leading-tight">${opt}</span>
-                            </button>
-                        `).join('')}
-                    </div>
-
-                    <div id="study-feedback-area" class="hidden animate-fadeIn space-y-12 border-t-8 border-slate-50 pt-16">
-                        <div class="bg-slate-900 text-slate-300 p-14 rounded-[64px] text-sm italic leading-relaxed shadow-[inset_0_4px_10px_rgba(0,0,0,0.5)] border border-white/5">
-                            <p class="font-black text-white uppercase text-[10px] mb-8 tracking-[0.6em] opacity-40">Insight Médico</p>
-                            ${q.explanation || 'O comentário desta questão está sendo sincronizado...'}
-                        </div>
-                        
-                        <div class="grid grid-cols-4 gap-6">
-                            <button onclick="window.handleSM2(1)" class="bg-rose-500 py-8 rounded-[36px] text-white font-black text-[12px] uppercase tracking-widest shadow-2xl shadow-rose-100 btn-press">Errei</button>
-                            <button onclick="window.handleSM2(3)" class="bg-slate-800 py-8 rounded-[36px] text-white font-black text-[12px] uppercase tracking-widest shadow-2xl btn-press">Difícil</button>
-                            <button onclick="window.handleSM2(4)" class="bg-indigo-600 py-8 rounded-[36px] text-white font-black text-[12px] uppercase tracking-widest shadow-2xl shadow-indigo-100 btn-press">Bom</button>
-                            <button onclick="window.handleSM2(5)" class="bg-emerald-500 py-8 rounded-[36px] text-white font-black text-[12px] uppercase tracking-widest shadow-2xl shadow-emerald-100 btn-press">Fácil</button>
-                        </div>
-                    </div>
-                </div>`;
-        }
-
-        window.revealStudy = (idx) => {
-            const q = studyQueue[studyIndex];
-            const btns = document.querySelectorAll('.study-opt');
-            btns.forEach((btn, i) => {
-                btn.disabled = true;
-                if (i === q.correctIndex) btn.classList.add('study-btn-correct');
-                else if (i === idx) btn.classList.add('study-btn-wrong');
-            });
-            el('study-feedback-area').classList.remove('hidden');
-        };
-
-        window.handleSM2 = (grade) => {
-            const q = studyQueue[studyIndex];
-            const now = Date.now();
-            
-            // SM-2 Algorithm Implementation
-            let srsData = state.srs[q.id] || { interval: 0, easeFactor: 2.5, reps: 0 };
-            let { interval, easeFactor, reps } = srsData;
-
-            if (grade >= 3) { 
-                if (reps === 0) interval = 1;
-                else if (reps === 1) interval = 6;
-                else interval = Math.round(interval * easeFactor);
-                reps++;
-            } else { 
-                reps = 0;
-                interval = 1;
-            }
-
-            easeFactor = Math.max(1.3, easeFactor + (0.1 - (5 - grade) * (0.08 + (5 - grade) * 0.02)));
-            
-            state.srs[q.id] = {
-                interval,
-                easeFactor,
-                reps,
-                nextReview: now + (interval * 24 * 60 * 60 * 1000)
-            };
-
-            state.history.push({ qId: q.id, grade, date: now });
-            
-            studyIndex++;
-            saveAppState(true);
-            renderStudyCard();
-        };
-
-        // 4. UI LAYER: NAVIGATION & DASHBOARD
-        window.switchTab = (tabId) => {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.nav-link').forEach(b => b.classList.remove('active', 'text-indigo-600'));
-            
-            el('tab-' + tabId).classList.add('active');
-            const navBtn = el('nav-' + tabId);
-            if (navBtn) {
-                navBtn.classList.add('active', 'text-indigo-600');
-                navBtn.classList.remove('text-slate-300');
-            }
-
-            if (tabId === 'home') refreshAllStats();
-            if (tabId === 'study') startNewStudySession();
-            if (tabId === 'bank') renderBank();
-            if (tabId === 'add') validateCurrentFolder();
-            
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        };
-
-        function startNewStudySession() {
-            studyQueue = getStudySessionQueue();
-            studyIndex = 0;
-            renderStudyCard();
-        }
-
-        function refreshAllStats() {
-            const filtered = state.currentFolderId === 'f_all' ? state.questions : state.questions.filter(q => q.folderId === state.currentFolderId);
-            const dueCount = filtered.filter(q => !state.srs[q.id] || state.srs[q.id].nextReview <= Date.now()).length;
-            
-            if (el('stat-total')) el('stat-total').innerText = filtered.length;
-            if (el('stat-due')) el('stat-due').innerText = dueCount;
-            if (el('home-due-label')) el('home-due-label').innerText = dueCount > 0 ? `${dueCount} revisões pendentes agora.` : "Nenhum card pendente hoje.";
-            if (el('vault-count-label')) el('vault-count-label').innerText = `${filtered.length} Cards`;
-            
-            renderFolderChips();
-            initPerformanceChart();
-        }
-
-        function renderFolderChips() {
-            const container = el('folders-scroll');
-            container.innerHTML = state.folders.map(f => `
-                <div onclick="window.setFolder('${f.id}')" class="folder-chip px-14 py-6 rounded-[36px] text-[12px] font-black uppercase tracking-[0.3em] border-2 border-slate-50 bg-white shadow-sm cursor-pointer whitespace-nowrap btn-press ${state.currentFolderId === f.id ? 'active' : 'text-slate-400'}">
-                    ${f.name}
-                </div>
-            `).join('');
-        }
-
-        window.setFolder = (id) => {
-            state.currentFolderId = id;
-            const f = state.folders.find(folder => folder.id === id);
-            el('current-folder-label').innerText = f ? f.name : 'Global Archive';
-            refreshAllStats();
-        };
-
-        window.createFolder = () => {
-            const n = prompt("Nome da Nova Categoria Médica:");
-            if (n && n.trim()) {
-                const id = 'f_' + Date.now();
-                state.folders.push({ id, name: n.trim() });
-                state.currentFolderId = id;
-                saveAppState(true);
-            }
-        };
-
-        function validateCurrentFolder() {
-            const isRoot = state.currentFolderId === 'f_all';
-            el('ia-warn-folder').classList.toggle('hidden', !isRoot);
-            const f = state.folders.find(folder => folder.id === state.currentFolderId);
-            el('ia-target-folder').innerText = f ? f.name.toUpperCase() : 'GLOBAL ARCHIVE';
-        }
-
-        window.renderBank = () => {
-            const s = el('bank-search').value.toLowerCase();
-            const list = el('bank-list');
-            
-            let pool = state.currentFolderId === 'f_all' ? state.questions : state.questions.filter(q => q.folderId === state.currentFolderId);
-            if (s) pool = pool.filter(q => q.statement.toLowerCase().includes(s));
-
-            list.innerHTML = pool.slice().reverse().map(q => `
-                <div class="bg-white p-12 rounded-[56px] border-2 border-slate-50 flex justify-between items-center shadow-premium group hover:border-indigo-400 transition-all duration-500">
-                    <div class="truncate mr-10 flex-1">
-                        <p class="text-[11px] font-black text-indigo-400 uppercase tracking-widest mb-3">${q.specialty}</p>
-                        <p class="text-[16px] font-bold text-slate-800 truncate italic">"${q.statement}"</p>
-                    </div>
-                    <button onclick="window.removeCard('${q.id}')" class="w-16 h-16 bg-rose-50 text-rose-500 rounded-[28px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all active:scale-90 shadow-inner hover:bg-rose-500 hover:text-white">✕</button>
-                </div>
-            `).join('') || '<div class="py-32 text-center text-slate-300 font-black uppercase tracking-[0.6em] text-[13px] opacity-40">Vault Empty</div>';
-        }
-
-        window.removeCard = (id) => {
-            if (confirm("Deletar permanentemente este card?")) {
-                state.questions = state.questions.filter(q => q.id !== id);
-                delete state.srs[id];
-                saveAppState(true);
-                renderBank();
-            }
-        };
-
-        // 5. DATA VIS: CHART JS ENGINE
-        function initPerformanceChart() {
-            const ctx = el('mainChart').getContext('2d');
-            if (chartInstance) chartInstance.destroy();
-            
-            const days = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab'];
-            const stats = [0, 0, 0, 0, 0, 0, 0];
-            const now = new Date();
-            
-            state.history.forEach(h => {
-                const d = new Date(h.date);
-                if (now - d < 7 * 24 * 60 * 60 * 1000) {
-                    stats[d.getDay()]++;
-                }
-            });
-
+        // ANALYTICS & STATS
+        function initChart() {
+            const ctx = document.getElementById('performanceChart').getContext('2d');
             chartInstance = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: days,
+                    labels: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'],
                     datasets: [{
-                        data: stats,
-                        borderColor: '#6366f1',
-                        backgroundColor: 'rgba(99, 102, 241, 0.15)',
+                        label: 'Acertos',
+                        data: [0,0,0,0,0,0,0],
+                        borderColor: '#fff',
+                        backgroundColor: 'rgba(255,255,255,0.15)',
                         fill: true,
-                        tension: 0.5,
-                        borderWidth: 8,
-                        pointRadius: 8,
-                        pointBackgroundColor: '#fff',
-                        pointBorderColor: '#6366f1',
-                        pointBorderWidth: 4,
-                        pointHoverRadius: 12
+                        tension: 0.4,
+                        borderWidth: 2,
+                        pointRadius: 2
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { display: false }, tooltip: { enabled: true } },
+                    plugins: { legend: { display: false } },
                     scales: {
-                        x: { display: true, ticks: { color: 'rgba(255,255,255,0.4)', font: { size: 12, weight: '900' } }, grid: { display: false } },
+                        x: { display: true, ticks: { color: 'rgba(255,255,255,0.6)', font: { size: 9 } }, grid: { display: false } },
                         y: { display: false }
                     }
                 }
             });
         }
 
-        // 6. MANAGEMENT: SETTINGS & GOOGLE AUTH
-        window.toggleSettings = () => el('settings-modal').classList.toggle('hidden');
-
-        window.saveSettings = () => {
-            const geminiKey = el('cfg-gemini-key').value.trim();
-            const clientId = el('cfg-client-id').value.trim();
-            localStorage.setItem(KEY_SETTINGS_STORE, JSON.stringify({ geminiKey, clientId }));
-            showToast("Novas Configurações Salvas", "✅");
-            setTimeout(() => location.reload(), 1500);
-        };
-
-        window.clearLocalData = () => {
-            if (confirm("Resetar Banco Local? Isso não apaga a nuvem até o próximo sync.")) {
-                localStorage.removeItem(KEY_DATABASE);
-                location.reload();
-            }
-        };
-
-        window.clearCloudData = async () => {
-            if (confirm("DELETAR backup permanente do Google Drive?")) {
-                if (!driveFileId || !accessToken) return alert("Drive não conectado ou sessão expirada.");
-                await fetch(`https://www.googleapis.com/drive/v3/files/${driveFileId}`, {
-                    method: 'DELETE',
-                    headers: { 'Authorization': `Bearer ${accessToken}` }
-                });
-                driveFileId = null;
-                showToast("Cloud Purged", "🗑️");
-            }
-        };
-
-        window.initAuth = () => {
-            el('login-loader').classList.remove('hidden');
-            el('btn-login-google').classList.add('hidden');
-            if (tokenClient) tokenClient.requestAccessToken();
-        };
-
-        function bootstrapAuth() {
-            const settings = JSON.parse(localStorage.getItem(KEY_SETTINGS_STORE)) || {};
-            gapi.load('client', async () => {
-                await gapi.client.init({ discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'] });
-                
-                tokenClient = google.accounts.oauth2.initTokenClient({
-                    client_id: settings.clientId || DEFAULT_CLIENT_ID,
-                    scope: 'https://www.googleapis.com/auth/drive.file',
-                    callback: (resp) => {
-                        accessToken = resp.access_token;
-                        localStorage.setItem(KEY_AUTH_TOKEN, JSON.stringify({ token: accessToken, expiry: Date.now() + 3500000 }));
-                        onAuthFinalize();
-                    }
-                });
-
-                const savedToken = JSON.parse(localStorage.getItem(KEY_AUTH_TOKEN));
-                if (savedToken && savedToken.expiry > Date.now()) {
-                    accessToken = savedToken.token;
-                    onAuthFinalize();
-                } else {
-                    el('login-loader').classList.add('hidden');
-                    el('btn-login-google').classList.remove('hidden');
-                }
-            });
-        }
-
-        async function onAuthFinalize() {
-            el('login-screen').classList.add('hidden');
-            el('app').classList.remove('hidden');
-            await syncCloud();
-        }
-
-        // 7. FILE ENGINE: PDF & DOCX READER
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-        el('ia-file-input').addEventListener('change', async (e) => {
-            const f = e.target.files[0];
-            if (!f) return;
-            const status = el('ia-file-status');
-            status.classList.remove('hidden');
-            status.innerText = "⏳ Decodificando...";
+        function updateStats() {
+            const folderId = state.currentFolderId;
+            const now = Date.now();
+            const questions = folderId === 'f_all' ? state.questions : state.questions.filter(q => q.folderId === folderId);
+            const questionIds = new Set(questions.map(q => q.id));
+            const history = state.history.filter(h => folderId === 'f_all' || questionIds.has(h.cardId));
+            const due = questions.filter(q => !state.srs[q.id] || state.srs[q.id].nextReview <= now).length;
             
-            try {
-                if (f.name.endsWith('.pdf')) {
-                    const ab = await f.arrayBuffer();
-                    const pdf = await pdfjsLib.getDocument({ data: ab }).promise;
-                    let fullTxt = "";
-                    for (let i = 1; i <= pdf.numPages; i++) {
-                        const p = await pdf.getPage(i);
-                        const c = await p.getTextContent();
-                        fullTxt += c.items.map(it => it.str).join(" ") + "\n";
-                    }
-                    extractedFileText = fullTxt;
-                } else if (f.name.endsWith('.docx')) {
-                    const ab = await f.arrayBuffer();
-                    const res = await mammoth.extractRawText({ arrayBuffer: ab });
-                    extractedFileText = res.value;
-                }
-                status.innerText = "✅ " + f.name + " pronto.";
-            } catch (err) {
-                status.innerText = "❌ Falha na leitura.";
-                console.error(err);
+            document.getElementById('stat-total').innerText = questions.length;
+            const hits = history.filter(h => h.success).length;
+            document.getElementById('stat-accuracy').innerText = history.length ? Math.round((hits / history.length) * 100) + "%" : "0%";
+            document.getElementById('home-due-text').innerText = due > 0 ? `${due} pendentes hoje.` : "Tudo revisado!";
+            
+            const badge = document.getElementById('due-badge');
+            badge.innerText = due;
+            badge.classList.toggle('hidden', due === 0);
+
+            if (chartInstance) {
+                const weeklyData = [0,0,0,0,0,0,0];
+                history.slice(-100).forEach(h => {
+                    const day = new Date(h.date).getDay();
+                    if (h.success) weeklyData[day]++;
+                });
+                chartInstance.data.datasets[0].data = weeklyData;
+                chartInstance.update();
             }
+            renderFoldersUI();
+        }
+
+        function renderFoldersUI() {
+            const scroll = document.getElementById('folders-scroll');
+            scroll.innerHTML = state.folders.map(f => {
+                const isActive = state.currentFolderId === f.id;
+                return `<div onclick="window.onFolderChange('${f.id}')" class="folder-chip px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest border border-slate-200 bg-white ${isActive ? 'active shadow-lg' : 'text-slate-500'}">${f.name}</div>`;
+            }).join('');
+        }
+
+        // ACERVO E BUSCA
+        window.renderBank = () => {
+            const searchTerm = document.getElementById('bank-search').value.toLowerCase();
+            const list = document.getElementById('bank-list');
+            const folderFilter = state.currentFolderId;
+            
+            let filtered = folderFilter === 'f_all' ? state.questions : state.questions.filter(q => q.folderId === folderFilter);
+            
+            if (searchTerm) {
+                filtered = filtered.filter(q => 
+                    q.statement.toLowerCase().includes(searchTerm) || 
+                    (q.specialty && q.specialty.toLowerCase().includes(searchTerm))
+                );
+            }
+
+            if (filtered.length === 0) {
+                list.innerHTML = `<div class="py-24 text-center text-slate-300 italic text-xs">Nenhum card encontrado.</div>`;
+                return;
+            }
+
+            list.innerHTML = filtered.slice().reverse().map(q => `
+                <div class="bg-white p-5 rounded-3xl border border-slate-100 flex justify-between items-center shadow-sm">
+                    <div class="truncate mr-4">
+                        <p class="text-[11px] text-slate-700 font-bold truncate">${q.statement}</p>
+                        <p class="text-[8px] text-slate-400 font-black uppercase mt-1 tracking-tighter">${q.specialty || 'Geral'}</p>
+                    </div>
+                    <button onclick="window.deleteQ('${q.id}')" class="text-rose-400 p-2 active:scale-90 transition-transform">✕</button>
+                </div>
+            `).join('');
+        };
+
+        // SRS ENGINE
+        function startStudy() {
+            const now = Date.now();
+            const questions = state.currentFolderId === 'f_all' ? state.questions : state.questions.filter(q => q.folderId === state.currentFolderId);
+            studyQueue = questions.filter(q => !state.srs[q.id] || state.srs[q.id].nextReview <= now);
+            studyQueue.sort(() => Math.random() - 0.5);
+            studyPointer = 0;
+            renderStudyCard();
+        }
+
+        function renderStudyCard() {
+            const container = document.getElementById('study-container');
+            if (studyQueue.length === 0) {
+                container.innerHTML = `<div class="py-24 text-center"><div class="text-6xl mb-6">✅</div><h2 class="text-xl font-black">Meta Batida!</h2><button onclick="window.switchTab('home')" class="mt-8 bg-indigo-600 text-white font-black px-10 py-4 rounded-2xl">Dashboard</button></div>`;
+                return;
+            }
+            if (studyPointer >= studyQueue.length) {
+                container.innerHTML = `<div class="py-24 text-center"><div class="text-6xl mb-6">🎯</div><h2 class="text-xl font-black">Sessão Encerrada</h2><button onclick="window.switchTab('home')" class="mt-8 bg-indigo-600 text-white font-black px-10 py-4 rounded-2xl">Dashboard</button></div>`;
+                return;
+            }
+            const q = studyQueue[studyPointer];
+            isRevealed = false;
+            container.innerHTML = `
+                <div class="bg-white p-8 rounded-[40px] border border-slate-100 shadow-xl space-y-6">
+                    <div class="flex justify-between items-center"><span class="text-[10px] font-black text-indigo-500 uppercase tracking-widest">${q.specialty || 'Medicina'}</span><span class="text-[10px] font-bold text-slate-400">${studyPointer+1}/${studyQueue.length}</span></div>
+                    <h3 class="text-lg font-bold text-slate-800 leading-relaxed">${q.statement}</h3>
+                    <div class="space-y-3">
+                        ${q.options.map((opt, i) => `<button onclick="window.reveal(${i})" class="opt-btn w-full text-left p-5 rounded-3xl border-2 border-slate-50 bg-slate-50 text-slate-600 text-sm font-semibold active:scale-95 transition-all">${opt}</button>`).join('')}
+                    </div>
+                    <div id="study-feedback" class="hidden pt-6 border-t border-slate-50 space-y-6">
+                        <div class="bg-slate-900 text-slate-300 p-6 rounded-[28px] text-[11px] border-l-4 border-indigo-500 leading-relaxed">${q.explanation}</div>
+                        <div class="grid grid-cols-4 gap-2">
+                            <button onclick="window.submitSRS(1)" class="bg-rose-500 py-5 rounded-2xl text-white font-black text-[9px] uppercase">Errei</button>
+                            <button onclick="window.submitSRS(2)" class="bg-orange-400 py-5 rounded-2xl text-white font-black text-[9px] uppercase">Dificil</button>
+                            <button onclick="window.submitSRS(3)" class="bg-indigo-500 py-5 rounded-2xl text-white font-black text-[9px] uppercase">Bom</button>
+                            <button onclick="window.submitSRS(4)" class="bg-emerald-500 py-5 rounded-2xl text-white font-black text-[9px] uppercase">Facil</button>
+                        </div>
+                    </div>
+                </div>`;
+        }
+
+        window.reveal = (idx) => {
+            if (isRevealed) return;
+            isRevealed = true;
+            const q = studyQueue[studyPointer];
+            document.querySelectorAll('.opt-btn').forEach((btn, i) => { 
+                if (i === q.correctIndex) btn.classList.add('option-btn-correct');
+                else if (i === idx) btn.classList.add('option-btn-wrong');
+                btn.disabled = true;
+            });
+            document.getElementById('study-feedback').classList.remove('hidden');
+        };
+
+        window.submitSRS = (grade) => {
+            const q = studyQueue[studyPointer];
+            const srs = state.srs[q.id] || { interval: 0, repetitions: 0, easeFactor: 2.5 };
+            let { interval, repetitions, easeFactor } = srs;
+            const score = grade === 1 ? 0 : grade === 2 ? 2 : grade === 3 ? 4 : 5;
+            if (score >= 3) {
+                if (repetitions === 0) interval = 1;
+                else if (repetitions === 1) interval = 6;
+                else interval = Math.round(interval * easeFactor);
+                repetitions++;
+            } else { repetitions = 0; interval = 1; }
+            easeFactor = easeFactor + (0.1 - (5 - score) * (0.08 + (5 - score) * 0.02));
+            if (easeFactor < 1.3) easeFactor = 1.3;
+            state.srs[q.id] = { interval, repetitions, easeFactor, nextReview: Date.now() + (interval * 24 * 60 * 60 * 1000) };
+            state.history.push({ cardId: q.id, success: score >= 3, date: Date.now() });
+            saveLocal();
+            studyPointer++;
+            renderStudyCard();
+        };
+
+        // AUXILIARES
+        function saveLocal(cloud = true) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            updateStats();
+            if (cloud) autoBackup();
+        }
+
+        function loadLocal() {
+            const data = localStorage.getItem(STORAGE_KEY);
+            if (data) state = JSON.parse(data);
+            const savedKey = localStorage.getItem(KEY_STORAGE);
+            if (savedKey) document.getElementById('gemini-key-input').value = savedKey;
+            updateStats();
+        }
+
+        window.deleteQ = (id) => { if (confirm("Excluir card?")) { state.questions = state.questions.filter(q => q.id !== id); delete state.srs[id]; saveLocal(); renderBank(); } };
+        window.clearAll = () => { if (confirm("Limpar todo o banco local?")) { localStorage.removeItem(STORAGE_KEY); location.reload(); } };
+
+        // FILE READER
+        document.getElementById('file-reader').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const status = document.getElementById('file-status');
+            status.innerText = "⏳ Extraindo...";
+            status.classList.remove('hidden');
+            try {
+                if (file.name.endsWith('.pdf')) {
+                    const arrayBuffer = await file.arrayBuffer();
+                    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                    let fullText = "";
+                    for (let i = 1; i <= pdf.numPages; i++) {
+                        const page = await pdf.getPage(i);
+                        const content = await page.getTextContent();
+                        fullText += content.items.map(item => item.str).join(" ") + " ";
+                    }
+                    extractedFileText = fullText;
+                } else if (file.name.endsWith('.docx')) {
+                    const arrayBuffer = await file.arrayBuffer();
+                    const result = await mammoth.extractRawText({ arrayBuffer });
+                    extractedFileText = result.value;
+                }
+                status.innerText = "✅ " + file.name;
+            } catch (err) { alert(err.message); status.innerText = ""; }
         });
 
-        // INICIALIZAÇÃO DO APP CORE
-        const local = localStorage.getItem(KEY_DATABASE);
-        if (local) state = JSON.parse(local);
-        
-        const sets = localStorage.getItem(KEY_SETTINGS_STORE);
-        if (sets) {
-            const s = JSON.parse(sets);
-            el('cfg-client-id').value = s.clientId || DEFAULT_CLIENT_ID;
-            el('cfg-gemini-key').value = s.geminiKey || '';
-        }
-
-        refreshAllStats();
-        bootstrapAuth();
-
+        // INIT
+        loadLocal();
+        initChart();
+        initGoogleWithRetry();
     </script>
 </body>
 </html>
